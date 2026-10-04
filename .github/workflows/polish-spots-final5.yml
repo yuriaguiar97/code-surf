@@ -1,0 +1,123 @@
+name: Polish My Spots final5
+
+on:
+  push:
+    paths:
+      - '.github/workflows/polish-spots-final5.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Polish spots UI
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # ---------- app.html ----------
+          p=Path('app.html')
+          h=p.read_text()
+
+          old='''<div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div>
+    <div id="spotsList" class="spots-list"></div>'''
+          new='''<div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
+    <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
+    <div id="spotsList" class="spots-list"></div>'''
+          assert old in h, 'spots header block not found'
+          h=h.replace(old,new)
+
+          h=h.replace('<header class="top"><a class="back" href="#spots">‹ Picos</a><div id="spotTitle" class="logo">PICO</div><div style="width:42px"></div></header>', '<header class="top"><a class="back" href="#spots">‹ Picos</a><div id="spotTitle" class="spot-title">Pico</div><div style="width:42px"></div></header>')
+          h=h.replace('<h2>Melhores condições</h2><div id="overviewBest" class="card"><small>Dados insuficientes.</small></div>', '<h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div>')
+          h=h.replace('<section class="spot-panel" data-panel="history"><h2>Histórico</h2><div id="history" class="card"><small>Nenhuma sessão registrada.</small></div></section>', '<section class="spot-panel" data-panel="history"><div class="panel-heading"><h2>Histórico</h2><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>')
+          h=h.replace('<h2>O código deste pico</h2><div id="codeOrigin" class="seed">Sem norte inicial cadastrado.</div>', '<div class="panel-heading"><h2>CODE do pico</h2><div class="panel-copy">As condições abaixo evoluem conforme você registra sessões reais.</div></div><div id="codeOrigin" class="seed">Ainda sem dados suficientes para formar o CODE.</div>')
+          h=h.replace('O norte inicial é só uma hipótese. Sessões com nota 8 ou mais passam a dominar o CODE e aumentam o Confidence.', 'O norte inicial serve como ponto de partida. Conforme entram sessões com nota 8 ou mais, os dados reais passam a ter mais peso e aumentam o Confidence.')
+
+          actions='<div class="sheet-actions"><button id="cancelSpot" class="btn secondary">CANCELAR</button><button id="saveSpot" class="btn">SALVAR</button></div>'
+          assert actions in h, 'spot sheet actions not found'
+          h=h.replace(actions,actions+'\n  <button id="deleteSpotInModal" class="btn danger modal-delete hidden" type="button">EXCLUIR PICO</button>')
+
+          h=h.replace('styles.css?v=20261004final4','styles.css?v=20261004final5').replace('app.js?v=20261004final4','app.js?v=20261004final5').replace('FINAL · 2026.10.04 · 4','FINAL · 2026.10.04 · 5')
+          p.write_text(h)
+
+          # ---------- app.js ----------
+          p=Path('app.js')
+          s=p.read_text()
+          s=s.replace("pendingPoint:null};", "pendingPoint:null,spotsEditMode:false};")
+
+          old_render=re.search(r"function renderSpots\(\)\{.*?\nfunction stars\(n\)",s,re.S)
+          assert old_render, 'renderSpots not found'
+          new_render=r'''function plural(n,one,many){return Number(n)===1?one:many}
+function updateSpotsEditUI(){const btn=$('editSpots'),hint=$('spotsEditHint'),list=$('spotsList');if(btn){btn.classList.toggle('active',state.spotsEditMode);btn.setAttribute('aria-pressed',state.spotsEditMode?'true':'false');btn.setAttribute('aria-label',state.spotsEditMode?'Concluir edição':'Editar picos')}if(hint)hint.classList.toggle('hidden',!state.spotsEditMode);if(list)list.classList.toggle('editing',state.spotsEditMode)}
+function toggleSpotsEditMode(){state.spotsEditMode=!state.spotsEditMode;renderSpots()}
+function renderSpots(){const list=$('spotsList'),spots=storage.spots(),sess=storage.sessions();updateSpotsEditUI();list.innerHTML=spots.length?spots.map((s,i)=>{const avg=avgFor(s),conf=confidenceFor(s),count=sess.filter(x=>x.spotId===s.id).length,countText=count?`${count} ${plural(count,'sessão registrada','sessões registradas')}`:'Nenhuma sessão registrada';return`<button class="spot-card spot-card-button${state.spotsEditMode?' edit-mode':''}" data-spot="${s.id}" type="button" aria-label="${state.spotsEditMode?'Editar':'Abrir'} ${esc(s.name)}"><span class="spot-thumb" style="--spot-img:url('${spotImage(i)}')"></span><span class="spot-main"><b>${esc(s.name)}</b><small>${countText}${Number.isFinite(Number(s.lat))?' · localização salva':''}</small><span class="spot-rating"><span>${Number.isFinite(avg)?stars(Math.round(avg/2)):'☆☆☆☆☆'}</span><span class="confidence-num">Confidence ${conf}%</span></span></span>${state.spotsEditMode?'<span class="edit-indicator" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></span>':'<span class="spot-chevron" aria-hidden="true">›</span>'}</button>`}).join(''):'<div class="empty">Nenhum pico cadastrado.<br>Crie o primeiro e marque o ponto no mapa.</div>';list.querySelectorAll('[data-spot]').forEach(el=>el.onclick=()=>state.spotsEditMode?openSpotEditor(el.dataset.spot):openSpot(el.dataset.spot));renderSpotSelect();renderAlerts();updateSpotsEditUI()}
+function stars(n)'''
+          s=s[:old_render.start()]+new_render+s[old_render.end():]
+
+          old_detail=re.search(r"function renderSpotDetail\(\)\{.*?\nfunction showSpotTab",s,re.S)
+          assert old_detail, 'renderSpotDetail not found'
+          new_detail=r'''function renderSpotDetail(){const spot=storage.spots().find(s=>s.id===state.currentSpotId);if(!spot){$('spotTitle').textContent='Pico';return}const all=storage.sessions().filter(s=>s.spotId===spot.id),good=all.filter(s=>Number(s.score)>=8),conf=confidenceFor(spot),avg=avgFor(spot),seed=spot.seed||null;$('spotTitle').textContent=spot.name;$('spotScore').textContent=Number.isFinite(avg)?avg.toFixed(1):'—';$('spotStars').textContent=Number.isFinite(avg)?stars(Math.round(avg/2)):'☆☆☆☆☆';$('spotSessionCount').textContent=all.length?`${all.length} ${plural(all.length,'sessão registrada','sessões registradas')}`:'Nenhuma sessão registrada';$('spotConf').textContent=`Confidence ${conf}%`;$('confBar').style.width=conf+'%';$('codeOrigin').textContent=good.length?`${good.length} ${plural(good.length,'sessão boa confirmada','sessões boas confirmadas')}${seed?' · norte inicial ainda considerado':''}`:seed?'Norte inicial cadastrado · baixa confiança':'Ainda sem dados suficientes para formar o CODE.';if(good.length){$('learnWave').textContent=learnedRange(good,'wave',1,' m');$('learnPeriod').textContent=learnedRange(good,'period',0,' s');$('learnWind').textContent=learnedRange(good,'wind',0,' kt');$('learnEnergy').textContent=learnedRange(good,'energy',0,' J/m²')}else if(seed){const rr=(a,b,u='')=>a!=null||b!=null?`${a??'—'}${b!=null?'–'+b:''}${u}`:'Dados insuficientes';$('learnWave').textContent=rr(seed.waveMin,seed.waveMax,' m')+(seed.swellDir?' · '+seed.swellDir:'');$('learnPeriod').textContent=rr(seed.periodMin,seed.periodMax,' s');$('learnWind').textContent=(seed.windDir||'—')+(seed.windMax!=null?' · até '+seed.windMax+' kt':'');$('learnEnergy').textContent='Será aprendido com suas sessões'}else['learnWave','learnPeriod','learnWind','learnEnergy'].forEach(id=>$(id).textContent='Dados insuficientes');$('history').innerHTML=all.length?all.slice().reverse().map(s=>{const waveText=`${fmt(s.wave)} m · ${dir(s.waveDir)} ${fmt(s.waveDir,0)}°`,periodText=`${fmt(s.period,0)} s`,windText=`${dir(s.windDir)} · ${fmt(s.wind,0)} kt`,energyText=`${fmt(s.energy,0)} J/m²`;return`<article class="history-item"><div class="history-head"><div><b>${esc(s.date)}</b><small>Sessão registrada</small></div><span class="history-score">${esc(s.score)}/10</span></div><div class="history-grid"><div><span>Ondulação</span><b>${waveText}</b></div><div><span>Período</span><b>${periodText}</b></div><div><span>Vento</span><b>${windText}</b></div><div><span>Energia</span><b>${energyText}</b></div></div>${s.size?`<div class="history-observed"><span>Tamanho observado</span><b>${esc(s.size)}</b></div>`:''}${s.comment?`<div class="history-comment">${esc(s.comment)}</div>`:''}</article>`}).join(''):'<div class="history-empty">Nenhuma sessão registrada neste pico.</div>';$('overviewBest').innerHTML=`<div class="row"><span>Ondulação</span><b>${esc($('learnWave').textContent)}</b></div><div class="row"><span>Período</span><b>${esc($('learnPeriod').textContent)}</b></div><div class="row"><span>Vento</span><b>${esc($('learnWind').textContent)}</b></div>`}
+function showSpotTab'''
+          s=s[:old_detail.start()]+new_detail+s[old_detail.end():]
+
+          old_editor="function openSpotEditor(id=null){state.editingSpotId=id;const spot=storage.spots().find(s=>s.id===id),seed=spot?.seed||{};$('modalTitle').textContent=spot?'Editar pico':'Novo pico';$('spotName').value=spot?.name||'';$('spotLat').value=spot?.lat??'';$('spotLon').value=spot?.lon??'';$('seedWaveMin').value=seed.waveMin??'';$('seedWaveMax').value=seed.waveMax??'';$('seedPeriodMin').value=seed.periodMin??'';$('seedPeriodMax').value=seed.periodMax??'';$('seedSwellDir').value=seed.swellDir??'';$('seedWindDir').value=seed.windDir??'';$('seedWindMax').value=seed.windMax??'';$('seedNote').value=seed.note??'';updateLocationSummary();$('spotModal').classList.add('show');setTimeout(()=>$('spotName').focus(),50)}"
+          new_editor="function openSpotEditor(id=null){state.editingSpotId=id;const spot=storage.spots().find(s=>s.id===id),seed=spot?.seed||{};$('modalTitle').textContent=spot?'Editar pico':'Novo pico';$('spotName').value=spot?.name||'';$('spotLat').value=spot?.lat??'';$('spotLon').value=spot?.lon??'';$('seedWaveMin').value=seed.waveMin??'';$('seedWaveMax').value=seed.waveMax??'';$('seedPeriodMin').value=seed.periodMin??'';$('seedPeriodMax').value=seed.periodMax??'';$('seedSwellDir').value=seed.swellDir??'';$('seedWindDir').value=seed.windDir??'';$('seedWindMax').value=seed.windMax??'';$('seedNote').value=seed.note??'';updateLocationSummary();$('deleteSpotInModal').classList.toggle('hidden',!spot);$('spotModal').classList.add('show');setTimeout(()=>$('spotName').focus(),50)}"
+          assert old_editor in s, 'openSpotEditor not found'
+          s=s.replace(old_editor,new_editor)
+
+          old_delete="function deleteSpot(id){const spots=storage.spots(),spot=spots.find(s=>s.id===id);if(!spot)return;if(!confirm(`Excluir ${spot.name} e o histórico desse pico?`))return;storage.setSpots(spots.filter(s=>s.id!==id));storage.setSessions(storage.sessions().filter(s=>s.spotId!==id));if(state.currentSpotId===id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}renderSpots();renderSpotDetail()}"
+          new_delete="function deleteSpot(id){const spots=storage.spots(),spot=spots.find(s=>s.id===id);if(!spot)return;if(!confirm(`Excluir ${spot.name} e todo o histórico deste pico?`))return;storage.setSpots(spots.filter(s=>s.id!==id));storage.setSessions(storage.sessions().filter(s=>s.spotId!==id));if(state.currentSpotId===id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}if(state.editingSpotId===id)closeSpotEditor();renderSpots();renderSpotDetail()}"
+          assert old_delete in s, 'deleteSpot not found'
+          s=s.replace(old_delete,new_delete)
+
+          old_bind="function bind(){$('refreshForecast').onclick=()=>loadForecast(true);$('addSpot').onclick=()=>openSpotEditor();$('cancelSpot').onclick=closeSpotEditor;$('saveSpot').onclick=saveSpot;"
+          new_bind="function bind(){$('refreshForecast').onclick=()=>loadForecast(true);$('editSpots').onclick=toggleSpotsEditMode;$('addSpot').onclick=()=>openSpotEditor();$('cancelSpot').onclick=closeSpotEditor;$('saveSpot').onclick=saveSpot;$('deleteSpotInModal').onclick=()=>{if(state.editingSpotId)deleteSpot(state.editingSpotId)};"
+          assert old_bind in s, 'bind prefix not found'
+          s=s.replace(old_bind,new_bind)
+
+          p.write_text(s)
+
+          # ---------- styles.css ----------
+          p=Path('styles.css')
+          c=p.read_text()
+          c += r'''
+
+/* final5 · My Spots polish */
+.spots-tools{display:flex;align-items:center;gap:8px}.edit-round{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.09);background:rgba(7,17,25,.68);color:#a9bfca;transition:.18s ease}.edit-round svg,.edit-indicator svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.edit-round.active{color:#072027;background:linear-gradient(90deg,#54dec9,#72e6ff);border-color:transparent;box-shadow:0 10px 24px rgba(84,222,201,.16)}.spots-edit-hint{margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(95,233,223,.07);border:1px solid rgba(95,233,223,.16);color:#add6d5;font-size:11px;line-height:1.35}.spots-edit-hint span{color:#67e7de;font-weight:800}.spot-card-button{width:100%;font:inherit;color:inherit;text-align:left;appearance:none;-webkit-appearance:none}.spot-card-button:focus-visible{outline:2px solid rgba(95,233,223,.55);outline-offset:2px}.spot-card-button.edit-mode{border-color:rgba(95,233,223,.24);background:linear-gradient(180deg,rgba(12,29,39,.96),rgba(7,18,27,.94))}.spot-chevron{flex:none;color:#6f8996;font-size:27px;font-weight:300;line-height:1;margin-left:2px}.edit-indicator{width:34px;height:34px;flex:none;border-radius:11px;display:grid;place-items:center;color:#7ce9df;background:rgba(95,233,223,.08);border:1px solid rgba(95,233,223,.16)}.spot-title{max-width:min(54vw,420px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:18px;font-weight:650;letter-spacing:.02em;color:#eef7fb}.spot-tabs{padding:4px;border-radius:16px;background:rgba(5,14,22,.56);border:1px solid rgba(255,255,255,.055);gap:4px}.spot-tab{min-width:0;border:0;background:transparent;padding:10px 6px;border-radius:12px;white-space:nowrap}.spot-tab.active{background:rgba(13,31,43,.92);color:#e1faf7;box-shadow:0 5px 16px rgba(0,0,0,.18),inset 0 0 0 1px rgba(95,233,223,.18)}.spot-panel{animation:spotFade .18s ease}.spot-panel h2{margin-bottom:8px}.panel-heading{margin:18px 0 10px}.panel-heading h2{margin:0 0 4px}.panel-copy{color:#8da6b3;font-size:12px;line-height:1.4}.score-card{border-radius:20px}.score-card small{line-height:1.35}.score-card .badge{white-space:nowrap}.spot-panel .row{align-items:flex-start}.spot-panel .row>span{flex:0 0 34%;color:#9bb2be}.spot-panel .row>b{max-width:66%;white-space:normal;overflow-wrap:anywhere;line-height:1.35}.history-card{padding:2px 15px;border-radius:20px}.history-item{padding:16px 0}.history-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.history-head b{font-size:14px}.history-head small{margin-top:2px;font-size:10px}.history-score{flex:none;padding:6px 9px;border-radius:10px;background:rgba(95,233,223,.08);border:1px solid rgba(95,233,223,.16);color:#baf4ef;font-size:11px;font-weight:800}.history-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.history-grid>div{min-width:0;padding:10px;border-radius:12px;background:rgba(5,14,22,.42);border:1px solid rgba(255,255,255,.045)}.history-grid span,.history-observed span{display:block;color:#839eab;font-size:9px;text-transform:uppercase;letter-spacing:.05em}.history-grid b,.history-observed b{display:block;margin-top:4px;font-size:11px;line-height:1.3;white-space:normal;overflow-wrap:anywhere}.history-observed{margin-top:8px;padding:10px 11px;border-radius:12px;background:rgba(5,14,22,.34)}.history-comment{margin-top:8px;padding:11px 12px;border-left:2px solid rgba(95,233,223,.38);border-radius:0 10px 10px 0;background:rgba(95,233,223,.045);color:#c5d9e1;font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}.history-empty{padding:22px 8px;text-align:center;color:#829aa7;font-size:12px}.seed{overflow-wrap:anywhere}.modal-delete{margin-top:8px}.sheet .modal-delete.hidden{display:none!important}@keyframes spotFade{from{opacity:.45;transform:translateY(2px)}to{opacity:1;transform:none}}@media(max-width:520px){.spots-head{align-items:flex-start}.spots-tools{margin-top:3px}.edit-round,.add-round{width:44px;height:44px}.history-grid{grid-template-columns:1fr}.spot-title{max-width:50vw;font-size:16px}.spot-tab{font-size:11px}.score-card{grid-template-columns:1fr auto}.score-number{font-size:50px}}
+'''
+          p.write_text(c)
+
+          # ---------- index.html ----------
+          p=Path('index.html')
+          idx=p.read_text().replace('20261004final4','20261004final5')
+          p.write_text(idx)
+          PY
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -e
+          node --check app.js
+          grep -q 'id="editSpots"' app.html
+          grep -q 'id="deleteSpotInModal"' app.html
+          grep -q 'function toggleSpotsEditMode' app.js
+          grep -q 'function plural' app.js
+          grep -q 'class="history-grid"' app.js
+          grep -q 'styles.css?v=20261004final5' app.html
+          ! grep -q 'data-edit=' app.js
+          ! grep -q 'data-del=' app.js
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js styles.css index.html
+          git commit -m 'Polish My Spots editing and detail views'
+          git push
