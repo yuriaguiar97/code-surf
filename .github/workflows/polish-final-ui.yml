@@ -13,92 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply UI polish
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          # ----- app.html -----
-          h=Path('app.html')
-          x=h.read_text()
-
-          # Remove gust card from current conditions.
-          x=re.sub(r'\s*<div id="gustCard" class="metric-card quality">.*?</div>\s*(?=<div id="energyCard")','\n        ',x,count=1,flags=re.S)
-
-          # Multiple alert lead times.
-          old='''<h2>Antecedência</h2><select id="alertLead" class="field"><option value="6">6 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="48">48 horas</option></select>'''
-          new='''<h2>Antecedência</h2><div class="lead-grid" id="alertLeads"><label class="lead-option"><input type="checkbox" data-alert-lead="6"><span>6h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="12"><span>12h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="24"><span>24h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="48"><span>48h</span></label></div><div class="sub lead-help">Você pode escolher mais de um aviso, por exemplo 48h e 24h antes.</div>'''
-          assert old in x, 'alert lead select not found'
-          x=x.replace(old,new)
-
-          # Neutral daily table legend.
-          x=x.replace('Estrelas de 1 a 5 resumem swell, período, vento e energia ao longo do dia. Swell abaixo de 1 m é ruim; 1,8–2,5 m é a faixa boa. Período abaixo de 8 s é ruim, 10 s é ok e 12 s+ é bom. Vento acima de 5 kt começa a perder nota, principalmente maral; terral moderado é favorecido.','A visão do dia mostra os valores brutos em cada horário. As estrelas acima resumem a qualidade geral do dia.')
-
-          # Tide event list below chart.
-          marker='<div class="tide-labels"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>'
-          assert marker in x, 'tide labels not found'
-          x=x.replace(marker,marker+'\n      <div id="tideEventsList" class="tide-events-list"></div>')
-
-          # Cache bump / version label.
-          x=x.replace('styles.css?v=20261004final2','styles.css?v=20261004final3').replace('app.js?v=20261004final2','app.js?v=20261004final3').replace('FINAL · 2026.10.04 · 2','FINAL · 2026.10.04 · 3')
-          h.write_text(x)
-
-          # ----- app.js -----
-          p=Path('app.js')
-          s=p.read_text()
-
-          # Alerts storage default + migration-compatible shape.
-          s=s.replace("alerts:()=>{try{return JSON.parse(localStorage.getItem('code_alert_settings')||'{\"enabled\":true,\"lead\":12,\"spots\":{}}')}catch{return{enabled:true,lead:12,spots:{}}}}", "alerts:()=>{try{return JSON.parse(localStorage.getItem('code_alert_settings')||'{\"enabled\":true,\"leads\":[24,48],\"spots\":{}}')}catch{return{enabled:true,leads:[24,48],spots:{}}}}")
-
-          # Current-condition cards: period has only seconds; energy has only J/m²; no gust card.
-          old_sel="setMetric('periodCard','period',fmt(p,0)+' s',quality('period',p)?.label||'período','period',p);setMetric('windCard','wind',fmt(wind,0)+' kt',`${dir(windDir)} · ${fmt(windDir,0)}° · ${quality('wind',wind,windDir)?.label||''}`,'wind',wind,windDir);setMetric('gustCard','gust',fmt(gust,0)+' kt','rajadas','wind',gust,windDir);setMetric('energyCard','energy',fmt(e,0),`${quality('energy',e)?.label||''} · J/m²`,'energy',e);"
-          new_sel="setMetric('periodCard','period',fmt(p,0)+' s','','period',p);setMetric('windCard','wind',fmt(wind,0)+' kt',`${dir(windDir)} · ${fmt(windDir,0)}° · ${quality('wind',wind,windDir)?.label||''}`,'wind',wind,windDir);setMetric('energyCard','energy',fmt(e,0),'J/m²','energy',e);"
-          assert old_sel in s, 'selected-day metric sequence not found'
-          s=s.replace(old_sel,new_sel)
-
-          # Daily table: raw values only, no red/green cells.
-          old_matrix="""html+=mk('Ondulação','≈',(t,i)=>fmt(H.wave_height[i])+' m',(t,i)=>qStyle('wave',H.wave_height[i]));html+=mk('Dir. onda','↗',(t,i)=>dir(H.wave_direction[i])+' '+fmt(H.wave_direction[i],0)+'°');html+=mk('Período','◷',(t,i)=>fmt(periodAt(i),0)+' s',(t,i)=>qStyle('period',periodAt(i)));html+=mk('Vento','≋',(t,i)=>{const wi=windIndex(t);return fmt(W.wind_speed_10m[wi],0)+' kt'},(t,i)=>{const wi=windIndex(t);return qStyle('wind',W.wind_speed_10m[wi],W.wind_direction_10m[wi])});html+=mk('Rajadas','»',(t,i)=>{const wi=windIndex(t);return fmt(W.wind_gusts_10m[wi],0)+' kt'},(t,i)=>{const wi=windIndex(t);return qStyle('wind',W.wind_gusts_10m[wi],W.wind_direction_10m[wi])});html+=mk('Dir. vento','→',(t,i)=>{const wi=windIndex(t),d=W.wind_direction_10m[wi];return dir(d)+' '+fmt(d,0)+'°'});html+=mk('Energia','ϟ',(t,i)=>fmt(energy(H.wave_height[i]),0)+' J/m²',(t,i)=>qStyle('energy',energy(H.wave_height[i])));"""
-          new_matrix="""html+=mk('Ondulação','≈',(t,i)=>fmt(H.wave_height[i])+' m');html+=mk('Dir. onda','↗',(t,i)=>dir(H.wave_direction[i])+' '+fmt(H.wave_direction[i],0)+'°');html+=mk('Período','◷',(t,i)=>fmt(periodAt(i),0)+' s');html+=mk('Vento','≋',(t,i)=>{const wi=windIndex(t);return fmt(W.wind_speed_10m[wi],0)+' kt'});html+=mk('Rajadas','»',(t,i)=>{const wi=windIndex(t);return fmt(W.wind_gusts_10m[wi],0)+' kt'});html+=mk('Dir. vento','→',(t,i)=>{const wi=windIndex(t),d=W.wind_direction_10m[wi];return dir(d)+' '+fmt(d,0)+'°'});html+=mk('Energia','ϟ',(t,i)=>fmt(energy(H.wave_height[i]),0)+' J/m²');"""
-          assert old_matrix in s, 'matrix colored rows not found'
-          s=s.replace(old_matrix,new_matrix)
-
-          # Tide chart: labels on graph are time only; details go into organized chips below.
-          old_draw=re.search(r"function drawTide\(\)\{.*?\nfunction spotImage",s,re.S)
-          assert old_draw, 'drawTide function not found'
-          new_draw=r'''function drawTide(){const day=state.selectedDay,ev=tideEvents(day),svg=$('tideChart'),list=$('tideEventsList');$('tideDayLabel').textContent=dayName(day,true);if(!ev.length){svg.innerHTML='';$('tideRange').textContent='sem tábua para este dia';if(list)list.innerHTML='';return}const start=new Date(`${day}T00:00:00-03:00`).getTime(),W=640,H=170,s=[];for(let i=0;i<=96;i++){const ms=start+i*15*60*1000,v=tideAtMs(ms,day);if(Number.isFinite(v))s.push([v,i/96*W])}const vals=s.map(x=>x[0]),min=Math.min(...vals),max=Math.max(...vals),pad=Math.max(.06,(max-min)*.12),lo=min-pad,hi=max+pad,y=v=>H-22-(v-lo)/(hi-lo)*(H-42),path=s.map(([v,x],i)=>(i?'L':'M')+x.toFixed(1)+','+y(v).toFixed(1)).join(' '),fill=path+` L ${W},${H-18} L 0,${H-18} Z`,marks=ev.map(e=>{const [hh,mm]=e.time.split(':').map(Number),x=(hh*60+mm)/1440*W,yy=y(Number(e.height)),labelY=e.type==='high'?Math.max(13,yy-9):Math.min(H-8,yy+14);return`<circle cx="${x}" cy="${yy}" r="3" fill="#dffaff"/><text x="${x}" y="${labelY}" text-anchor="middle" font-size="8" fill="#b8d0da">${e.time}</text>`}).join('');svg.innerHTML=`<path d="${fill}" fill="rgba(77,180,255,.10)"/><path d="${path}" fill="none" stroke="#66c7ff" stroke-width="2.2" vector-effect="non-scaling-stroke"/>${marks}`;$('tideRange').textContent=`${fmt(min,2)}–${fmt(max,2)} m`;$('tideSource').textContent=`${state.tides?.source||'tábua astronômica'} · alturas positivas no datum da tábua`;if(list)list.innerHTML=ev.map(e=>`<div class="tide-event ${e.type}"><span>${e.type==='high'?'↑ Cheia':'↓ Baixa'}</span><b>${e.time}</b><small>${fmt(e.height,2)} m</small></div>`).join('')}
-function spotImage'''
-          s=s[:old_draw.start()]+new_draw+s[old_draw.end():]
-
-          # Multiple alert lead times + migrate old single lead setting.
-          old_alert=re.search(r"function renderAlerts\(\)\{.*?\nfunction bind\(\)\{",s,re.S)
-          assert old_alert, 'renderAlerts block not found'
-          new_alert=r'''function alertLeadValues(cfg){if(Array.isArray(cfg?.leads)&&cfg.leads.length)return cfg.leads.map(Number).filter(Number.isFinite);if(Number.isFinite(Number(cfg?.lead)))return[Number(cfg.lead)];return[24,48]}
-function renderAlerts(){const box=$('alertsList');if(!box)return;const spots=storage.spots(),cfg=storage.alerts(),leads=alertLeadValues(cfg);$('globalAlert').checked=cfg.enabled!==false;document.querySelectorAll('[data-alert-lead]').forEach(el=>el.checked=leads.includes(Number(el.dataset.alertLead)));box.innerHTML=spots.length?spots.map(s=>`<div class="toggle-row"><div><b>${esc(s.name)}</b><small>monitorar aproximação do CODE</small></div><label class="switch"><input type="checkbox" data-alert-spot="${s.id}" ${cfg.spots?.[s.id]!==false?'checked':''}><span class="slider"></span></label></div>`).join(''):'<small>Nenhum pico cadastrado.</small>';box.querySelectorAll('[data-alert-spot]').forEach(el=>el.onchange=()=>{const x=storage.alerts();x.spots??={};x.spots[el.dataset.alertSpot]=el.checked;storage.setAlerts(x)})}
-function saveAlertLeads(){const x=storage.alerts(),vals=[...document.querySelectorAll('[data-alert-lead]:checked')].map(el=>Number(el.dataset.alertLead)).filter(Number.isFinite).sort((a,b)=>a-b);x.leads=vals.length?vals:[24];delete x.lead;storage.setAlerts(x);if(!vals.length){const fallback=document.querySelector('[data-alert-lead="24"]');if(fallback)fallback.checked=true}}
-function bind(){'''
-          s=s[:old_alert.start()]+new_alert+s[old_alert.end():]
-
-          # Replace old single select listener with checkbox listeners.
-          old_bind=";$('alertLead').onchange=()=>{const x=storage.alerts();x.lead=Number($('alertLead').value);storage.setAlerts(x)};"
-          assert old_bind in s, 'old alertLead listener not found'
-          s=s.replace(old_bind,";document.querySelectorAll('[data-alert-lead]').forEach(el=>el.onchange=saveAlertLeads);")
-
-          p.write_text(s)
-
-          # ----- styles.css -----
-          css=Path('styles.css')
-          c=css.read_text()
-          c += '''\n/* final3 polish */\n.lead-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.lead-option{position:relative}.lead-option input{position:absolute;opacity:0;pointer-events:none}.lead-option span{display:grid;place-items:center;padding:14px 8px;border-radius:14px;background:rgba(7,17,25,.7);border:1px solid rgba(255,255,255,.08);color:#9eb5c0;font-weight:800}.lead-option input:checked+span{background:rgba(95,233,223,.13);border-color:rgba(95,233,223,.48);color:#dffbf8;box-shadow:inset 0 0 0 1px rgba(95,233,223,.12)}.lead-help{margin-top:8px}.tide-events-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:12px}.tide-event{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(5,14,22,.55);border:1px solid rgba(255,255,255,.055)}.tide-event span{font-size:10px;color:#8fa8b4}.tide-event b{font-size:12px}.tide-event small{grid-column:1/-1;font-size:10px}.tide-event.high span{color:#8fd7ff}.tide-event.low span{color:#8edfd7}@media(max-width:520px){.lead-grid{grid-template-columns:repeat(2,1fr)}.tide-events-list{grid-template-columns:repeat(2,minmax(0,1fr))}}\n'''
-          css.write_text(c)
-
-          # ----- index.html -----
-          idx=Path('index.html')
-          ix=idx.read_text().replace('20261004final2','20261004final3')
-          idx.write_text(ix)
-          PY
-
+      - name: Patch CODE
+        run: python3 polish_final_ui.py
       - name: Validate
         shell: bash
         run: |
@@ -110,7 +26,6 @@ function bind(){'''
           grep -q 'styles.css?v=20261004final3' app.html
           ! grep -q 'id="gustCard"' app.html
           ! grep -q "qStyle('wave',H.wave_height" app.js
-
       - name: Commit changes
         shell: bash
         run: |
