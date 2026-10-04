@@ -1,0 +1,34 @@
+name: Run final7 CODE polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run-final7.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply final7 polish
+        run: python3 scripts/final7_polish.py
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'FINAL · 2026.10.04 · 7' app.html
+          grep -q 'Register CODE' app.html
+          grep -q 'code-metrics-grid' app.html
+          grep -q '24 horas antes' app.html
+          grep -q '48 horas antes' app.html
+          ! grep -q 'data-alert-lead="6"' app.html
+          ! grep -q 'data-alert-lead="12"' app.html
+      - name: Commit
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js styles.css index.html
+          git commit -m 'Polish CODE learning tab and alert timing controls'
+          git push
