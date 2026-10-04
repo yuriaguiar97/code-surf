@@ -1,0 +1,31 @@
+name: Run final tuning patch
+on:
+  push:
+    paths:
+      - '.github/workflows/run-final-tuning.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch CODE
+        run: python3 patch-final-tuning.py
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q "function dayStars" app.js
+          grep -q "kind==='energy'" app.js
+          grep -q "function tideStatus" app.js
+          grep -q 'id="energyCard"' app.html
+          grep -q 'id="tideCard"' app.html
+          grep -q '20261004final2' app.html
+      - name: Commit changes
+        run: |
+          rm -f patch-final-tuning.py .github/workflows/run-final-tuning.yml .github/workflows/patch-final-tuning.yml
+          git config user.name "CODE deploy bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Tune surf condition scoring and tide status"
+          git push
