@@ -1,0 +1,32 @@
+name: Run final8 CODE polish
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run-final8.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python3 scripts/polish_final8.py
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'CONDIÇÕES REGULARES' app.js
+          grep -q 'FINAL · 2026.10.04 · 8' app.html
+          grep -q 'styles.css?v=20261004final8' app.html
+          grep -q '<span class="register-word">Register</span><span class="code-word">CODE</span>' app.html
+          ! grep -q '<a class="nav-register" href="#register" aria-label="Register CODE"><svg' app.html
+      - name: Commit changes
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js styles.css index.html
+          git commit -m 'Use regular conditions label and round Register CODE button'
+          git push
