@@ -1,0 +1,51 @@
+name: Fix forecast heat gradient
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-heat-gradient.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make intensity colors strictly monotonic
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('app.html')
+          s=p.read_text()
+
+          old_re = r"function heatColor\(kind,val\)\{.*?\}function heatStyle\(kind,val\)\{.*?\}function tintSnap\(id,kind,val\)\{.*?\}"
+          new = r'''function heatLevel(kind,val){const n=Number(val);if(!Number.isFinite(n))return 0;const r={wave:[.5,2.5],period:[7,16],wind:[0,20]}[kind];if(!r)return 0;return Math.max(0,Math.min(1,(n-r[0])/(r[1]-r[0])))}
+function heatColor(kind,val){const t=heatLevel(kind,val),pal={wave:[[218,227,255],[31,52,112]],period:[[255,232,241],[112,28,62]],wind:[[216,249,248],[7,91,101]]}[kind];if(!pal)return '';const a=pal[0],b=pal[1],mix=(x,y)=>Math.round(x+(y-x)*t);return `rgb(${mix(a[0],b[0])} ${mix(a[1],b[1])} ${mix(a[2],b[2])})`}
+function heatStyle(kind,val){const bg=heatColor(kind,val),t=heatLevel(kind,val);return bg?`background:${bg};color:${t>.48?'#f8fbff':'#071219'};font-weight:800`:''}
+function tintSnap(id,kind,val){const el=$(id)?.closest('.snap'),bg=heatColor(kind,val),t=heatLevel(kind,val);if(!el||!bg)return;el.style.background=bg;el.style.color=t>.48?'#f8fbff':'#071219';el.querySelectorAll('small,div:not(.metric-icon),strong').forEach(x=>x.style.color='inherit');const icon=el.querySelector('.metric-icon');if(icon)icon.style.color=t>.48?'#d9f5ff':'#173b50'}'''
+          s,n=re.subn(old_re,new,s,count=1,flags=re.S)
+          assert n==1, f'heat helper replacements={n}'
+
+          s=s.replace('BUILD 2026.10.04-F','BUILD 2026.10.04-G')
+          p.write_text(s)
+
+          idx=Path('index.html')
+          t=idx.read_text()
+          t=re.sub(r'app\.html\?v=20261004[a-z]', 'app.html?v=20261004g', t)
+          idx.write_text(t)
+          PY
+
+          grep -q "function heatLevel" app.html
+          grep -q "BUILD 2026.10.04-G" app.html
+          grep -q "20261004g" index.html
+          rm .github/workflows/fix-heat-gradient.yml
+          git config user.name "CODE deploy bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app.html index.html .github/workflows/fix-heat-gradient.yml
+          git commit -m "Fix monotonic swell and period heat gradients"
+          git push
