@@ -12,13 +12,33 @@
 <meta http-equiv="Expires" content="0">
 <title>CODE · Ubatuba</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261004final9">
+<link rel="stylesheet" href="styles.css?v=20261004final10">
 </head>
 <body>
 <section id="splash">
   <div class="splash-bg"></div><div class="splash-vignette"></div>
-  <a class="splash-tap" href="#forecast" aria-label="Entrar no CODE"></a>
-  <div class="splash-copy"><div class="splash-logo">CODE</div><div class="splash-tag">EVERY SPOT HAS A CODE</div><div class="splash-hint">TOQUE PARA ENTRAR</div></div>
+  <button id="splashTap" class="splash-tap" type="button" aria-label="Entrar no CODE"></button>
+  <div class="splash-copy"><div class="splash-logo">CODE<span class="code-blink">.</span></div><div id="typedTag" class="splash-tag" data-text="EVERY SPOT HAS A CODE"></div><div class="splash-hint">TOQUE EM QUALQUER LUGAR</div></div>
+</section>
+
+<section id="pinGate" class="pin-gate hidden" aria-label="Acesso ao CODE">
+  <div class="pin-card">
+    <div class="pin-brand">CODE<span>.</span></div>
+    <div id="pinStep">
+      <div class="pin-kicker">ACESSO PRIVADO</div>
+      <h2>Digite o PIN</h2>
+      <input id="pinInput" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" placeholder="••••" aria-label="PIN de quatro dígitos">
+      <button id="pinSubmit" class="btn pin-submit" type="button">ENTRAR</button>
+      <div id="pinError" class="pin-error"></div>
+    </div>
+    <div id="profileStep" class="hidden">
+      <div class="pin-kicker">IDENTIFICAÇÃO</div>
+      <h2>Qual é o seu nome?</h2>
+      <div class="sub">Ele aparecerá nas sessões que você registrar.</div>
+      <input id="profileName" class="field" maxlength="30" autocomplete="name" placeholder="Seu nome">
+      <button id="profileSave" class="btn" type="button">ENTRAR NO CODE</button>
+    </div>
+  </div>
 </section>
 
 <section id="forecast" class="screen">
@@ -53,7 +73,7 @@
     </div>
 
     <h2>Leitura do CODE</h2><div class="notice">O forecast mostra o cenário geral de Ubatuba. Conforme você registra sessões, cada pico passa a ter seu próprio CODE e Confidence.</div>
-    <div class="version">FINAL · 2026.10.04 · 9</div>
+    <div class="version">FINAL · 2026.10.04 · 10</div>
   </main>
   <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -64,7 +84,7 @@
     <div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
     <div id="spotsList" class="spots-list"></div>
-    <div class="version">FINAL · 2026.10.04 · 9</div>
+    <div class="version">FINAL · 2026.10.04 · 10</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -94,7 +114,7 @@
       <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span><small>cresce conforme o histórico fica mais consistente</small></div><b id="codeConfValue" class="code-confidence-value">0%</b></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
       <div class="notice code-learning-notice">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
     </section>
-    <div class="version">FINAL · 2026.10.04 · 9</div>
+    <div class="version">FINAL · 2026.10.04 · 10</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -102,7 +122,7 @@
 <section id="register" class="screen">
   <header class="top"><a class="back" href="#forecast">‹ Previsão</a><div class="logo" style="font-size:18px">REGISTRAR</div><div style="width:42px"></div></header>
   <main class="content">
-    <h1>Registrar sessão</h1><div class="sub">As condições do momento são capturadas automaticamente. Você só avalia o surf.</div>
+    <h1>Registrar sessão</h1><div class="sub">As condições do momento são capturadas automaticamente. Você só avalia o surf.</div><div id="registerIdentity" class="register-identity"></div>
     <select id="spotSelect" class="field"></select>
     <div id="noSpot" class="notice hidden">Você ainda não cadastrou nenhum pico. <a href="#spots"><b>Criar pico →</b></a></div>
     <div class="card"><b>Condições capturadas</b><div class="capture-grid"><div class="capture"><small>Ondulação</small><b id="rs">—</b></div><div class="capture"><small>Período</small><b id="rp">—</b></div><div class="capture"><small>Vento</small><b id="rw">—</b></div><div class="capture"><small>Energia</small><b id="re">—</b></div><div class="capture"><small>Maré</small><b id="rt">—</b></div></div></div>
@@ -110,7 +130,7 @@
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
-    <div class="version">FINAL · 2026.10.04 · 9</div>
+    <div class="version">FINAL · 2026.10.04 · 10</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -122,7 +142,7 @@
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
     <h2>Antecedência</h2><div class="card alerts-card alert-leads-card" id="alertLeads"><div class="toggle-row"><div><b>24 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="24"><span class="slider"></span></label></div><div class="toggle-row"><div><b>48 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="48"><span class="slider"></span></label></div></div><div class="sub lead-help">Você pode manter os dois avisos ativos ao mesmo tempo.</div>
-    <div class="version">FINAL · 2026.10.04 · 9</div>
+    <div class="version">FINAL · 2026.10.04 · 10</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -154,6 +174,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261004final9"></script>
+<script src="app.js?v=20261004final10"></script>
 </body>
 </html>
