@@ -14,7 +14,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          for lon in -45.0711 -44.95 -44.85 -44.75 -44.65 -44.55; do
+          for lon in -44.55 -44.45 -44.35 -44.25 -44.15 -44.05; do
             echo "===== lon $lon ====="
             url="https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=$lon&hourly=wave_height,wave_direction,wave_period,wave_peak_period,swell_wave_height,swell_wave_direction,swell_wave_period,swell_wave_peak_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea"
             curl -fsSL "$url" > /tmp/marine.json
