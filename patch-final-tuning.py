@@ -1,0 +1,84 @@
+from pathlib import Path
+import re
+
+p=Path('app.js')
+s=p.read_text()
+
+new_quality=r'''function quality(kind,val,dirDeg=null){
+  const n=Number(val);if(!Number.isFinite(n))return null;
+  let good=false,intensity=.25,label='',score=.5;
+  if(kind==='wave'){
+    if(n<1){good=false;intensity=clamp(.65+(1-n)*.25,.65,.95);score=clamp(.10+n*.18,.08,.28);label='SWELL FRACO'}
+    else if(n<1.8){good=false;intensity=clamp(.34-((n-1)/.8)*.22,.10,.34);score=.34+((n-1)/.8)*.26;label='SWELL MÉDIO'}
+    else{good=true;const ideal=clamp((n-1.8)/.7,0,1);intensity=.30+ideal*.48;score=.82+ideal*.18;label=n<=2.5?'SWELL BOM':'SWELL GRANDE'}
+  }else if(kind==='period'){
+    if(n<8){good=false;intensity=clamp(.72+(8-n)*.07,.72,1);score=.10+clamp(n/8,0,1)*.15;label='PERÍODO RUIM'}
+    else if(n<10){good=false;intensity=clamp(.34-((n-8)/2)*.20,.12,.34);score=.36+((n-8)/2)*.20;label='PERÍODO CURTO'}
+    else if(n<12){good=true;intensity=.18+((n-10)/2)*.24;score=.65+((n-10)/2)*.18;label='PERÍODO OK'}
+    else{good=true;intensity=clamp(.55+(n-12)*.09,.55,1);score=clamp(.90+(n-12)*.025,.90,1);label='PERÍODO BOM'}
+  }else if(kind==='wind'){
+    const d=Number(dirDeg),terral=offshore(d),maral=onshore(d),leve=n<=5;
+    if(leve){good=true;intensity=.22;score=.96-n*.018;label='VENTO LEVE'}
+    else if(terral&&n<=10){good=true;intensity=.25+((n-5)/5)*.28;score=.86-((n-5)/5)*.20;label='TERRAL'}
+    else{good=false;intensity=clamp(.16+(n-5)/15*.72,.16,.95);score=clamp((terral?.52:maral?.24:.36)-(n-5)*.025,.08,.55);label=terral?'TERRAL FORTE':maral?'MARAL':'VENTO FORTE'}
+  }else if(kind==='energy'){
+    if(n<1000){good=false;intensity=clamp(.62+(1000-n)/1000*.28,.62,.92);score=.10+clamp(n/1000,0,1)*.18;label='ENERGIA BAIXA'}
+    else if(n<1800){good=false;intensity=clamp(.34-((n-1000)/800)*.22,.12,.34);score=.34+((n-1000)/800)*.22;label='ENERGIA MÉDIA'}
+    else if(n<2500){good=true;intensity=.22+((n-1800)/700)*.32;score=.68+((n-1800)/700)*.18;label='ENERGIA OK'}
+    else{good=true;intensity=clamp(.58+(n-2500)/1800*.34,.58,.92);score=clamp(.90+(n-2500)/3000*.10,.90,1);label='ENERGIA BOA'}
+  }else return null;
+  const light=good?[207,242,218]:[250,222,223],dark=good?[18,101,59]:[124,36,46],mix=(a,b,t)=>Math.round(a+(b-a)*t),bg=`rgb(${mix(light[0],dark[0],intensity)} ${mix(light[1],dark[1],intensity)} ${mix(light[2],dark[2],intensity)})`;
+  return{good,intensity,label,bg,dark:intensity>.55,score:clamp(score)}
+}
+function qStyle(kind,val,dirDeg=null){const q=quality(kind,val,dirDeg);return q?`background:${q.bg};color:${q.dark?'#f7fff8':'#08150d'};font-weight:800`:''}
+function surfScore(wave,period,wind,windDir,energyValue){const parts=[['wave',wave,null,.30],['period',period,null,.25],['wind',wind,windDir,.30],['energy',energyValue,null,.15]];let total=0,weight=0;for(const [k,v,d,w] of parts){const q=quality(k,v,d);if(q){total+=q.score*w;weight+=w}}return weight?clamp(total/weight):.5}
+function overallQuality(wave,period,wind,windDir,energyValue){const s=surfScore(wave,period,wind,windDir,energyValue);if(s>=.78)return{cls:'good',text:'BOAS CONDIÇÕES'};if(s<.48)return{cls:'bad',text:'CONDIÇÕES FRACAS'};return{cls:'mixed',text:'CONDIÇÕES MISTAS'}}
+function dayStars(day){const H=state.marine?.hourly,W=state.wind?.hourly;if(!H||!W)return 1;let idx=H.time.map((t,i)=>[t,i]).filter(([t])=>{const h=Number(t.slice(11,13));return t.startsWith(day)&&h>=7&&h<=19&&h%2===1});if(!idx.length)idx=H.time.map((t,i)=>[t,i]).filter(([t])=>t.startsWith(day));const scores=idx.map(([t,i])=>{const wi=windIndex(t);return surfScore(H.wave_height[i],periodAt(i),W.wind_speed_10m[wi],W.wind_direction_10m[wi],energy(H.wave_height[i]))}).filter(Number.isFinite);if(!scores.length)return 1;const avg=scores.reduce((a,b)=>a+b,0)/scores.length,best=Math.max(...scores),combined=avg*.72+best*.28;return Math.max(1,Math.min(5,Math.round(1+combined*4)))}
+function starsText(n){return '★★★★★'.split('').map((x,i)=>i<n?'★':'☆').join('')}
+'''
+s,n=re.subn(r"function quality\(kind,val,dirDeg=null\)\{.*?\nasync function fetchJSON",new_quality+'async function fetchJSON',s,count=1,flags=re.S)
+assert n==1, f'quality block replacement={n}'
+
+new_days=r'''function renderDays(){const h=state.marine?.hourly;if(!h)return;const by={};h.time.forEach((t,i)=>(by[t.slice(0,10)]??=[]).push(i));const today=h.time[nearestIndex(h.time)].slice(0,10);$('days').innerHTML=Object.entries(by).slice(0,7).map(([day])=>{const i=nearestInDay(h.time,day,12);if(i<0)return'';const wave=h.wave_height[i],p=periodAt(i),label=day===today?'HOJE':dayName(day).toUpperCase(),rating=dayStars(day);return`<button class="day-card ${day===state.selectedDay?'active':''}" data-day="${day}"><span class="day-name">${label}</span><span class="wave-glyph">≈</span><b>${fmt(wave)} m</b><div class="day-meta">${dir(h.wave_direction[i])} · ${fmt(p,0)}s</div><div class="day-stars" aria-label="${rating} de 5 estrelas">${starsText(rating)}</div></button>`}).join('');$('days').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{state.selectedDay=b.dataset.day;renderSelectedDay();renderDays()})}
+'''
+s,n=re.subn(r"function renderDays\(\)\{.*?\nfunction selectedIndex",new_days+'function selectedIndex',s,count=1,flags=re.S)
+assert n==1, f'renderDays replacement={n}'
+
+new_selected=r'''function renderSelectedDay(){if(!state.marine||!state.wind)return;const i=selectedIndex();if(i<0)return;const h=state.marine.hourly,ts=h.time[i],wi=windIndex(ts),wave=Number(h.wave_height[i]),waveDir=Number(h.wave_direction[i]),p=periodAt(i),wind=Number(state.wind.hourly.wind_speed_10m[wi]),windDir=Number(state.wind.hourly.wind_direction_10m[wi]),gust=Number(state.wind.hourly.wind_gusts_10m[wi]),e=energy(wave),tide=tideValue(ts),today=h.time[nearestIndex(h.time)].slice(0,10),isToday=state.selectedDay===today,overall=overallQuality(wave,p,wind,windDir,e),tideState=tideStatus(ts);state.latest={wave,waveDir,period:p,wind,windDir,gust,energy:e,tide,ts};$('selectedMoment').textContent=isToday?'HOJE · AGORA':dayName(state.selectedDay,true).toUpperCase()+' · 12H';$('selectedTitle').textContent=isToday?'Condições atuais':'Referência do dia';$('conditionPill').className='condition-pill '+overall.cls;$('conditionPill').textContent=overall.text;setMetric('waveCard','wave',fmt(wave)+' m',`${dir(waveDir)} · ${fmt(waveDir,0)}°`,'wave',wave);setMetric('periodCard','period',fmt(p,0)+' s',quality('period',p)?.label||'período','period',p);setMetric('windCard','wind',fmt(wind,0)+' kt',`${dir(windDir)} · ${fmt(windDir,0)}° · ${quality('wind',wind,windDir)?.label||''}`,'wind',wind,windDir);setMetric('gustCard','gust',fmt(gust,0)+' kt','rajadas','wind',gust,windDir);setMetric('energyCard','energy',fmt(e,0),`${quality('energy',e)?.label||''} · J/m²`,'energy',e);$('tideNow').textContent=Number.isFinite(Number(tide))?`${fmt(tide,2)} m${tideState?' '+(tideState.rising?'↑':'↓'):''}`:'—';const tideSub=$('tideCard')?.querySelector('.metric-sub');if(tideSub)tideSub.textContent=tideState?`${tideState.rising?'subindo':'descendo'} · ${tideState.nextType} ${tideState.nextTime}`:'tábua astronômica';$('dayTitle').textContent=dayName(state.selectedDay,true);$('summarySource').textContent=state.sourceMode==='primary'?'GFS-Wave 0,25° + GFS':'fonte alternativa / cache';renderMatrix();drawTide();renderRegisterCapture()}
+'''
+s,n=re.subn(r"function renderSelectedDay\(\)\{.*?\nfunction setMetric",new_selected+'function setMetric',s,count=1,flags=re.S)
+assert n==1, f'renderSelectedDay replacement={n}'
+
+old_energy="html+=mk('Energia','ϟ',(t,i)=>fmt(energy(H.wave_height[i]),0)+' J/m²');"
+new_energy="html+=mk('Energia','ϟ',(t,i)=>fmt(energy(H.wave_height[i]),0)+' J/m²',(t,i)=>qStyle('energy',energy(H.wave_height[i])));"
+assert old_energy in s
+s=s.replace(old_energy,new_energy)
+
+tide_value="function tideValue(ts){if(!state.tides||!ts)return null;return tideAtMs(localDate(ts).getTime(),ts.slice(0,10))}\n"
+assert tide_value in s
+s=s.replace(tide_value,tide_value+"function tideStatus(ts){if(!state.tides||!ts)return null;const day=ts.slice(0,10),ms=localDate(ts).getTime(),series=tideSeries(day),next=series.find(e=>e.ms>ms);if(!next)return null;const now=tideAtMs(ms,day),later=tideAtMs(ms+10*60*1000,day),rising=Number.isFinite(now)&&Number.isFinite(later)?later>=now:next.type==='high';return{rising,nextType:next.type==='high'?'cheia':'baixa',nextTime:next.time,nextHeight:Number(next.height)}}\n")
+p.write_text(s)
+
+h=Path('app.html')
+x=h.read_text()
+old_energy_card='<div class="metric-card"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M13 2L6 13h6l-1 9 7-12h-6z"/></svg></div><small>Energia</small><strong id="energy">—</strong><div class="metric-sub">J/m²</div></div>'
+new_energy_card='<div id="energyCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M13 2L6 13h6l-1 9 7-12h-6z"/></svg></div><small>Energia</small><strong id="energy">—</strong><div class="metric-sub">J/m²</div></div>'
+assert old_energy_card in x
+x=x.replace(old_energy_card,new_energy_card)
+old_tide_card='<div class="metric-card"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></div><small>Maré</small><strong id="tideNow">—</strong><div class="metric-sub">tábua astronômica</div></div>'
+new_tide_card='<div id="tideCard" class="metric-card"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></div><small>Maré</small><strong id="tideNow">—</strong><div class="metric-sub">próxima cheia/baixa</div></div>'
+assert old_tide_card in x
+x=x.replace(old_tide_card,new_tide_card)
+x=x.replace('Verde = condição favorável · vermelho = desfavorável. Swell ≥ 1,8 m e período ≥ 10 s entram no verde. Vento leve ou terral entra no verde; vento forte/maral entra no vermelho.','Estrelas de 1 a 5 resumem swell, período, vento e energia ao longo do dia. Swell abaixo de 1 m é ruim; 1,8–2,5 m é a faixa boa. Período abaixo de 8 s é ruim, 10 s é ok e 12 s+ é bom. Vento acima de 5 kt começa a perder nota, principalmente maral; terral moderado é favorecido.')
+x=x.replace('styles.css?v=20261004final','styles.css?v=20261004final2').replace('app.js?v=20261004final','app.js?v=20261004final2').replace('FINAL · 2026.10.04','FINAL · 2026.10.04 · 2')
+h.write_text(x)
+
+css=Path('styles.css')
+c=css.read_text()
+if '.day-stars{' not in c:
+    c += '\n.day-stars{margin-top:7px;color:var(--yellow);font-size:11px;letter-spacing:1px;white-space:nowrap}.day-card.active .day-stars{text-shadow:0 0 9px rgba(255,212,94,.22)}#tideCard .metric-sub{line-height:1.35}#tideCard strong{white-space:nowrap}\n'
+css.write_text(c)
+
+idx=Path('index.html')
+ix=idx.read_text().replace('20261004final','20261004final2')
+idx.write_text(ix)
