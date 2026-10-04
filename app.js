@@ -13,8 +13,42 @@ const dayPlus=(day,n)=>{const d=new Date(day+'T12:00:00-03:00');d.setDate(d.getD
 const dayName=(day,long=false)=>new Intl.DateTimeFormat('pt-BR',long?{weekday:'long',day:'2-digit',month:'2-digit'}:{weekday:'short'}).format(new Date(day+'T12:00:00-03:00')).replace('.','');
 const storage={sessions:()=>{try{return JSON.parse(localStorage.getItem('code_sessions')||'[]')}catch{return[]}},setSessions:v=>localStorage.setItem('code_sessions',JSON.stringify(v)),spots:()=>{try{return JSON.parse(localStorage.getItem('code_spots')||'[]')}catch{return[]}},setSpots:v=>localStorage.setItem('code_spots',JSON.stringify(v)),alerts:()=>{try{return JSON.parse(localStorage.getItem('code_alert_settings')||'{"enabled":true,"leads":[24,48],"spots":{}}')}catch{return{enabled:true,leads:[24,48],spots:{}}}},setAlerts:v=>localStorage.setItem('code_alert_settings',JSON.stringify(v))};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const ACCESS_PIN='7777';
+const SYNC_URL='https://aaiynfintqsjvkaitmlz.supabase.co/functions/v1/code-sync';
+let accessPin=sessionStorage.getItem('code_access_pin')||'';
+let syncPromise=null;
 const currentUserName=()=>localStorage.getItem('code_user_name')||'';
+async function sharedRequest(action,payload={},pin=accessPin){
+  if(!pin)throw new Error('PIN necessário');
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000);
+  try{
+    const r=await fetch(SYNC_URL,{method:'POST',cache:'no-store',signal:ctl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({action,pin,actor:currentUserName(),...payload})});
+    let data={};try{data=await r.json()}catch{}
+    if(!r.ok||data?.error)throw new Error(data?.error||('HTTP '+r.status));
+    return data;
+  }finally{clearTimeout(timer)}
+}
+async function syncSharedData({migrate=true}={}){
+  if(!accessPin)return null;
+  if(syncPromise)return syncPromise;
+  syncPromise=(async()=>{
+    if(migrate&&localStorage.getItem('code_shared_migrated')!=='1'){
+      const spots=storage.spots();
+      let changed=false;
+      const sessions=storage.sessions().map(x=>{if(x.id)return x;changed=true;return{...x,id:uid(),registeredBy:x.registeredBy||currentUserName()||'Surfista'}});
+      if(changed)storage.setSessions(sessions);
+      if(spots.length||sessions.length)await sharedRequest('migrate',{spots,sessions});
+      localStorage.setItem('code_shared_migrated','1');
+    }
+    const snap=await sharedRequest('snapshot');
+    const spots=Array.isArray(snap.spots)?snap.spots:[];
+    const sessions=Array.isArray(snap.sessions)?snap.sessions:[];
+    storage.setSpots(spots);storage.setSessions(sessions);
+    if(state.currentSpotId&&!spots.some(x=>x.id===state.currentSpotId)){state.currentSpotId='';localStorage.removeItem('code_current_spot')}
+    renderSpots();renderSpotDetail();renderRegisterCapture();
+    return snap;
+  })().finally(()=>{syncPromise=null});
+  return syncPromise;
+}
 function nearestIndex(times,target=Date.now()){let best=0,delta=Infinity;times.forEach((v,i)=>{const d=Math.abs(localDate(v).getTime()-target);if(d<delta){delta=d;best=i}});return best}
 function nearestInDay(times,day,targetHour=12){let idx=-1,delta=Infinity;times.forEach((v,i)=>{if(!v.startsWith(day))return;const h=Number(v.slice(11,13))+Number(v.slice(14,16))/60,d=Math.abs(h-targetHour);if(d<delta){delta=d;idx=i}});return idx}
 function energy(H){H=Number(H);return Number.isFinite(H)?1025*9.81*H*H/16:null}
@@ -93,26 +127,57 @@ async function chooseSpotPhoto(file){if(!file)return;try{const photo=await compr
 function openSpotEditor(id=null){state.editingSpotId=id;const spot=storage.spots().find(s=>s.id===id),seed=spot?.seed||{};state.pendingSpotPhoto=spot?.photo||null;updateSpotPhotoPreview(state.pendingSpotPhoto);if($('chooseSpotPhoto'))$('chooseSpotPhoto').textContent=spot?'ALTERAR FOTO':'ESCOLHER FOTO';$('modalTitle').textContent=spot?'Editar pico':'Novo pico';$('spotName').value=spot?.name||'';$('spotLat').value=spot?.lat??'';$('spotLon').value=spot?.lon??'';$('seedWaveMin').value=seed.waveMin??'';$('seedWaveMax').value=seed.waveMax??'';$('seedPeriodMin').value=seed.periodMin??'';$('seedPeriodMax').value=seed.periodMax??'';$('seedSwellDir').value=seed.swellDir??'';$('seedWindDir').value=seed.windDir??'';$('seedWindMax').value=seed.windMax??'';$('seedNote').value=seed.note??'';updateLocationSummary();$('deleteSpotInModal').classList.toggle('hidden',!spot);$('spotModal').classList.add('show');setTimeout(()=>$('spotName').focus(),50)}
 function closeSpotEditor(){$('spotModal').classList.remove('show');state.editingSpotId=null;state.pendingSpotPhoto=null}
 function numField(id){const v=$(id).value.trim().replace(',','.');return v===''?null:Number(v)}
-function saveSpot(){const name=$('spotName').value.trim();if(!name)return alert('Dê um nome ao pico.');const lat=numField('spotLat'),lon=numField('spotLon'),seed={waveMin:numField('seedWaveMin'),waveMax:numField('seedWaveMax'),periodMin:numField('seedPeriodMin'),periodMax:numField('seedPeriodMax'),swellDir:$('seedSwellDir').value.trim(),windDir:$('seedWindDir').value.trim(),windMax:numField('seedWindMax'),note:$('seedNote').value.trim()},hasSeed=Object.values(seed).some(v=>v!==null&&v!=='');const spots=storage.spots();if(state.editingSpotId){const s=spots.find(x=>x.id===state.editingSpotId);if(s){s.name=name;s.lat=lat;s.lon=lon;s.seed=hasSeed?seed:null;s.photo=state.pendingSpotPhoto||s.photo||null}}else{const id=uid();spots.push({id,name,lat,lon,seed:hasSeed?seed:null,photo:state.pendingSpotPhoto||null});state.currentSpotId=id;localStorage.setItem('code_current_spot',id)}storage.setSpots(spots);closeSpotEditor();renderSpots();renderSpotDetail()}
-function deleteSpot(id){const spots=storage.spots(),spot=spots.find(s=>s.id===id);if(!spot)return;if(!confirm(`Excluir ${spot.name} e todo o histórico deste pico?`))return;storage.setSpots(spots.filter(s=>s.id!==id));storage.setSessions(storage.sessions().filter(s=>s.spotId!==id));if(state.currentSpotId===id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}if(state.editingSpotId===id)closeSpotEditor();renderSpots();renderSpotDetail()}
+async function saveSpot(){
+  const name=$('spotName').value.trim();if(!name)return alert('Dê um nome ao pico.');
+  const lat=numField('spotLat'),lon=numField('spotLon'),seed={waveMin:numField('seedWaveMin'),waveMax:numField('seedWaveMax'),periodMin:numField('seedPeriodMin'),periodMax:numField('seedPeriodMax'),swellDir:$('seedSwellDir').value.trim(),windDir:$('seedWindDir').value.trim(),windMax:numField('seedWindMax'),note:$('seedNote').value.trim()},hasSeed=Object.values(seed).some(v=>v!==null&&v!=='');
+  const spots=storage.spots();let candidate;
+  if(state.editingSpotId){const existing=spots.find(x=>x.id===state.editingSpotId);if(!existing)return;candidate={...existing,name,lat,lon,seed:hasSeed?seed:null,photo:state.pendingSpotPhoto||existing.photo||null}}
+  else{candidate={id:uid(),name,lat,lon,seed:hasSeed?seed:null,photo:state.pendingSpotPhoto||null,createdBy:currentUserName()||'Surfista'}}
+  const btn=$('saveSpot');if(btn){btn.disabled=true;btn.textContent='SALVANDO…'}
+  try{
+    const result=await sharedRequest('upsert_spot',{spot:candidate});const savedSpot=result.spot||candidate;
+    const next=spots.filter(x=>x.id!==savedSpot.id);next.push(savedSpot);storage.setSpots(next);
+    if(!state.editingSpotId){state.currentSpotId=savedSpot.id;localStorage.setItem('code_current_spot',savedSpot.id)}
+    closeSpotEditor();renderSpots();renderSpotDetail();
+  }catch(err){console.error(err);alert('Não consegui salvar o pico no CODE compartilhado. Confira sua conexão e tente novamente.')}
+  finally{if(btn){btn.disabled=false;btn.textContent='SALVAR'}}
+}
+async function deleteSpot(id){
+  const spots=storage.spots(),spot=spots.find(s=>s.id===id);if(!spot)return;if(!confirm(`Excluir ${spot.name} e todo o histórico deste pico?`))return;
+  try{await sharedRequest('delete_spot',{spotId:id})}catch(err){console.error(err);alert('Não consegui excluir o pico do CODE compartilhado. Tente novamente.');return}
+  storage.setSpots(spots.filter(s=>s.id!==id));storage.setSessions(storage.sessions().filter(s=>s.spotId!==id));
+  if(state.currentSpotId===id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}if(state.editingSpotId===id)closeSpotEditor();renderSpots();renderSpotDetail();
+}
 function updateLocationSummary(){const lat=$('spotLat').value,lon=$('spotLon').value,ok=lat!==''&&lon!=='';$('spotLocationSummary').classList.toggle('marked',ok);$('spotLocationSummary').textContent=ok?`Ponto marcado · ${Number(lat).toFixed(5)}, ${Number(lon).toFixed(5)}`:'Nenhum local marcado'}
 function openMap(){const lat=Number($('spotLat').value),lon=Number($('spotLon').value),has=$('spotLat').value!==''&&$('spotLon').value!==''&&Number.isFinite(lat)&&Number.isFinite(lon);state.pendingPoint=has?{lat,lon}:null;$('mapResults').innerHTML='';$('mapSearch').value='';$('mapModal').classList.add('show');setTimeout(()=>{if(!window.L){$('mapCoords').textContent='Mapa indisponível. Tente novamente em alguns segundos.';return}if(!state.map){state.map=L.map('mapCanvas',{zoomControl:true}).setView(has?[lat,lon]:[CFG.lat,CFG.lon],has?16:11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(state.map);state.map.on('click',e=>setMapPoint(e.latlng.lat,e.latlng.lng,'Ponto marcado'))}else{state.map.invalidateSize();state.map.setView(has?[lat,lon]:[CFG.lat,CFG.lon],has?16:11)}if(has)setMapPoint(lat,lon,'Ponto atual');else{$('mapCoords').textContent='Busque uma praia ou toque no mapa para marcar o pico.';if(state.mapMarker){state.map.removeLayer(state.mapMarker);state.mapMarker=null}}},120)}
 function closeMap(){$('mapModal').classList.remove('show')}
 function setMapPoint(lat,lon,label='Ponto marcado'){lat=Number(lat);lon=Number(lon);if(!Number.isFinite(lat)||!Number.isFinite(lon))return;state.pendingPoint={lat,lon};if(state.map){if(!state.mapMarker)state.mapMarker=L.marker([lat,lon]).addTo(state.map);else state.mapMarker.setLatLng([lat,lon]);state.map.panTo([lat,lon])}$('mapCoords').textContent=`${label} · ${lat.toFixed(6)}, ${lon.toFixed(6)}`}
 async function searchMap(){const q=$('mapSearch').value.trim();if(!q)return;$('mapSearchBtn').textContent='…';$('mapResults').innerHTML='<div class="hintbox">Buscando…</div>';try{const data=await fetchJSON('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=pt-BR&countrycodes=br&q='+encodeURIComponent(q),10000);if(!data.length){$('mapResults').innerHTML='<div class="hintbox">Nenhum resultado. Tente incluir Ubatuba ou o nome da praia.</div>';return}$('mapResults').innerHTML=data.map((x,i)=>`<button class="map-result" data-map-result="${i}" type="button">${esc(x.display_name)}</button>`).join('');$('mapResults').querySelectorAll('[data-map-result]').forEach(b=>b.onclick=()=>{const x=data[Number(b.dataset.mapResult)],lat=Number(x.lat),lon=Number(x.lon);setMapPoint(lat,lon,x.display_name.split(',').slice(0,2).join(','));state.map.setView([lat,lon],16);$('mapResults').innerHTML=''})}catch{$('mapResults').innerHTML='<div class="hintbox">Não consegui buscar agora. Você ainda pode navegar e tocar diretamente no mapa.</div>'}finally{$('mapSearchBtn').textContent='BUSCAR'}}
 function renderRegisterCapture(){if(!state.latest)return;const x=state.latest;$('rs').textContent=`${fmt(x.wave)} m · ${dir(x.waveDir)} ${fmt(x.waveDir,0)}°`;$('rp').textContent=fmt(x.period,0)+' s';$('rw').textContent=`${dir(x.windDir)} ${fmt(x.wind,0)} kt · raj. ${fmt(x.gust,0)}`;$('re').textContent=fmt(x.energy,0)+' J/m²';$('rt').textContent=Number.isFinite(Number(x.tide))?fmt(x.tide,2)+' m':'—'}
-function saveSession(){const spots=storage.spots(),spotId=$('spotSelect').value,spot=spots.find(s=>s.id===spotId),score=document.querySelector('input[name="score"]:checked');if(!spot)return alert('Crie um pico antes de registrar a sessão.');if(!state.latest)return alert('A previsão ainda não carregou.');if(!score)return alert('Escolha uma nota de 6 a 10.');const arr=storage.sessions();arr.push({...state.latest,spotId,spotName:spot.name,registeredBy:currentUserName()||'Surfista',score:Number(score.value),size:$('size').value.trim(),comment:$('comment').value.trim(),date:new Date().toLocaleDateString('pt-BR')});storage.setSessions(arr);state.currentSpotId=spotId;localStorage.setItem('code_current_spot',spotId);$('saved').style.display='block';renderSpots();renderSpotDetail();setTimeout(()=>{location.hash='spot';showSpotTab('overview');$('saved').style.display='none'},500)}
+async function saveSession(){
+  const spots=storage.spots(),spotId=$('spotSelect').value,spot=spots.find(s=>s.id===spotId),score=document.querySelector('input[name="score"]:checked');
+  if(!spot)return alert('Crie um pico antes de registrar a sessão.');if(!state.latest)return alert('A previsão ainda não carregou.');if(!score)return alert('Escolha uma nota de 6 a 10.');
+  const session={id:uid(),...state.latest,spotId,spotName:spot.name,registeredBy:currentUserName()||'Surfista',score:Number(score.value),size:$('size').value.trim(),comment:$('comment').value.trim(),date:new Date().toLocaleDateString('pt-BR')};
+  const btn=$('saveSession');if(btn){btn.disabled=true;btn.textContent='SALVANDO…'}
+  try{
+    const result=await sharedRequest('add_session',{session});const savedSession=result.session||session,arr=storage.sessions();arr.push(savedSession);storage.setSessions(arr);
+    state.currentSpotId=spotId;localStorage.setItem('code_current_spot',spotId);$('saved').style.display='block';renderSpots();renderSpotDetail();
+    document.querySelectorAll('input[name="score"]').forEach(x=>x.checked=false);$('size').value='';$('comment').value='';
+    setTimeout(()=>{location.hash='spot';showSpotTab('overview');$('saved').style.display='none'},500)
+  }catch(err){console.error(err);alert('Não consegui registrar a sessão no CODE compartilhado. Confira sua conexão e tente novamente.')}
+  finally{if(btn){btn.disabled=false;btn.textContent='SALVAR SESSÃO'}}
+}
 function alertLeadValues(cfg){const allowed=[24,48];let vals=[];if(Array.isArray(cfg?.leads))vals=cfg.leads.map(Number).filter(v=>allowed.includes(v));else if(allowed.includes(Number(cfg?.lead)))vals=[Number(cfg.lead)];return vals.length?vals:[24,48]}
 function renderAlerts(){const box=$('alertsList');if(!box)return;const spots=storage.spots(),cfg=storage.alerts(),leads=alertLeadValues(cfg);$('globalAlert').checked=cfg.enabled!==false;document.querySelectorAll('[data-alert-lead]').forEach(el=>el.checked=leads.includes(Number(el.dataset.alertLead)));box.innerHTML=spots.length?spots.map(s=>`<div class="toggle-row alert-spot-row"><div><b>${esc(s.name)}</b></div><label class="switch"><input type="checkbox" data-alert-spot="${s.id}" ${cfg.spots?.[s.id]!==false?'checked':''}><span class="slider"></span></label></div>`).join(''):'<small>Nenhum pico cadastrado.</small>';box.querySelectorAll('[data-alert-spot]').forEach(el=>el.onchange=()=>{const x=storage.alerts();x.spots??={};x.spots[el.dataset.alertSpot]=el.checked;storage.setAlerts(x)})}
 function saveAlertLeads(){const x=storage.alerts(),vals=[...document.querySelectorAll('[data-alert-lead]:checked')].map(el=>Number(el.dataset.alertLead)).filter(Number.isFinite).sort((a,b)=>a-b);x.leads=vals.length?vals:[24];delete x.lead;storage.setAlerts(x);if(!vals.length){const fallback=document.querySelector('[data-alert-lead="24"]');if(fallback)fallback.checked=true}}
 function typeSplash(){const el=$('typedTag');if(!el)return;const text=el.dataset.text||'EVERY SPOT HAS A CODE';el.textContent='';let i=0;const tick=()=>{if(i<=text.length){el.textContent=text.slice(0,i++);setTimeout(tick,72)}};setTimeout(tick,350)}
 function updateRegisterIdentity(){const el=$('registerIdentity');if(!el)return;const name=currentUserName();el.textContent=name?`Registrando como ${name}`:'Identifique-se para registrar'}
-function unlockAccess(){document.body.classList.add('access-granted');$('pinGate')?.classList.add('hidden');updateRegisterIdentity();const allowed=['#forecast','#spots','#spot','#register','#alerts'];if(!allowed.includes(location.hash))location.hash='forecast'}
+function unlockAccess(){document.body.classList.add('access-granted');$('pinGate')?.classList.add('hidden');updateRegisterIdentity();const allowed=['#forecast','#spots','#spot','#register','#alerts'];if(!allowed.includes(location.hash))location.hash='forecast';syncSharedData({migrate:true}).catch(err=>{console.error('shared sync failed',err);alert('Você entrou no CODE, mas a sincronização compartilhada não respondeu agora. Tente novamente com conexão à internet.')})}
 function showProfileStep(){$('pinStep')?.classList.add('hidden');$('profileStep')?.classList.remove('hidden');setTimeout(()=>$('profileName')?.focus(),80)}
-function tryPin(){const input=$('pinInput'),err=$('pinError'),card=document.querySelector('.pin-card');if(!input)return;if(input.value===ACCESS_PIN){err.textContent='';if(currentUserName())unlockAccess();else showProfileStep();return}err.textContent='PIN incorreto';input.value='';card?.classList.remove('shake');void card?.offsetWidth;card?.classList.add('shake');input.focus()}
+async function tryPin(){const input=$('pinInput'),err=$('pinError'),card=document.querySelector('.pin-card'),btn=$('pinSubmit');if(!input)return;const pin=input.value.trim();if(pin.length!==4){err.textContent='Digite os 4 números do PIN';return}if(btn){btn.disabled=true;btn.textContent='VALIDANDO…'}try{await sharedRequest('login',{},pin);accessPin=pin;sessionStorage.setItem('code_access_pin',pin);err.textContent='';if(currentUserName())unlockAccess();else showProfileStep()}catch(e){err.textContent='PIN incorreto ou conexão indisponível';input.value='';card?.classList.remove('shake');void card?.offsetWidth;card?.classList.add('shake');input.focus()}finally{if(btn){btn.disabled=false;btn.textContent='ENTRAR'}}}
 function saveProfileName(){const name=$('profileName')?.value.trim();if(!name){$('profileName')?.focus();return}localStorage.setItem('code_user_name',name.slice(0,30));unlockAccess()}
 function openPinGate(){$('pinGate')?.classList.remove('hidden');$('pinStep')?.classList.remove('hidden');$('profileStep')?.classList.add('hidden');const input=$('pinInput');if(input){input.value='';setTimeout(()=>input.focus(),80)}}
 function bootAccess(){typeSplash();$('splashTap')?.addEventListener('click',openPinGate);$('pinSubmit')?.addEventListener('click',tryPin);$('pinInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')tryPin()});$('profileSave')?.addEventListener('click',saveProfileName);$('profileName')?.addEventListener('keydown',e=>{if(e.key==='Enter')saveProfileName()});updateRegisterIdentity()}
 function bind(){$('refreshForecast').onclick=()=>loadForecast(true);$('editSpots').onclick=toggleSpotsEditMode;$('addSpot').onclick=()=>openSpotEditor();$('cancelSpot').onclick=closeSpotEditor;$('saveSpot').onclick=saveSpot;if($('chooseSpotPhoto'))$('chooseSpotPhoto').onclick=()=>$('spotPhotoInput').click();if($('spotPhotoInput'))$('spotPhotoInput').onchange=e=>chooseSpotPhoto(e.target.files?.[0]);$('deleteSpotInModal').onclick=()=>{if(state.editingSpotId)deleteSpot(state.editingSpotId)};$('spotModal').onclick=e=>{if(e.target===$('spotModal'))closeSpotEditor()};$('openMapPicker').onclick=openMap;$('cancelMap').onclick=closeMap;$('confirmMap').onclick=()=>{if(!state.pendingPoint)return alert('Marque um ponto no mapa primeiro.');$('spotLat').value=state.pendingPoint.lat.toFixed(6);$('spotLon').value=state.pendingPoint.lon.toFixed(6);updateLocationSummary();closeMap()};$('mapSearchBtn').onclick=searchMap;$('mapSearch').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();searchMap()}};$('mapModal').onclick=e=>{if(e.target===$('mapModal'))closeMap()};document.querySelectorAll('.spot-tab').forEach(b=>b.onclick=()=>showSpotTab(b.dataset.tab));$('saveSession').onclick=saveSession;$('globalAlert').onchange=()=>{const x=storage.alerts();x.enabled=$('globalAlert').checked;storage.setAlerts(x)};document.querySelectorAll('[data-alert-lead]').forEach(el=>el.onchange=saveAlertLeads);window.addEventListener('hashchange',()=>{if(location.hash==='#spots'||location.hash==='#register'||location.hash==='#alerts')renderSpots();if(location.hash==='#spot')renderSpotDetail();if(location.hash==='#register'){renderRegisterCapture();updateRegisterIdentity()}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-state.lastLoad>CFG.staleMs)loadForecast(true)})}
-bootAccess();bind();renderSpots();renderSpotDetail();showSpotTab('overview');loadForecast(true);setInterval(()=>loadForecast(true),CFG.refreshMs);
+bootAccess();bind();renderSpots();renderSpotDetail();showSpotTab('overview');loadForecast(true);setInterval(()=>loadForecast(true),CFG.refreshMs);setInterval(()=>{if(document.body.classList.contains('access-granted'))syncSharedData({migrate:false}).catch(()=>{})},45000);
 })();
