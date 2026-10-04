@@ -13,90 +13,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build daily interactive forecast UI
+      - name: Apply Windguru-style interval and heat colors
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           p=Path('app.html')
           s=p.read_text()
 
-          extra_css=r'''
-          .day{cursor:pointer;color:#edf5f8;font:inherit}.day:first-child{border-color:#18303c}.day.active,.day.active:first-child{border-color:#54c8e8;background:#0c2029;box-shadow:0 0 0 1px rgba(84,200,232,.08) inset}.day .mini-energy{font-size:9px;color:#54c8e8;margin-top:5px}.snapshot-card{padding:14px}.snapshot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.snapshot-head h2{margin:3px 0 0;font-size:20px}.snapshot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:14px}.snap{position:relative;padding:13px;background:#0a1820;border:1px solid #102b37;border-radius:13px;min-height:105px}.snap small{display:block;padding-right:34px}.snap strong{display:block;font-size:21px;margin:8px 0 3px}.metric-icon{position:absolute;right:11px;top:11px;width:25px;height:25px;color:#62c8e4;opacity:.95}.metric-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.day-view-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-top:22px}.day-view-head h2{margin:0}.matrix-scroll{overflow:auto;margin:10px -18px 0;padding:0 18px 8px;scrollbar-width:none}.forecast-table{border-collapse:separate;border-spacing:0;min-width:1040px;width:100%;font-size:11px;background:#071219;border:1px solid #142b36;border-radius:14px;overflow:hidden}.forecast-table th,.forecast-table td{padding:10px 9px;text-align:center;border-right:1px solid #102732;border-bottom:1px solid #102732;white-space:nowrap}.forecast-table th{font:700 9px "Courier New",monospace;color:#77909c;background:#08161d;letter-spacing:.04em}.forecast-table td:first-child,.forecast-table th:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:112px;background:#08161d;color:#9ab0ba}.forecast-table td:last-child,.forecast-table th:last-child{border-right:0}.forecast-table tbody tr:last-child td{border-bottom:0}.forecast-table .wave-row td:not(:first-child){color:#dfeef3;font-weight:700}.forecast-table .period-row td:not(:first-child){color:#9bd9ea;font-weight:700}.forecast-table .energy-row td:not(:first-child){color:#62c8e4}.rowicon{display:inline-flex;width:20px;justify-content:center;color:#62c8e4;margin-right:5px;font-size:13px}.tide-wrap{margin-top:24px}.tide-chart{height:170px}.tide-labels{padding:0 5px}.selected-day-note{font:10px "Courier New",monospace;color:#6e8793;margin-top:7px}.register-bottom{margin-top:24px}.forecast-source{margin-top:6px}.today-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#54c8e8;margin-right:5px;vertical-align:1px}
-          '''
-          s=s.replace('</style>',extra_css+'\n</style>',1)
+          s=s.replace('Variação de 00h até 24h','Intervalos de 2h · padrão Windguru')
+          s=s.replace('Leitura em intervalos de 2 horas, no estilo de uma grade diária: ondulação, direção, período, vento, rajadas, direção do vento, energia e maré.','Leitura em intervalos de 2 horas, alinhada ao padrão visual do Windguru. Quanto mais escura a célula, maior a intensidade.')
 
-          forecast=r'''<section id="forecast" class="screen">
-          <header class="top"><div class="logo">CODE</div><div class="place">⌖ Ubatuba, SP</div></header>
-          <main class="content">
-            <h1>Previsão</h1><div class="sub">Escolha o dia e veja a leitura completa das 24 horas</div><div class="badge">CODE FORECAST · LIVE</div><div id="status" class="status"><span class="dot"></span>sincronizando previsão…</div>
-            <div id="days" class="days"></div>
+          helper=r'''function heatColor(kind,val){const n=Number(val);if(!Number.isFinite(n))return '';const cfg={wave:[.5,2.5,214],period:[7,16,334],wind:[0,20,186]}[kind];if(!cfg)return '';const [lo,hi,h]=cfg,t=Math.max(0,Math.min(1,(n-lo)/(hi-lo))),sat=Math.round(48+30*t),light=Math.round(31-14*t);return `hsl(${h} ${sat}% ${light}%)`}
+function heatStyle(kind,val){const bg=heatColor(kind,val);return bg?`background:${bg};color:#f5fbfd;font-weight:800`:''}
+function tintSnap(id,kind,val){const el=$(id)?.closest('.snap'),bg=heatColor(kind,val);if(el&&bg)el.style.background=bg}
+'''
+          if 'function heatColor(' not in s:
+              s=s.replace('function renderDayMatrix(day){',helper+'function renderDayMatrix(day){',1)
 
-            <div class="card snapshot-card">
-              <div class="snapshot-head"><div><small id="selectedMoment">HOJE · AGORA</small><h2 id="selectedTitle">Condições atuais</h2></div><span class="badge" style="margin:0">LIVE</span></div>
-              <div class="snapshot-grid">
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M2 15c3-5 6-5 9 0s6 5 11 0"/><path d="M3 19c3-3 6-3 9 0s6 3 9 0"/></svg></div><small>Ondulação</small><strong id="wave">—</strong><div id="waveDir">—</div></div>
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></div><small>Período</small><strong id="period">—</strong><div>segundos</div></div>
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M3 8h10c2 0 2-3 0-3"/><path d="M3 12h15c3 0 3 4 0 4"/><path d="M3 16h8"/></svg></div><small>Vento</small><strong id="wind">—</strong><div id="windDirText">—</div></div>
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M4 12h10"/><path d="M11 8l4 4-4 4"/><path d="M18 6v12"/></svg></div><small>Rajadas</small><strong id="gust">—</strong><div>nós</div></div>
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M13 2L6 13h6l-1 9 7-12h-6z"/></svg></div><small>Energia</small><strong class="cyan" id="energy">—</strong><div>J/m²</div></div>
-                <div class="snap"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M12 3v7"/><path d="M9 7l3 3 3-3"/></svg></div><small>Maré</small><strong id="tideNow">—</strong><div>MSL</div></div>
-              </div>
-            </div>
+          pattern=r'function renderDayMatrix\(day\)\{.*?\}\nfunction drawTideDay'
+          new=r'''function renderDayMatrix(day){const {m,w}=forecastData,idx=m.hourly.time.map((v,i)=>[v,i]).filter(([v])=>{const h=Number(v.slice(11,13));return v.startsWith(day)&&h>=3&&h<=23&&h%2===1});if(!idx.length){$('dayMatrix').innerHTML='<div class="empty">Sem dados para este dia.</div>';return}const heads=idx.map(([ts])=>`<th>${ts.slice(11,13)}h</th>`).join('');const mk=(cls,label,icon,fn,styleFn)=>`<tr class="${cls}"><td><span class="rowicon">${icon}</span>${label}</td>${idx.map(([ts,i])=>{const st=styleFn?styleFn(ts,i):'';return `<td${st?` style="${st}"`:''}>${fn(ts,i)}</td>`}).join('')}</tr>`;let html=`<table class="forecast-table"><thead><tr><th>HORA</th>${heads}</tr></thead><tbody>`;html+=mk('wave-row','Ondulação','≈',(ts,i)=>f(m.hourly.wave_height[i])+' m',(ts,i)=>heatStyle('wave',m.hourly.wave_height[i]));html+=mk('','Dir. onda','↗',(ts,i)=>dir(m.hourly.wave_direction[i])+' '+f(m.hourly.wave_direction[i],0)+'°');html+=mk('period-row','Período','◷',(ts,i)=>f(dominantPeriod(m.hourly,i),0)+' s',(ts,i)=>heatStyle('period',dominantPeriod(m.hourly,i)));html+=mk('','Vento','≋',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_speed_10m[wi],0)+' kt'},(ts,i)=>{const wi=windIndex(ts);return heatStyle('wind',w.hourly.wind_speed_10m[wi])});html+=mk('','Rajada','»',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_gusts_10m[wi],0)+' kt'},(ts,i)=>{const wi=windIndex(ts);return heatStyle('wind',w.hourly.wind_gusts_10m[wi])});html+=mk('','Dir. vento','→',(ts,i)=>{const wi=windIndex(ts),d=w.hourly.wind_direction_10m[wi];return dir(d)+' '+f(d,0)+'°'});html+=mk('energy-row','Energia','ϟ',(ts,i)=>f(energyAt(m.hourly,i),0));html+=mk('','Maré','∿',(ts,i)=>{const v=valueAtTide(ts);return Number.isFinite(Number(v))?f(v,2)+' m':'—'});html+='</tbody></table>';$('dayMatrix').innerHTML=html}
+function drawTideDay'''
+          s,n=re.subn(pattern,new,s,flags=re.S)
+          assert n==1, f'renderDayMatrix replacements={n}'
 
-            <div class="day-view-head"><div><h2>Visão do dia</h2><div class="sub">Variação de 00h até 24h</div></div><small id="dailyDate">—</small></div>
-            <div class="matrix-scroll"><div id="dayMatrix"></div></div>
-            <div class="source forecast-source">Leitura em intervalos de 2 horas, no estilo de uma grade diária: ondulação, direção, período, vento, rajadas, direção do vento, energia e maré.</div>
+          snap_target="$('energy').textContent=f(e,0);$('tideNow').textContent=Number.isFinite(Number(tv))?f(tv,2)+' m':'—';$('dailyDate').textContent=dayName(day,true)"
+          snap_repl=snap_target+";tintSnap('wave','wave',H);tintSnap('period','period',p);tintSnap('wind','wind',wv);tintSnap('gust','wind',g)"
+          if snap_target in s:
+              s=s.replace(snap_target,snap_repl,1)
 
-            <div class="tide-wrap"><div class="tide-head"><div><h2 style="margin:0">Maré</h2><div class="sub" id="tideDayLabel">24 horas</div></div><small id="tideRange">MSL</small></div><svg id="tideChart" class="tide-chart" viewBox="0 0 640 170" preserveAspectRatio="none" aria-label="Gráfico diário de maré"></svg><div id="tideLabels" class="tide-labels"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div><div class="source">A curva muda junto com o dia selecionado. Sem “enchendo/vazando”: você vê diretamente a evolução da maré ao longo das 24 horas.</div></div>
-
-            <h2>Leitura do CODE</h2><div id="codeNotice" class="notice">Cadastre seus picos e registre sessões. O CODE vai aprender quais condições fazem cada pico funcionar.</div>
-            <a class="btn cta register-bottom" href="#register">＋ REGISTRAR SUA SESSÃO</a><div class="version">BUILD 2026.10.04-D</div>
-          </main>
-          <nav class="nav"><a class="active" href="#forecast"><span>≋</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a></nav></section>
-
-          '''
-          s,n=re.subn(r'<section id="forecast" class="screen">.*?(?=<section id="spots")',forecast,s,flags=re.S)
-          assert n==1, f'forecast section replacements={n}'
-
-          s=s.replace("let latest={};let editingId=null;", "let latest={},forecastData=null,selectedDay='';let editingId=null;",1)
-
-          new_funcs=r'''function energyAt(h,i){const H=Number(h.wave_height?.[i]);return Number.isFinite(H)?1025*9.81*H*H/16:null}
-          function dayPlus(day,n){const d=new Date(day+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-          function dayName(day,long=false){const d=new Date(day+'T12:00:00');return new Intl.DateTimeFormat('pt-BR',long?{weekday:'long',day:'2-digit',month:'2-digit'}:{weekday:'short'}).format(d).replace('.','')}
-          function closestIndex(times,target){let ix=0,b=Infinity;times.forEach((v,i)=>{const q=Math.abs(new Date(v).getTime()-target);if(q<b){b=q;ix=i}});return ix}
-          function windIndex(ts){const w=forecastData?.w;if(!w?.hourly?.time)return 0;const exact=w.hourly.time.indexOf(ts);return exact>=0?exact:closestIndex(w.hourly.time,new Date(ts).getTime())}
-          function tideIndex(ts){const t=forecastData?.t;if(!t?.hourly?.time)return -1;const exact=t.hourly.time.indexOf(ts);return exact>=0?exact:closestIndex(t.hourly.time,new Date(ts).getTime())}
-          function renderDays(){const {m}=forecastData,byDay={};m.hourly.time.forEach((v,i)=>(byDay[v.slice(0,10)]??=[]).push(i));const today=m.hourly.time[closestIndex(m.hourly.time,Date.now())].slice(0,10);$('days').innerHTML=Object.entries(byDay).slice(0,7).map(([day,idx],n)=>{const noon=idx.reduce((a,i)=>Math.abs(Number(m.hourly.time[i].slice(11,13))-12)<Math.abs(Number(m.hourly.time[a].slice(11,13))-12)?i:a,idx[0]),name=day===today?'HOJE':dayName(day).toUpperCase(),e=energyAt(m.hourly,noon);return `<button class="day ${day===selectedDay?'active':''}" data-day="${day}"><small>${day===today?'<span class="today-dot"></span>':''}${name}</small><b>${f(m.hourly.wave_height[noon])} m</b><div>${dir(m.hourly.wave_direction[noon])} · ${f(dominantPeriod(m.hourly,noon),0)}s</div><div class="mini-energy">${f(e,0)} J/m²</div></button>`}).join('');$('days').querySelectorAll('[data-day]').forEach(el=>el.onclick=()=>{selectedDay=el.dataset.day;renderSelectedDay()})}
-          function valueAtTide(ts){const t=forecastData?.t,ti=tideIndex(ts);return ti>=0?t.hourly.sea_level_height_msl?.[ti]:null}
-          function renderDayMatrix(day){const {m,w}=forecastData,idx=m.hourly.time.map((v,i)=>[v,i]).filter(([v])=>v.startsWith(day)&&Number(v.slice(11,13))%2===0);if(!idx.length){$('dayMatrix').innerHTML='<div class="empty">Sem dados para este dia.</div>';return}const heads=idx.map(([ts])=>`<th>${ts.slice(11,13)}h</th>`).join('');const mk=(cls,label,icon,fn)=>`<tr class="${cls}"><td><span class="rowicon">${icon}</span>${label}</td>${idx.map(([ts,i])=>`<td>${fn(ts,i)}</td>`).join('')}</tr>`;let html=`<table class="forecast-table"><thead><tr><th>HORA</th>${heads}</tr></thead><tbody>`;html+=mk('wave-row','Ondulação','≈',(ts,i)=>f(m.hourly.wave_height[i])+' m');html+=mk('','Dir. onda','↗',(ts,i)=>dir(m.hourly.wave_direction[i])+' '+f(m.hourly.wave_direction[i],0)+'°');html+=mk('period-row','Período','◷',(ts,i)=>f(dominantPeriod(m.hourly,i),0)+' s');html+=mk('','Vento','≋',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_speed_10m[wi],0)+' kt'});html+=mk('','Rajada','»',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_gusts_10m[wi],0)+' kt'});html+=mk('','Dir. vento','→',(ts,i)=>{const wi=windIndex(ts),d=w.hourly.wind_direction_10m[wi];return dir(d)+' '+f(d,0)+'°'});html+=mk('energy-row','Energia','ϟ',(ts,i)=>f(energyAt(m.hourly,i),0));html+=mk('','Maré','∿',(ts,i)=>{const v=valueAtTide(ts);return Number.isFinite(Number(v))?f(v,2)+' m':'—'});html+='</tbody></table>';$('dayMatrix').innerHTML=html}
-          function drawTideDay(day){const t=forecastData?.t,h=t?.hourly;if(!h?.time?.length||!h?.sea_level_height_msl?.length){$('tideChart').innerHTML='';$('tideRange').textContent='indisponível';return}const next=dayPlus(day,1),pairs=h.time.map((v,i)=>[v,i]).filter(([v])=>v.startsWith(day)||v===next+'T00:00');const ok=pairs.map(([ts,i])=>[Number(h.sea_level_height_msl[i]),ts]).filter(([v])=>Number.isFinite(v));if(ok.length<2){$('tideChart').innerHTML='';$('tideRange').textContent='indisponível';return}const vals=ok.map(x=>x[0]),min=Math.min(...vals),max=Math.max(...vals),pad=Math.max(.06,(max-min)*.12),lo=min-pad,hi=max+pad,W=640,H=170;const pts=ok.map(([v,ts],i)=>{const hr=Number(ts.slice(11,13))+(ts.startsWith(next)?24:0);return [hr/24*W,H-22-(v-lo)/(hi-lo)*(H-42)]}),path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');let extrema=[];for(let i=2;i<vals.length-2;i++){const isHi=vals[i]>=vals[i-1]&&vals[i]>=vals[i+1]&&(vals[i]-Math.min(vals[i-2],vals[i+2])>.04),isLo=vals[i]<=vals[i-1]&&vals[i]<=vals[i+1]&&(Math.max(vals[i-2],vals[i+2])-vals[i]>.04);if((isHi||isLo)&&(!extrema.length||i-extrema[extrema.length-1]>=2))extrema.push(i)}const marks=extrema.map(i=>{const [x,y]=pts[i],tm=ok[i][1].slice(11,16),val=f(ok[i][0],2);return `<circle cx="${x}" cy="${y}" r="3" fill="#edf5f8"/><text x="${x}" y="${y<48?y+17:y-9}" text-anchor="middle" font-size="8" fill="#9bb1bb">${tm} · ${val}m</text>`}).join('');$('tideChart').innerHTML=`<path d="${path}" fill="none" stroke="#54c8e8" stroke-width="2.2" vector-effect="non-scaling-stroke"/>${marks}`;$('tideRange').textContent=`${f(min,2)}–${f(max,2)} m MSL`;$('tideDayLabel').textContent=dayName(day,true)}
-          function renderSnapshot(day){const {m,w}=forecastData,today=m.hourly.time[closestIndex(m.hourly.time,Date.now())].slice(0,10),isToday=day===today,indices=m.hourly.time.map((v,i)=>[v,i]).filter(([v])=>v.startsWith(day));if(!indices.length)return;let i=isToday?closestIndex(m.hourly.time,Date.now()):indices.reduce((a,x)=>Math.abs(Number(x[0].slice(11,13))-12)<Math.abs(Number(a[0].slice(11,13))-12)?x:a,indices[0])[1];if(Array.isArray(i))i=i[1];const ts=m.hourly.time[i],wi=windIndex(ts),H=m.hourly.wave_height[i],wd=m.hourly.wave_direction[i],p=dominantPeriod(m.hourly,i),wv=w.hourly.wind_speed_10m[wi],wdir=w.hourly.wind_direction_10m[wi],g=w.hourly.wind_gusts_10m[wi],e=energyAt(m.hourly,i),tv=valueAtTide(ts);$('selectedMoment').textContent=isToday?'HOJE · AGORA':dayName(day).toUpperCase()+' · 12H';$('selectedTitle').textContent=isToday?'Condições atuais':'Referência do dia';$('wave').textContent=f(H)+' m';$('waveDir').textContent=dir(wd)+' · '+f(wd,0)+'°';$('period').textContent=f(p,0)+' s';$('wind').textContent=f(wv,0)+' kt';$('windDirText').textContent=dir(wdir)+' · '+f(wdir,0)+'°';$('gust').textContent=f(g,0)+' kt';$('energy').textContent=f(e,0);$('tideNow').textContent=Number.isFinite(Number(tv))?f(tv,2)+' m':'—';$('dailyDate').textContent=dayName(day,true)}
-          function renderSelectedDay(){if(!forecastData)return;renderDays();renderSnapshot(selectedDay);renderDayMatrix(selectedDay);drawTideDay(selectedDay)}
-          async function loadForecast(){const status=$('status');status.className='status';status.innerHTML='<span class="dot"></span>sincronizando previsão…';try{const marineQ=new URLSearchParams({latitude:MAR_LAT,longitude:MAR_LON,hourly:'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period',models:'ncep_gfswave025',timezone:'America/Sao_Paulo',forecast_days:'7',cell_selection:'sea'}),windQ=new URLSearchParams({latitude:LAT,longitude:LON,hourly:'wind_speed_10m,wind_direction_10m,wind_gusts_10m',wind_speed_unit:'kn',models:'gfs_seamless',timezone:'America/Sao_Paulo',forecast_days:'7'}),tideQ=new URLSearchParams({latitude:LAT,longitude:LON,hourly:'sea_level_height_msl',models:'meteofrance_currents',timezone:'America/Sao_Paulo',forecast_days:'7',cell_selection:'sea'});const [mr,wr,tr]=await Promise.all([fetch('https://marine-api.open-meteo.com/v1/marine?'+marineQ),fetch('https://api.open-meteo.com/v1/forecast?'+windQ),fetch('https://marine-api.open-meteo.com/v1/marine?'+tideQ)]);if(!mr.ok||!wr.ok)throw Error('forecast');const [m,w,t]=await Promise.all([mr.json(),wr.json(),tr.ok?tr.json():Promise.resolve(null)]);forecastData={m,w,t};const ix=closestIndex(m.hourly.time,Date.now()),today=m.hourly.time[ix].slice(0,10);if(!selectedDay||!m.hourly.time.some(v=>v.startsWith(selectedDay)))selectedDay=today;const ts=m.hourly.time[ix],wi=(()=>{const e=w.hourly.time.indexOf(ts);return e>=0?e:closestIndex(w.hourly.time,Date.now())})(),H=Number(m.hourly.wave_height[ix]),energy=energyAt(m.hourly,ix),ti=t?.hourly?.time?.length?t.hourly.time.indexOf(ts):-1,tide=ti>=0?t.hourly.sea_level_height_msl?.[ti]:null;latest={wave:m.hourly.wave_height[ix],waveDir:m.hourly.wave_direction[ix],period:dominantPeriod(m.hourly,ix),wind:w.hourly.wind_speed_10m[wi],windDir:w.hourly.wind_direction_10m[wi],gust:w.hourly.wind_gusts_10m[wi],energy,tide};$('rs').textContent=f(latest.wave)+' m · '+dir(latest.waveDir)+' '+f(latest.waveDir,0)+'°';$('rp').textContent=f(latest.period,0)+' s';$('rw').textContent=dir(latest.windDir)+' '+f(latest.wind,0)+' kt · raj. '+f(latest.gust,0);$('re').textContent=f(latest.energy,0)+' J/m²';$('rt').textContent=Number.isFinite(Number(latest.tide))?f(latest.tide,2)+' m MSL':'—';status.className='status ok';status.innerHTML='<span class="dot"></span>AO VIVO · atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});renderSelectedDay()}catch(e){console.error(e);status.className='status err';status.innerHTML='PREVISÃO INDISPONÍVEL · toque para tentar novamente';status.onclick=loadForecast}}
-          '''
-          s,n=re.subn(r'function drawTide\(t\)\{.*?(?=\$\(\'useLocation\'\))',new_funcs,s,flags=re.S)
-          assert n==1, f'forecast functions replacements={n}'
-          s=s.replace('BUILD 2026.10.04-C','BUILD 2026.10.04-D')
-          assert "renderSelectedDay" in s and "dayMatrix" in s and "BUILD 2026.10.04-D" in s
+          s=s.replace('BUILD 2026.10.04-E','BUILD 2026.10.04-F')
           p.write_text(s)
 
           idx=Path('index.html')
-          q=idx.read_text()
-          q=re.sub(r'app\.html\?v=20261004[a-z]', 'app.html?v=20261004d', q)
-          idx.write_text(q)
+          idx.write_text(idx.read_text().replace('20261004e','20261004f'))
+
+          scripts=re.findall(r'<script>([\s\S]*?)</script>',s)
+          Path('/tmp/app-inline.js').write_text(scripts[-1])
+          assert 'h>=3&&h<=23&&h%2===1' in s
+          assert "heatStyle('wave'" in s and "heatStyle('period'" in s and "heatStyle('wind'" in s
+          assert 'BUILD 2026.10.04-F' in s
           PY
-          node -e "const fs=require('fs'); const s=fs.readFileSync('app.html','utf8'); const m=s.match(/<script>([\\s\\S]*)<\\/script>/); if(!m) throw new Error('script missing'); new Function(m[1]); console.log('JS syntax OK');"
-          grep -q 'BUILD 2026.10.04-D' app.html
-          grep -q 'data-day' app.html
-          grep -q 'Visão do dia' app.html
-      - name: Commit patched app
-        shell: bash
-        run: |
+          node --check /tmp/app-inline.js
           git config user.name "CODE deploy bot"
           git config user.email "actions@users.noreply.github.com"
           git add app.html index.html
-          git commit -m "Add clickable daily forecast and Windguru-style day view"
+          git rm .github/workflows/patch-daily-ui.yml
+          git commit -m "Match Windguru intervals and add intensity heat colors"
           git push
