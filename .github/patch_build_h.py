@@ -1,0 +1,53 @@
+from pathlib import Path
+import re
+
+p=Path('app.html')
+s=p.read_text()
+
+s=s.replace('<div>MSL</div>','<div>tábua astronômica</div>')
+s=s.replace('<small id="tideRange">MSL</small>','<small id="tideRange">—</small>')
+s=s.replace('Leitura em intervalos de 2 horas, alinhada ao padrão visual do Windguru. Quanto mais escura a célula, maior a intensidade.','Teste visual: verde = condição favorável · vermelho = desfavorável. Regra geral provisória de Ubatuba; depois cada pico terá seu próprio CODE.')
+s=s.replace('A curva muda junto com o dia selecionado. Sem “enchendo/vazando”: você vê diretamente a evolução da maré ao longo das 24 horas.','Curva diária baseada em tábua astronômica para Ubatuba, com alturas acima do datum da tábua. Sem usar anomalia MSL negativa.')
+s=s.replace("let latest={},forecastData=null,selectedDay='';","let latest={},forecastData=null,tideData=null,selectedDay='';")
+
+tide_helpers = """function tideEvents(day){return tideData?.events?.[day]||[]}
+function tideEventMs(day,e){return new Date(`${day}T${e.time}:00-03:00`).getTime()}
+function tideSeries(day){return [dayPlus(day,-1),day,dayPlus(day,1)].flatMap(d=>tideEvents(d).map(e=>({...e,day:d,ms:tideEventMs(d,e)}))).sort((a,b)=>a.ms-b.ms)}
+function tideValueAtMs(ms,day){const a=tideSeries(day);if(!a.length)return null;let left=null,right=null;for(const e of a){if(e.ms<=ms)left=e;if(e.ms>=ms){right=e;break}}if(!left)return right?.height??null;if(!right)return left.height;if(left.ms===right.ms)return left.height;const u=Math.max(0,Math.min(1,(ms-left.ms)/(right.ms-left.ms))),ease=(1-Math.cos(Math.PI*u))/2;return left.height+(right.height-left.height)*ease}
+"""
+s,n=re.subn(r"function tideIndex\(ts\)\{.*?\}\nfunction renderDays",tide_helpers+'function renderDays',s,count=1,flags=re.S)
+assert n==1, f'tide helper replacement={n}'
+
+condition_helpers = """function valueAtTide(ts){if(!tideData||!ts)return null;const day=ts.slice(0,10),ms=new Date(ts+':00-03:00').getTime();return tideValueAtMs(ms,day)}
+function clamp01(v){return Math.max(0,Math.min(1,v))}
+function mixColor(a,b,t){const m=(x,y)=>Math.round(x+(y-x)*t);return `rgb(${m(a[0],b[0])} ${m(a[1],b[1])} ${m(a[2],b[2])})`}
+function conditionTone(kind,val,dirDeg=null){const n=Number(val);if(!Number.isFinite(n))return null;const redLight=[250,220,220],redDark=[132,34,42],greenLight=[206,240,213],greenDark=[23,105,57];let good=false,t=.35;if(kind==='wave'){good=n>=1.8;t=good?clamp01((n-1.8)/1.1):clamp01((1.8-n)/1.3)}else if(kind==='period'){good=n>=10;t=good?clamp01((n-10)/6):clamp01((10-n)/4)}else if(kind==='wind'){const d=((Number(dirDeg)%360)+360)%360,terral=Number.isFinite(d)&&d>=225&&d<=315,leve=n<=5;good=leve||terral;if(good)t=terral?Math.max(.35,clamp01(n/16)):.3;else t=clamp01((n-5)/12)}else return null;const bg=good?mixColor(greenLight,greenDark,t):mixColor(redLight,redDark,t);return {bg,good,dark:t>.52}}
+function conditionStyle(kind,val,dirDeg=null){const q=conditionTone(kind,val,dirDeg);return q?`background:${q.bg};color:${q.dark?'#f8fff9':'#08120c'};font-weight:800`:''}
+function tintSnap(id,kind,val,dirDeg=null){const el=$(id)?.closest('.snap'),q=conditionTone(kind,val,dirDeg);if(!el||!q)return;el.style.background=q.bg;el.style.color=q.dark?'#f8fff9':'#08120c';el.querySelectorAll('small,div:not(.metric-icon),strong').forEach(x=>x.style.color='inherit');const icon=el.querySelector('.metric-icon');if(icon)icon.style.color=q.dark?'#effff3':'#174528'}
+"""
+s,n=re.subn(r"function valueAtTide\(ts\)\{.*?\}function renderDayMatrix",condition_helpers+'function renderDayMatrix',s,count=1,flags=re.S)
+assert n==1, f'condition helper replacement={n}'
+
+matrix = """function renderDayMatrix(day){const {m,w}=forecastData,idx=m.hourly.time.map((v,i)=>[v,i]).filter(([v])=>{const h=Number(v.slice(11,13));return v.startsWith(day)&&h>=3&&h<=23&&h%2===1});if(!idx.length){$('dayMatrix').innerHTML='<div class=\"empty\">Sem dados para este dia.</div>';return}const heads=idx.map(([ts])=>`<th>${ts.slice(11,13)}h</th>`).join('');const mk=(cls,label,icon,fn,styleFn)=>`<tr class=\"${cls}\"><td><span class=\"rowicon\">${icon}</span>${label}</td>${idx.map(([ts,i])=>{const st=styleFn?styleFn(ts,i):'';return `<td${st?` style=\"${st}\"`:''}>${fn(ts,i)}</td>`}).join('')}</tr>`;let html=`<table class=\"forecast-table\"><thead><tr><th>HORA</th>${heads}</tr></thead><tbody>`;html+=mk('wave-row','Ondulação','≈',(ts,i)=>f(m.hourly.wave_height[i])+' m',(ts,i)=>conditionStyle('wave',m.hourly.wave_height[i]));html+=mk('','Dir. onda','↗',(ts,i)=>dir(m.hourly.wave_direction[i])+' '+f(m.hourly.wave_direction[i],0)+'°');html+=mk('period-row','Período','◷',(ts,i)=>f(dominantPeriod(m.hourly,i),0)+' s',(ts,i)=>conditionStyle('period',dominantPeriod(m.hourly,i)));html+=mk('','Vento','≋',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_speed_10m[wi],0)+' kt'},(ts,i)=>{const wi=windIndex(ts);return conditionStyle('wind',w.hourly.wind_speed_10m[wi],w.hourly.wind_direction_10m[wi])});html+=mk('','Rajada','»',(ts,i)=>{const wi=windIndex(ts);return f(w.hourly.wind_gusts_10m[wi],0)+' kt'},(ts,i)=>{const wi=windIndex(ts);return conditionStyle('wind',w.hourly.wind_gusts_10m[wi],w.hourly.wind_direction_10m[wi])});html+=mk('','Dir. vento','→',(ts,i)=>{const wi=windIndex(ts),d=w.hourly.wind_direction_10m[wi];return dir(d)+' '+f(d,0)+'°'});html+=mk('energy-row','Energia','ϟ',(ts,i)=>f(energyAt(m.hourly,i),0));html+=mk('','Maré','∿',(ts,i)=>{const v=valueAtTide(ts);return Number.isFinite(Number(v))?f(v,2)+' m':'—'});html+='</tbody></table>';$('dayMatrix').innerHTML=html}
+"""
+s,n=re.subn(r"function renderDayMatrix\(day\)\{.*?\}\nfunction drawTideDay",matrix+'function drawTideDay',s,count=1,flags=re.S)
+assert n==1, f'matrix replacement={n}'
+
+tide_draw = """function drawTideDay(day){const ev=tideEvents(day);if(!tideData||!ev.length){$('tideChart').innerHTML='';$('tideRange').textContent='indisponível';$('tideDayLabel').textContent=dayName(day,true);return}const start=new Date(`${day}T00:00:00-03:00`).getTime(),W=640,H=170,samples=[];for(let i=0;i<=96;i++){const ms=start+i*15*60*1000,v=tideValueAtMs(ms,day);if(Number.isFinite(Number(v)))samples.push([Number(v),i/96*W])}if(samples.length<2){$('tideChart').innerHTML='';$('tideRange').textContent='indisponível';return}const vals=samples.map(x=>x[0]),min=Math.min(...vals),max=Math.max(...vals),pad=Math.max(.05,(max-min)*.12),lo=min-pad,hi=max+pad;const y=v=>H-22-(v-lo)/(hi-lo)*(H-42),path=samples.map(([v,x],i)=>(i?'L':'M')+x.toFixed(1)+','+y(v).toFixed(1)).join(' ');const marks=ev.map((e,i)=>{const [hh,mm]=e.time.split(':').map(Number),x=(hh*60+mm)/1440*W,yy=y(Number(e.height)),dy=yy<48?17:-9;return `<circle cx=\"${x}\" cy=\"${yy}\" r=\"3\" fill=\"#edf5f8\"/><text x=\"${x}\" y=\"${yy+dy}\" text-anchor=\"middle\" font-size=\"8\" fill=\"#a9bbc3\">${e.time} · ${f(e.height,2)}m</text>`}).join('');$('tideChart').innerHTML=`<path d=\"${path}\" fill=\"none\" stroke=\"#54c8e8\" stroke-width=\"2.2\" vector-effect=\"non-scaling-stroke\"/>${marks}`;$('tideRange').textContent=`${f(min,2)}–${f(max,2)} m`;$('tideDayLabel').textContent=dayName(day,true)+' · tábua astronômica'}
+"""
+s,n=re.subn(r"function drawTideDay\(day\)\{.*?\}\nfunction renderSnapshot",tide_draw+'function renderSnapshot',s,count=1,flags=re.S)
+assert n==1, f'tide draw replacement={n}'
+
+s=s.replace("tintSnap('wave','wave',H);tintSnap('period','period',p);tintSnap('wind','wind',wv);tintSnap('gust','wind',g)","tintSnap('wave','wave',H);tintSnap('period','period',p);tintSnap('wind','wind',wv,wdir);tintSnap('gust','wind',g,wdir)")
+
+load = """async function loadForecast(){const status=$('status');status.className='status';status.innerHTML='<span class=\"dot\"></span>sincronizando previsão…';try{const marineQ=new URLSearchParams({latitude:MAR_LAT,longitude:MAR_LON,hourly:'wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period',models:'ncep_gfswave025',timezone:'America/Sao_Paulo',forecast_days:'7',cell_selection:'sea'}),windQ=new URLSearchParams({latitude:LAT,longitude:LON,hourly:'wind_speed_10m,wind_direction_10m,wind_gusts_10m',wind_speed_unit:'kn',models:'gfs_seamless',timezone:'America/Sao_Paulo',forecast_days:'7'});const [mr,wr,tdr]=await Promise.all([fetch('https://marine-api.open-meteo.com/v1/marine?'+marineQ),fetch('https://api.open-meteo.com/v1/forecast?'+windQ),fetch('tides.json?v='+Date.now())]);if(!mr.ok||!wr.ok)throw Error('forecast');const [m,w,td]=await Promise.all([mr.json(),wr.json(),tdr.ok?tdr.json():Promise.resolve(null)]);tideData=td;forecastData={m,w};const ix=closestIndex(m.hourly.time,Date.now()),today=m.hourly.time[ix].slice(0,10);if(!selectedDay||!m.hourly.time.some(v=>v.startsWith(selectedDay)))selectedDay=today;const ts=m.hourly.time[ix],wi=(()=>{const e=w.hourly.time.indexOf(ts);return e>=0?e:closestIndex(w.hourly.time,Date.now())})(),H=Number(m.hourly.wave_height[ix]),energy=energyAt(m.hourly,ix),tide=valueAtTide(ts);latest={wave:m.hourly.wave_height[ix],waveDir:m.hourly.wave_direction[ix],period:dominantPeriod(m.hourly,ix),wind:w.hourly.wind_speed_10m[wi],windDir:w.hourly.wind_direction_10m[wi],gust:w.hourly.wind_gusts_10m[wi],energy,tide};$('rs').textContent=f(latest.wave)+' m · '+dir(latest.waveDir)+' '+f(latest.waveDir,0)+'°';$('rp').textContent=f(latest.period,0)+' s';$('rw').textContent=dir(latest.windDir)+' '+f(latest.wind,0)+' kt · raj. '+f(latest.gust,0);$('re').textContent=f(latest.energy,0)+' J/m²';$('rt').textContent=Number.isFinite(Number(latest.tide))?f(latest.tide,2)+' m':'—';status.className='status ok';status.innerHTML='<span class=\"dot\"></span>AO VIVO · atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});renderSelectedDay()}catch(e){console.error(e);status.className='status err';status.innerHTML='PREVISÃO INDISPONÍVEL · toque para tentar novamente';status.onclick=loadForecast}}
+"""
+s,n=re.subn(r"async function loadForecast\(\)\{.*?\}\nfunction updateLocationSummary",load+'function updateLocationSummary',s,count=1,flags=re.S)
+assert n==1, f'load replacement={n}'
+
+s=s.replace('BUILD 2026.10.04-G','BUILD 2026.10.04-H')
+p.write_text(s)
+
+idx=Path('index.html')
+x=idx.read_text().replace('20261004g','20261004h')
+idx.write_text(x)
