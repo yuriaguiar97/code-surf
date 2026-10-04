@@ -12,7 +12,7 @@
 <meta http-equiv="Expires" content="0">
 <title>CODE · Ubatuba</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261004final3">
+<link rel="stylesheet" href="styles.css?v=20261004final4">
 </head>
 <body>
 <section id="splash">
@@ -32,6 +32,7 @@
       <div class="hero-head"><div><small id="selectedMoment">HOJE · AGORA</small><h2 id="selectedTitle">Condições atuais</h2></div><span id="conditionPill" class="condition-pill mixed">CARREGANDO</span></div>
       <div class="snapshot-grid">
         <div id="waveCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M2 15c3-5 6-5 9 0s6 5 11 0"/><path d="M3 19c3-3 6-3 9 0s6 3 9 0"/></svg></div><small>Ondulação</small><strong id="wave">—</strong><div class="metric-sub">—</div></div>
+        <div id="swellDirCard" class="metric-card"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 20V5"/><path d="M7 10l5-5 5 5"/></svg></div><small>Direção</small><strong id="swellDir">—</strong><div class="metric-sub" id="swellDirDeg">—</div></div>
         <div id="periodCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></div><small>Período</small><strong id="period">—</strong><div class="metric-sub">—</div></div>
         <div id="windCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M3 8h10c2 0 2-3 0-3"/><path d="M3 12h15c3 0 3 4 0 4"/><path d="M3 16h8"/></svg></div><small>Vento</small><strong id="wind">—</strong><div class="metric-sub">—</div></div>
         <div id="energyCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M13 2L6 13h6l-1 9 7-12h-6z"/></svg></div><small>Energia</small><strong id="energy">—</strong><div class="metric-sub">J/m²</div></div>
@@ -48,13 +49,12 @@
       <div class="tide-head"><div><h2>Maré</h2><div class="sub" id="tideDayLabel">24 horas</div></div><small id="tideRange">—</small></div>
       <svg id="tideChart" class="tide-chart" viewBox="0 0 640 170" preserveAspectRatio="none" aria-label="Gráfico diário da maré"></svg>
       <div class="tide-labels"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>
-      <div id="tideEventsList" class="tide-events-list"></div>
       <div id="tideSource" class="source">tábua astronômica</div>
     </div>
 
     <h2>Leitura do CODE</h2><div class="notice">O forecast mostra o cenário geral de Ubatuba. Conforme você registra sessões, cada pico passa a ter seu próprio CODE e Confidence.</div>
     <a class="btn" href="#register">＋ REGISTRAR SUA SESSÃO</a>
-    <div class="version">FINAL · 2026.10.04 · 3</div>
+    <div class="version">FINAL · 2026.10.04 · 4</div>
   </main>
   <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a></nav>
 </section>
@@ -64,7 +64,7 @@
   <main class="content">
     <div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div>
     <div id="spotsList" class="spots-list"></div>
-    <div class="version">FINAL · 2026.10.04 · 3</div>
+    <div class="version">FINAL · 2026.10.04 · 4</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a></nav>
 </section>
@@ -88,7 +88,7 @@
       <div class="card"><div class="row"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div><div class="row"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div><div class="row"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div><div class="row"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
       <div class="notice">O norte inicial é só uma hipótese. Sessões com nota 8 ou mais passam a dominar o CODE e aumentam o Confidence.</div>
     </section>
-    <div class="version">FINAL · 2026.10.04 · 3</div>
+    <div class="version">FINAL · 2026.10.04 · 4</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a></nav>
 </section>
@@ -104,7 +104,7 @@
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
-    <div class="version">FINAL · 2026.10.04 · 3</div>
+    <div class="version">FINAL · 2026.10.04 · 4</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a></nav>
 </section>
@@ -117,7 +117,7 @@
     <h2>Picos monitorados</h2><div id="alertsList" class="card alerts-card"></div>
     <h2>Antecedência</h2><div class="lead-grid" id="alertLeads"><label class="lead-option"><input type="checkbox" data-alert-lead="6"><span>6h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="12"><span>12h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="24"><span>24h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="48"><span>48h</span></label></div><div class="sub lead-help">Você pode escolher mais de um aviso, por exemplo 48h e 24h antes.</div>
     <div class="notice">As preferências ficam salvas neste aparelho. O backend de notificações push entra quando o CODE estiver compartilhado entre os três usuários.</div>
-    <div class="version">FINAL · 2026.10.04 · 3</div>
+    <div class="version">FINAL · 2026.10.04 · 4</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a></nav>
 </section>
@@ -142,6 +142,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261004final3"></script>
+<script src="app.js?v=20261004final4"></script>
 </body>
 </html>
