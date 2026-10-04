@@ -1,0 +1,33 @@
+name: Run tide direction refinement
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run-refine-tide-direction.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch files
+        run: python3 tools/refine_tide_direction.py
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'id="swellDirCard"' app.html
+          grep -q 'id="swellDirDeg"' app.html
+          grep -q "$('swellDir').textContent" app.js
+          grep -q 'heightText' app.js
+          ! grep -q 'id="tideEventsList"' app.html
+          grep -q 'app.js?v=20261004final4' app.html
+      - name: Commit changes
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js styles.css index.html
+          git commit -m 'Refine tide labels and add swell direction card'
+          git push
