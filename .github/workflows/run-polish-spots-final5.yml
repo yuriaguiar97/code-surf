@@ -1,0 +1,34 @@
+name: Run My Spots polish final5
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run-polish-spots-final5.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python3 scripts/polish_spots_final5.py
+      - name: Validate
+        run: |
+          node --check app.js
+          grep -q 'id="editSpots"' app.html
+          grep -q 'id="deleteSpotInModal"' app.html
+          grep -q 'function toggleSpotsEditMode' app.js
+          grep -q 'class="history-grid"' app.js
+          grep -q 'styles.css?v=20261004final5' app.html
+          ! grep -q 'data-edit=' app.js
+          ! grep -q 'data-del=' app.js
+      - name: Commit changes
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js styles.css index.html
+          git commit -m 'Polish My Spots editing and detail views'
+          git push
