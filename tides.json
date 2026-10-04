@@ -1,38 +1,38 @@
 {
   "location": "Ubatuba, SP",
   "timezone": "America/Sao_Paulo",
-  "datum": "chart datum",
-  "source": "Tides Today / FES global tide model",
+  "datum": "LAT",
+  "source": "TideCheck / FES2022 (AVISO+)",
   "updated": "2026-10-04",
   "events": {
     "2026-10-03": [
-      {"type":"low","time":"01:32","height":0.71},
-      {"type":"high","time":"05:41","height":1.03},
-      {"type":"low","time":"07:19","height":0.98},
-      {"type":"high","time":"11:01","height":1.24},
-      {"type":"low","time":"15:24","height":1.06},
-      {"type":"high","time":"17:00","height":1.07},
-      {"type":"low","time":"20:24","height":0.86},
-      {"type":"high","time":"22:58","height":0.97}
+      {"type":"low","time":"01:37","height":0.57},
+      {"type":"high","time":"05:59","height":0.91},
+      {"type":"low","time":"07:15","height":0.90},
+      {"type":"high","time":"10:54","height":1.13},
+      {"type":"low","time":"15:27","height":0.89},
+      {"type":"high","time":"17:13","height":0.92},
+      {"type":"low","time":"20:29","height":0.74},
+      {"type":"high","time":"22:48","height":0.82}
     ],
     "2026-10-04": [
-      {"type":"low","time":"03:26","height":0.73},
-      {"type":"high","time":"11:59","height":1.40},
-      {"type":"low","time":"17:01","height":0.99},
-      {"type":"high","time":"18:22","height":1.00},
-      {"type":"low","time":"20:37","height":0.92},
-      {"type":"high","time":"23:43","height":1.10}
+      {"type":"low","time":"03:26","height":0.55},
+      {"type":"high","time":"11:55","height":1.22},
+      {"type":"low","time":"17:02","height":0.82},
+      {"type":"high","time":"18:32","height":0.84},
+      {"type":"low","time":"20:40","height":0.80},
+      {"type":"high","time":"23:35","height":0.93}
     ],
     "2026-10-05": [
-      {"type":"low","time":"04:51","height":0.59},
-      {"type":"high","time":"12:41","height":1.38},
-      {"type":"low","time":"17:47","height":0.85}
+      {"type":"low","time":"04:50","height":0.45},
+      {"type":"high","time":"12:38","height":1.29},
+      {"type":"low","time":"17:50","height":0.73}
     ],
     "2026-10-06": [
-      {"type":"high","time":"00:16","height":1.17},
-      {"type":"low","time":"05:49","height":0.46},
-      {"type":"high","time":"13:13","height":1.42},
-      {"type":"low","time":"18:25","height":0.73}
+      {"type":"high","time":"00:09","height":1.04},
+      {"type":"low","time":"05:49","height":0.34},
+      {"type":"high","time":"13:10","height":1.31},
+      {"type":"low","time":"18:27","height":0.63}
     ],
     "2026-10-07": [
       {"type":"high","time":"00:38","height":1.16},
