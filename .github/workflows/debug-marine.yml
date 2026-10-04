@@ -4,19 +4,16 @@ on:
   push:
     paths:
       - '.github/workflows/debug-marine.yml'
-  workflow_dispatch:
 
 jobs:
   compare:
     runs-on: ubuntu-latest
     steps:
-      - name: Sample GFS-Wave offshore Ubatuba
+      - name: Verify CODE data sources
         shell: bash
         run: |
           set -e
-          for lon in -44.55 -44.45 -44.35 -44.25 -44.15 -44.05; do
-            echo "===== lon $lon ====="
-            url="https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=$lon&hourly=wave_height,wave_direction,wave_period,wave_peak_period,swell_wave_height,swell_wave_direction,swell_wave_period,swell_wave_peak_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea"
-            curl -fsSL "$url" > /tmp/marine.json
-            python3 -c "import json; j=json.load(open('/tmp/marine.json')); h=j['hourly']; i=h['time'].index('2026-10-04T11:00'); keys=[k for k in h if k!='time']; print('grid',j.get('latitude'),j.get('longitude')); print({k:h[k][i] for k in keys})"
-          done
+          curl -fsSL "https://marine-api.open-meteo.com/v1/marine?latitude=-23.5&longitude=-44.25&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea" > /tmp/wave.json
+          python3 -c "import json; h=json.load(open('/tmp/wave.json'))['hourly']; print('WAVES'); [(lambda i: print(t,h['wave_height'][i],h['wave_period'][i],h['wave_direction'][i]))(i) for i,t in enumerate(h['time']) if t[11:13] in {'08','10','12','14','16','18','20','22'}]"
+          curl -fsSL "https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=-45.0711&hourly=sea_level_height_msl&models=meteofrance_currents&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea" > /tmp/tide.json
+          python3 -c "import json; j=json.load(open('/tmp/tide.json')); h=j['hourly']; v=h['sea_level_height_msl']; print('TIDE',len(v),min(v),max(v)); [print('EXT',h['time'][i],v[i]) for i in range(1,len(v)-1) if (v[i]>v[i-1] and v[i]>=v[i+1]) or (v[i]<v[i-1] and v[i]<=v[i+1])]"
