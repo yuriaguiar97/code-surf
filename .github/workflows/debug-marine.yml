@@ -10,13 +10,13 @@ jobs:
   compare:
     runs-on: ubuntu-latest
     steps:
-      - name: Compare Ubatuba marine periods
+      - name: Sample GFS-Wave offshore Ubatuba
         shell: bash
         run: |
           set -e
-          for model in ncep_gfswave025 dwd_gwam ecmwf_wam025 meteofrance_wave; do
-            echo "===== $model ====="
-            url="https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=-45.0711&hourly=wave_height,wave_direction,wave_period,wave_peak_period,swell_wave_height,swell_wave_direction,swell_wave_period,swell_wave_peak_period&models=$model&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea"
-            curl -fsSL "$url" > /tmp/marine.json || { echo "unavailable"; continue; }
-            python3 -c "import json; j=json.load(open('/tmp/marine.json')); h=j.get('hourly',{}); keys=['wave_height','wave_direction','wave_period','wave_peak_period','swell_wave_height','swell_wave_direction','swell_wave_period','swell_wave_peak_period']; [print(t,{k:(h.get(k,[None]*len(h.get('time',[])))[i] if i < len(h.get(k,[])) else None) for k in keys}) for i,t in enumerate(h.get('time',[])) if t[11:13] in {'08','09','10','11','12','13','14'}]"
+          for lon in -45.0711 -44.95 -44.85 -44.75 -44.65 -44.55; do
+            echo "===== lon $lon ====="
+            url="https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=$lon&hourly=wave_height,wave_direction,wave_period,wave_peak_period,swell_wave_height,swell_wave_direction,swell_wave_period,swell_wave_peak_period,secondary_swell_wave_height,secondary_swell_wave_direction,secondary_swell_wave_period,tertiary_swell_wave_height,tertiary_swell_wave_direction,tertiary_swell_wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea"
+            curl -fsSL "$url" > /tmp/marine.json
+            python3 -c "import json; j=json.load(open('/tmp/marine.json')); h=j['hourly']; i=h['time'].index('2026-10-04T11:00'); keys=[k for k in h if k!='time']; print('grid',j.get('latitude'),j.get('longitude')); print({k:h[k][i] for k in keys})"
           done
