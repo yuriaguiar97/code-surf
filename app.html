@@ -12,7 +12,7 @@
 <meta http-equiv="Expires" content="0">
 <title>CODE · Ubatuba</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261004final8">
+<link rel="stylesheet" href="styles.css?v=20261004final9">
 </head>
 <body>
 <section id="splash">
@@ -53,7 +53,7 @@
     </div>
 
     <h2>Leitura do CODE</h2><div class="notice">O forecast mostra o cenário geral de Ubatuba. Conforme você registra sessões, cada pico passa a ter seu próprio CODE e Confidence.</div>
-    <div class="version">FINAL · 2026.10.04 · 8</div>
+    <div class="version">FINAL · 2026.10.04 · 9</div>
   </main>
   <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -64,7 +64,7 @@
     <div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
     <div id="spotsList" class="spots-list"></div>
-    <div class="version">FINAL · 2026.10.04 · 8</div>
+    <div class="version">FINAL · 2026.10.04 · 9</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -91,10 +91,10 @@
         <div class="code-metric-card"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
         <div class="code-metric-card"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
       </div>
-      <div class="code-confidence-card"><div><span>Confidence do CODE</span><small>cresce conforme o histórico fica mais consistente</small></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
+      <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span><small>cresce conforme o histórico fica mais consistente</small></div><b id="codeConfValue" class="code-confidence-value">0%</b></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
       <div class="notice code-learning-notice">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
     </section>
-    <div class="version">FINAL · 2026.10.04 · 8</div>
+    <div class="version">FINAL · 2026.10.04 · 9</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -110,7 +110,7 @@
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
-    <div class="version">FINAL · 2026.10.04 · 8</div>
+    <div class="version">FINAL · 2026.10.04 · 9</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -122,8 +122,7 @@
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
     <h2>Antecedência</h2><div class="card alerts-card alert-leads-card" id="alertLeads"><div class="toggle-row"><div><b>24 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="24"><span class="slider"></span></label></div><div class="toggle-row"><div><b>48 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="48"><span class="slider"></span></label></div></div><div class="sub lead-help">Você pode manter os dois avisos ativos ao mesmo tempo.</div>
-    <div class="notice">As preferências ficam salvas neste aparelho. O backend de notificações push entra quando o CODE estiver compartilhado entre os três usuários.</div>
-    <div class="version">FINAL · 2026.10.04 · 8</div>
+    <div class="version">FINAL · 2026.10.04 · 9</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -131,6 +130,12 @@
 <div id="spotModal" class="modal"><div class="sheet">
   <h2 id="modalTitle">Novo pico</h2><div class="sub">Marque o ponto e, se souber, salve um norte inicial do spot.</div>
   <input id="spotName" class="field" maxlength="50" placeholder="Nome do pico">
+  <div class="section-label">FOTO DO PICO</div>
+  <div class="spot-photo-editor">
+    <div id="spotPhotoPreview" class="spot-photo-preview"><span>Sem foto personalizada</span></div>
+    <input id="spotPhotoInput" type="file" accept="image/*" hidden>
+    <button id="chooseSpotPhoto" class="btn secondary spot-photo-button" type="button">ESCOLHER FOTO</button>
+  </div>
   <div class="section-label">LOCALIZAÇÃO · RECOMENDADA</div><button id="openMapPicker" class="btn secondary" type="button">⌖ BUSCAR E MARCAR NO MAPA</button><div id="spotLocationSummary" class="location-summary">Nenhum local marcado</div><input id="spotLat" type="hidden"><input id="spotLon" type="hidden">
   <div class="section-label">NORTE INICIAL · “OUÇO DIZER”</div>
   <div class="form-grid"><input id="seedWaveMin" class="field" inputmode="decimal" placeholder="Onda mín. · m"><input id="seedWaveMax" class="field" inputmode="decimal" placeholder="Onda máx. · m"><input id="seedPeriodMin" class="field" inputmode="numeric" placeholder="Período mín. · s"><input id="seedPeriodMax" class="field" inputmode="numeric" placeholder="Período máx. · s"></div>
@@ -149,6 +154,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261004final8"></script>
+<script src="app.js?v=20261004final9"></script>
 </body>
 </html>

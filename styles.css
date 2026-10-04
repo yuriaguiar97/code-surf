@@ -103,3 +103,16 @@
   .nav-register .register-word{font-size:8.5px!important}
   .nav-register .code-word{font-size:9.5px!important}
 }
+
+
+/* final9 · editable spot photo + CODE confidence value */
+.spot-photo-editor{margin:7px 0 14px}
+.spot-photo-preview{height:150px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#17364a,#08151d);border:1px solid rgba(255,255,255,.08);background-position:center;background-size:cover;color:#8ca5b1;font-size:12px;text-align:center;padding:16px}
+.spot-photo-preview.has-photo span{display:none}
+.spot-photo-button{margin-top:9px}
+.code-confidence-head{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%}
+.code-confidence-head>div{min-width:0}
+.code-confidence-value{flex:none;font-size:22px;line-height:1;color:#a8faf2;letter-spacing:-.02em}
+.code-confidence-card{display:block}
+.code-confidence-card .confidence{margin-top:12px}
+@media(max-width:520px){.spot-photo-preview{height:132px}.code-confidence-value{font-size:20px}}
