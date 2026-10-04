@@ -1,0 +1,29 @@
+name: Marine model check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/debug-marine.yml'
+  workflow_dispatch:
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare Ubatuba marine periods
+        shell: bash
+        run: |
+          set -e
+          for model in ncep_gfswave025 dwd_gwam ecmwf_wam025 meteofrance_wave; do
+            echo "===== $model ====="
+            curl -fsSL "https://marine-api.open-meteo.com/v1/marine?latitude=-23.4347&longitude=-45.0711&hourly=wave_height,wave_direction,wave_period,wave_peak_period,swell_wave_height,swell_wave_direction,swell_wave_period,swell_wave_peak_period&models=$model&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea" > /tmp/marine.json || { echo "unavailable"; continue; }
+            python3 - <<'PY'
+import json
+j=json.load(open('/tmp/marine.json'))
+h=j.get('hourly',{})
+keys=['wave_height','wave_direction','wave_period','wave_peak_period','swell_wave_height','swell_wave_direction','swell_wave_period','swell_wave_peak_period']
+for i,t in enumerate(h.get('time',[])):
+    if t[11:13] in {'08','09','10','11','12','13','14'}:
+        print(t, {k:(h.get(k,[None]*len(h.get('time',[])))[i] if i < len(h.get(k,[])) else None) for k in keys})
+PY
+          done
