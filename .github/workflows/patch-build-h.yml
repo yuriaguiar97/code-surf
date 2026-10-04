@@ -13,18 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fix tides and surf signals
+      - name: Apply build H
         shell: bash
         run: |
-          echo 'CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAppbXBvcnQgcmUKCnA9UGF0aCgnYXBwLmh0bWwnKQpzPXAucmVhZF90ZXh0KCkKCnM9cy5yZXBsYWNlKCc8ZGl2Pk1TTDwvZGl2PicsJzxkaXY+dMOiYnVhIGFzdHJvbsO0bWljYTwvZGl2PicpCnM9cy5yZXBsYWNlKCc8c21hbGwgaWQ9InRpZGVSYW5nZSI+TVNMPC9zbWFsbD4nLCc8c21hbGwgaWQ9InRpZGVSYW5nZSI+4oCUPC9zbWFsbD4nKQpzPXMucmVwbGFjZSgnTGVpdHVyYSBlbSBpbnRlcnZhbG9zIGRlIDIgaG9yYXMsIGFsaW5oYWRhIGFvIHBhZHLDo28gdmlzdWFsIGRvIFdpbmRndXJ1LiBRdWFudG8gbWFpcyBlc2N1cmEgYSBjZWx1bGEsIG1haW9yIGEgaW50ZW5zaWRhZGUuJywnVGVzdGUgdmlzdWFsOiB2ZXJkZSA9IGNvbmRpw6fDo28gZmF2b3LDoXZlbCDDtyB2ZXJtZWxobyA9IGRlc2Zhdm9yw6F2ZWwuIFJlZ3JhIGdlcmFsIHByb3Zpc8OzcmlhIGRlIFViYXR1YmE7IGRlcG9pcyBjYWRhIHBpY28gdGVyw6Egc2V1IHByw7NwcmlvIENPREUuJykKcz1zLnJlcGxhY2UoJ0EgY3VydmEgbXVkYSBqdW50byBjb20gbyBkaWEgc2VsZWNpb25hZG8uIFNlbSDigJxlbmNoZW5kby92YXphbmRv4oCdOiB2b2PDqiB2w6ogZGlyZXRhbWVudGUgYSBldm9sdcOnw6NvIGRhIG1hcsOpIGFvIGxvbmdvIGRhcyAyNCBob3Jhcy4nLCdDdXJ2YSBkacOhcmlhIGJhc2VhZGEgZW0gdMOhYnVhIGFzdHJvbsO0bWljYSBwYXJhIFViYXR1YmEsIGNvbSBhbHR1cmFzIGFjaW1hIGRvIGRhdHVtIGRhIHTDoWJ1YS4gU2VtIHVzYXIgYW5vbWFsaWEgTVNMIG5lZ2F0aXZhLicpCnM9cy5yZXBsYWNlKCJsZXQgbGF0ZXN0PXt9LGZvcmVjYXN0RGF0YT1udWxsLHNlbGVjdGVkRGF5PScnOyIsImxldCBsYXRlc3Q9e30sZm9yZWNhc3REYXRhPW51bGwsdGlkZURhdGE9bnVsbCxzZWxlY3RlZERheT0nJzsiKQoKdGlkZV9oZWxwZXJzID0gIiIiZnVuY3Rpb24gdGlkZUV2ZW50cyhkYXkpe3JldHVybiB0aWRlRGF0YT8uZXZlbnRzPy5bZGF5XXx8W119CmZ1bmN0aW9uIHRpZGVFdmVudE1zKGRheSxlKXtyZXR1cm4gbmV3IERhdGUoYCR7ZGF5fVQke2UudGltZX06MDAtMDM6MDApLmdldFRpbWUoKX0KZnVuY3Rpb24gdGlkZVNlcmllcyhkYXkpe3JldHVybiBbZGF5UGx1cyhkYXksLTEpLGRheSxkYXlQbHVzKGRheSwxKV0uZmxhdE1hcChkPT50aWRlRXZlbnRzKGQpLm1hcChlPT4oey4uLmUsZGF5OmQsbXM6dGlkZUV2ZW50TXMoZCxlKX0pKSkuc29ydCgoYSxiKT0+YS5tcy1iLm1zKX0KZnVuY3Rpb24gdGlkZVZhbHVlQXRNcyhtcyxkYXkpe2NvbnN0IGE9dGlkZVNlcmllcyhkYXkpO2lmKCFhLmxlbmd0aClyZXR1cm4gbnVsbDtsZXQgbGVmdD1udWxsLHJpZ2h0PW51bGw7Zm9yKGNvbnN0IGUgb2YgYSl7aWYoZS5tczw9bXMpbGVmdD1lO2lmKGUubXM+PW1zKXtyaWdodD1lO2JyZWFrfX1pZighbGVmdClyZXR1cm4gcmlnaHQ/LmhlaWdodD8/bnVsbDtpZighcmlnaHQpcmV0dXJuIGxlZnQuaGVpZ2h0O2lmKGxlZnQubXM9PT1yaWdodC5tc ylyZXR1cm4gbGVmdC5oZWlnaHQ7Y29uc3QgdT1NYXRoLm1heCgwLE1hdGgubWluKDEsKG1zLWxlZnQubXMpLyhyaWdodC5tcy1sZWZ0Lm1zKSkpLGVhc2U9KDEtTWF0aC5jb3MoTWF0aC5QSSp1KSkvMjtyZXR1cm4gbGVmdC5oZWlnaHQrKHJpZ2h0LmhlaWdodC1sZWZ0LmhlaWdodCkqZWFzZX0KIiIiCnMsbj1yZS5zdWJuKHIoImZ1bmN0aW9uIHRpZGVJbmRleFxcKHRzXFwpXFxffC4qP1xcfVxcbiBmdW5jdGlvbiByZW5kZXJEYXlzIiksdGlkZV9oZWxwZXJzKydmdW5jdGlvbiByZW5kZXJEYXlzJyxzLGNvdW50PTEsZmxhZ3M9cmUuUykKYXNzZXJ0IG49PTEsIGYndGlkZSBoZWxwZXIgcmVwbGFjZW1lbnQ9e259JwoKY29uZGl0aW9uX2hlbHBlcnMgPSAiIiJmdW5jdGlvbiB2YWx1ZUF0VGlkZSh0cyl7aWYoIXRpZGVEYXRhfHw - truncated -' | base64 -d > /tmp/patch.py
-          python3 /tmp/patch.py
+          python3 .github/patch_build_h.py
           grep -q "BUILD 2026.10.04-H" app.html
           grep -q "function conditionTone" app.html
           grep -q "tides.json" app.html
           grep -q "20261004h" index.html
-          rm .github/workflows/patch-build-h.yml
+          rm .github/workflows/patch-build-h.yml .github/patch_build_h.py
           git config user.name "CODE deploy bot"
           git config user.email "actions@users.noreply.github.com"
-          git add app.html index.html .github/workflows/patch-build-h.yml
+          git add app.html index.html .github/workflows/patch-build-h.yml .github/patch_build_h.py
           git commit -m "Fix tide source and add red green surf signals"
           git push
