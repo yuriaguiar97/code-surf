@@ -1,0 +1,33 @@
+name: Run final11 shared CODE patch
+on:
+  push:
+    paths:
+      - '.github/workflows/run-final11.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply final11 patch
+        run: python .github/scripts/final11_shared.py
+      - name: Check JavaScript syntax
+        run: node --check app.js
+      - name: Verify shared CODE integration
+        run: |
+          set -e
+          grep -q 'aaiynfintqsjvkaitmlz.supabase.co/functions/v1/code-sync' app.js
+          grep -q "sharedRequest('login'" app.js
+          grep -q "sharedRequest('upsert_spot'" app.js
+          grep -q "sharedRequest('add_session'" app.js
+          grep -q 'FINAL · 2026.10.04 · 11' app.html
+          ! grep -q "ACCESS_PIN='7777'" app.js
+      - name: Commit final11
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html app.js index.html
+          git rm .github/scripts/final11_shared.py .github/workflows/run-final11.yml
+          git commit -m 'Enable shared CODE data with Supabase'
+          git push
