@@ -27,3 +27,5 @@ for i,t in enumerate(h.get('time',[])):
         print(t, {k:(h.get(k,[None]*len(h.get('time',[])))[i] if i < len(h.get(k,[])) else None) for k in keys})
 PY
           done
+
+# trigger
