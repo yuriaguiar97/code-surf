@@ -12,7 +12,7 @@
 <meta http-equiv="Expires" content="0">
 <title>CODE · Ubatuba</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261004final6">
+<link rel="stylesheet" href="styles.css?v=20261004final7">
 </head>
 <body>
 <section id="splash">
@@ -53,9 +53,9 @@
     </div>
 
     <h2>Leitura do CODE</h2><div class="notice">O forecast mostra o cenário geral de Ubatuba. Conforme você registra sessões, cada pico passa a ter seu próprio CODE e Confidence.</div>
-    <div class="version">FINAL · 2026.10.04 · 6</div>
+    <div class="version">FINAL · 2026.10.04 · 7</div>
   </main>
-  <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Registrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg></a></nav>
+  <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg><span>Register CODE</span></a></nav>
 </section>
 
 <section id="spots" class="screen">
@@ -64,9 +64,9 @@
     <div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
     <div id="spotsList" class="spots-list"></div>
-    <div class="version">FINAL · 2026.10.04 · 6</div>
+    <div class="version">FINAL · 2026.10.04 · 7</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Registrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg></a></nav>
+  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg><span>Register CODE</span></a></nav>
 </section>
 
 <section id="spot" class="screen">
@@ -83,13 +83,20 @@
     <section class="spot-panel" data-panel="history"><div class="panel-heading"><h2>Histórico</h2><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
 
     <section class="spot-panel" data-panel="code">
-      <div class="panel-heading"><h2>CODE do pico</h2><div class="panel-copy">As condições abaixo evoluem conforme você registra sessões reais.</div></div><div id="codeOrigin" class="seed">Ainda sem dados suficientes para formar o CODE.</div>
-      <div class="card"><div class="row"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div><div class="row"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div><div class="row"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div><div class="row"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
-      <div class="notice">O norte inicial serve como ponto de partida. Conforme entram sessões com nota 8 ou mais, os dados reais passam a ter mais peso e aumentam o Confidence.</div>
+      <div class="panel-heading"><h2>CODE do pico</h2><div class="panel-copy">O padrão ideal deste pico é atualizado automaticamente conforme você registra sessões.</div></div>
+      <div id="codeOrigin" class="code-origin-card">Ainda sem dados suficientes para formar o CODE.</div>
+      <div class="code-metrics-grid">
+        <div class="code-metric-card"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
+        <div class="code-metric-card"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
+        <div class="code-metric-card"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
+        <div class="code-metric-card"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
+      </div>
+      <div class="code-confidence-card"><div><span>Confidence do CODE</span><small>cresce conforme o histórico fica mais consistente</small></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
+      <div class="notice code-learning-notice">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
     </section>
-    <div class="version">FINAL · 2026.10.04 · 6</div>
+    <div class="version">FINAL · 2026.10.04 · 7</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Registrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg></a></nav>
+  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg><span>Register CODE</span></a></nav>
 </section>
 
 <section id="register" class="screen">
@@ -103,9 +110,9 @@
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
-    <div class="version">FINAL · 2026.10.04 · 6</div>
+    <div class="version">FINAL · 2026.10.04 · 7</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Registrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg></a></nav>
+  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg><span>Register CODE</span></a></nav>
 </section>
 
 <section id="alerts" class="screen">
@@ -114,11 +121,11 @@
     <h1>Alertas</h1><div class="sub">Configure quais picos você quer monitorar</div>
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
-    <h2>Antecedência</h2><div class="lead-grid" id="alertLeads"><label class="lead-option"><input type="checkbox" data-alert-lead="6"><span>6h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="12"><span>12h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="24"><span>24h</span></label><label class="lead-option"><input type="checkbox" data-alert-lead="48"><span>48h</span></label></div><div class="sub lead-help">Você pode escolher mais de um aviso, por exemplo 48h e 24h antes.</div>
+    <h2>Antecedência</h2><div class="card alerts-card alert-leads-card" id="alertLeads"><div class="toggle-row"><div><b>24 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="24"><span class="slider"></span></label></div><div class="toggle-row"><div><b>48 horas antes</b></div><label class="switch"><input type="checkbox" data-alert-lead="48"><span class="slider"></span></label></div></div><div class="sub lead-help">Você pode manter os dois avisos ativos ao mesmo tempo.</div>
     <div class="notice">As preferências ficam salvas neste aparelho. O backend de notificações push entra quando o CODE estiver compartilhado entre os três usuários.</div>
-    <div class="version">FINAL · 2026.10.04 · 6</div>
+    <div class="version">FINAL · 2026.10.04 · 7</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Registrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg></a></nav>
+  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-2 4-2 6 0s4 2 6 0"/><path d="M17 6v8"/><path d="M13 10h8"/></svg><span>Register CODE</span></a></nav>
 </section>
 
 <div id="spotModal" class="modal"><div class="sheet">
@@ -142,6 +149,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261004final6"></script>
+<script src="app.js?v=20261004final7"></script>
 </body>
 </html>
