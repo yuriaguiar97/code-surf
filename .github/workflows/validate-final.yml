@@ -1,0 +1,35 @@
+name: Validate final CODE
+on:
+  push:
+    paths:
+      - '.github/workflows/validate-final.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate files and live data sources
+        shell: bash
+        run: |
+          set -e
+          node --check app.js
+          grep -q 'FINAL · 2026.10.04' app.html
+          grep -q 'styles.css?v=20261004final' app.html
+          grep -q 'app.js?v=20261004final' app.html
+          python3 -m json.tool tides.json >/dev/null
+          curl -fsSL 'https://marine-api.open-meteo.com/v1/marine?latitude=-23.5&longitude=-44.25&hourly=wave_height,wave_direction,wave_period,swell_wave_height,swell_wave_direction,swell_wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=1&cell_selection=sea' > /tmp/marine.json
+          curl -fsSL 'https://api.open-meteo.com/v1/forecast?latitude=-23.4347&longitude=-45.0711&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kn&models=gfs_seamless&timezone=America%2FSao_Paulo&forecast_days=1' > /tmp/wind.json
+          python3 - <<'PY'
+          import json
+          m=json.load(open('/tmp/marine.json'))
+          w=json.load(open('/tmp/wind.json'))
+          assert m['hourly']['time'] and w['hourly']['time']
+          periods=[x for x in m['hourly']['wave_period'] if isinstance(x,(int,float))]
+          heights=[x for x in m['hourly']['wave_height'] if isinstance(x,(int,float))]
+          assert periods and max(periods)>0
+          assert heights and max(heights)>0
+          print('marine_ok', min(periods), max(periods), min(heights), max(heights))
+          print('wind_ok', len(w['hourly']['time']))
+          PY
