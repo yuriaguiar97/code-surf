@@ -18,28 +18,21 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-
+          import re, base64
           p=Path('app.html')
           s=p.read_text()
-
-          old_re = r"function heatColor\(kind,val\)\{.*?\}function heatStyle\(kind,val\)\{.*?\}function tintSnap\(id,kind,val\)\{.*?\}"
-          new = r'''function heatLevel(kind,val){const n=Number(val);if(!Number.isFinite(n))return 0;const r={wave:[.5,2.5],period:[7,16],wind:[0,20]}[kind];if(!r)return 0;return Math.max(0,Math.min(1,(n-r[0])/(r[1]-r[0])))}
-function heatColor(kind,val){const t=heatLevel(kind,val),pal={wave:[[218,227,255],[31,52,112]],period:[[255,232,241],[112,28,62]],wind:[[216,249,248],[7,91,101]]}[kind];if(!pal)return '';const a=pal[0],b=pal[1],mix=(x,y)=>Math.round(x+(y-x)*t);return `rgb(${mix(a[0],b[0])} ${mix(a[1],b[1])} ${mix(a[2],b[2])})`}
-function heatStyle(kind,val){const bg=heatColor(kind,val),t=heatLevel(kind,val);return bg?`background:${bg};color:${t>.48?'#f8fbff':'#071219'};font-weight:800`:''}
-function tintSnap(id,kind,val){const el=$(id)?.closest('.snap'),bg=heatColor(kind,val),t=heatLevel(kind,val);if(!el||!bg)return;el.style.background=bg;el.style.color=t>.48?'#f8fbff':'#071219';el.querySelectorAll('small,div:not(.metric-icon),strong').forEach(x=>x.style.color='inherit');const icon=el.querySelector('.metric-icon');if(icon)icon.style.color=t>.48?'#d9f5ff':'#173b50'}'''
+          old_re=r"function heatColor\(kind,val\)\{.*?\}function heatStyle\(kind,val\)\{.*?\}function tintSnap\(id,kind,val\)\{.*?\}"
+          payload='ZnVuY3Rpb24gaGVhdExldmVsKGtpbmQsdmFsKXtjb25zdCBuPU51bWJlcih2YWwpO2lmKCFOdW1iZXIuaXNGaW5pdGUobikpcmV0dXJuIDA7Y29uc3Qgcj17d2F2ZTpbLjUsMi41XSxwZXJpb2Q6WzcsMTZdLHdpbmQ6WzAsMjBdfVtraW5kXTtpZighcilyZXR1cm4gMDtyZXR1cm4gTWF0aC5tYXgoMCxNYXRoLm1pbigxLChuLXJbMF0pLyhyWzFdLXJbMF0pKSl9CmZ1bmN0aW9uIGhlYXRDb2xvcihraW5kLHZhbCl7Y29uc3QgdD1oZWF0TGV2ZWwoa2luZCx2YWwpLHBhbD17d2F2ZTpbWzIxOCwyMjcsMjU1XSxbMzEsNTIsMTEyXV0scGVyaW9kOltbMjU1LDIzMiwyNDFdLFsxMTIsMjgsNjJdXSx3aW5kOltbMjE2LDI0OSwyNDhdLFs3LDkxLDEwMV1dfVtraW5kXTtpZighcGFsKXJldHVybiAnJztjb25zdCBhPXBhbFswXSxiPXBhbFsxXSxtaXg9KHgseSk9Pk1hdGgucm91bmQoeCsoeS14KSp0KTtyZXR1cm4gYHJnYigke21peChhWzBdLGJbMF0pfSAke21peChhWzFdLGJbMV0pfSAke21peChhWzJdLGJbMl0pfSlgfQpmdW5jdGlvbiBoZWF0U3R5bGUoa2luZCx2YWwpe2NvbnN0IGJnPWhlYXRDb2xvcihraW5kLHZhbCksdD1oZWF0TGV2ZWwoa2luZCx2YWwpO3JldHVybiBiZz9gYmFja2dyb3VuZDoke2JnfTtjb2xvcjoke3Q+LjQ4PycjZjhmYmZmJzonIzA3MTIxOSd9O2ZvbnQtd2VpZ2h0OjgwMGA6Jyd9CmZ1bmN0aW9uIHRpbnRTbmFwKGlkLGtpbmQsdmFsKXtjb25zdCBlbD0kKGlkKT8uY2xvc2VzdCgnLnNuYXAnKSxiZz1oZWF0Q29sb3Ioa2luZCx2YWwpLHQ9aGVhdExldmVsKGtpbmQsdmFsKTtpZighZWx8fCFiZylyZXR1cm47ZWwuc3R5bGUuYmFja2dyb3VuZD1iZztlbC5zdHlsZS5jb2xvcj10Pi40OD8nI2Y4ZmJmZic6JyMwNzEyMTknO2VsLnF1ZXJ5U2VsZWN0b3JBbGwoJ3NtYWxsLGRpdjpub3QoLm1ldHJpYy1pY29uKSxzdHJvbmcnKS5mb3JFYWNoKHg9Pnguc3R5bGUuY29sb3I9J2luaGVyaXQnKTtjb25zdCBpY29uPWVsLnF1ZXJ5U2VsZWN0b3IoJy5tZXRyaWMtaWNvbicpO2lmKGljb24paWNvbi5zdHlsZS5jb2xvcj10Pi40OD8nI2Q5ZjVmZic6JyMxNzNiNTAnfQ=='
+          new=base64.b64decode(payload).decode()
           s,n=re.subn(old_re,new,s,count=1,flags=re.S)
           assert n==1, f'heat helper replacements={n}'
-
           s=s.replace('BUILD 2026.10.04-F','BUILD 2026.10.04-G')
           p.write_text(s)
-
           idx=Path('index.html')
           t=idx.read_text()
           t=re.sub(r'app\.html\?v=20261004[a-z]', 'app.html?v=20261004g', t)
           idx.write_text(t)
           PY
-
           grep -q "function heatLevel" app.html
           grep -q "BUILD 2026.10.04-G" app.html
           grep -q "20261004g" index.html
