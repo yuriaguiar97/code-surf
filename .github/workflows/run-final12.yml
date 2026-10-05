@@ -1,0 +1,29 @@
+name: Run final12 splash polish
+on:
+  push:
+    paths:
+      - '.github/workflows/run-final12.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply final12 splash patch
+        run: python .github/scripts/final12_splash_patch.py
+      - name: Check JavaScript syntax
+        run: node --check app.js
+      - name: Verify splash polish
+        run: |
+          grep -q 'final12 · fullscreen monochrome CODE splash' styles.css
+          grep -q '20261004final12' app.html
+          grep -q 'filter:grayscale(1)' styles.css
+          grep -q 'height:100dvh' styles.css
+      - name: Commit final12
+        run: |
+          git config user.name 'CODE deploy bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app.html styles.css
+          git commit -m 'Polish fullscreen CODE splash'
+          git push
