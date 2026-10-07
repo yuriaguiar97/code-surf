@@ -152,3 +152,6 @@ body:not(.access-granted){padding-bottom:0;background:#02060a!important}
 .splash-tag{color:#d7dde1}
 .splash-hint{border-color:rgba(255,255,255,.17);background:rgba(0,5,9,.46);color:#e2e6e9;box-shadow:0 10px 32px rgba(0,0,0,.22)}
 @supports(-webkit-touch-callout:none){#splash{min-height:-webkit-fill-available}.splash-bg{min-height:-webkit-fill-available}}
+
+/* Push controls follow the existing mobile cards. */
+.push-card{display:grid;gap:12px;padding:18px;margin-top:18px}.push-card .btn{width:100%;white-space:normal;min-height:44px}.push-card [hidden]{display:none!important}.push-card p{margin:0;line-height:1.5}.alerts-card .toggle-row>div{min-width:0;flex:1}.alerts-card .toggle-row small{display:block;margin-top:5px;line-height:1.5}.alerts-card .switch{flex-shrink:0;margin-left:12px}
