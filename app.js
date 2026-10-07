@@ -138,6 +138,7 @@ async function saveSpot(){
     const result=await sharedRequest('upsert_spot',{spot:candidate});const savedSpot=result.spot||candidate;
     const next=spots.filter(x=>x.id!==savedSpot.id);next.push(savedSpot);storage.setSpots(next);
     if(!state.editingSpotId){state.currentSpotId=savedSpot.id;localStorage.setItem('code_current_spot',savedSpot.id)}
+    state.spotsEditMode=false;
     closeSpotEditor();renderSpots();renderSpotDetail();
   }catch(err){console.error(err);alert('Não consegui salvar o pico no CODE compartilhado. Confira sua conexão e tente novamente.')}
   finally{if(btn){btn.disabled=false;btn.textContent='SALVAR'}}
