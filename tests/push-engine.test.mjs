@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluate,angleDistance,directions,leadFor,shouldNotify } from '../supabase/functions/code-push/engine.js';
+import { firstLead,evaluate,angleDistance,directions,leadFor,shouldNotify } from '../supabase/functions/code-push/engine.js';
 const conditions={wave:2.3,period:12,wind:4,waveDir:180,windDir:90,energy:3320};
 const spot={id:'test',seed:{waveMin:2,periodMin:10,swellDir:'S/SE',windDir:'L'}};
 test('seed matches all measured variables jointly',()=>{
@@ -34,5 +34,7 @@ test('daily follow-up includes deterioration, avoids duplicates and respects ind
  assert.equal(shouldNotify(previous,args),false);
  assert.equal(shouldNotify(previous,{...args,daily:true,favorable:false}),true);
  assert.equal(shouldNotify({...previous,last_day:args.day},{...args,daily:true}),false);
- assert.equal(shouldNotify(previous,{...args,lead:72}),true);
+ assert.equal(shouldNotify(previous,{...args,lead:72}),false);
 });
+
+test('first notice migrates multiple leads to the earliest horizon',()=>{assert.equal(firstLead({leads:[24,48,168]}),168);assert.equal(firstLead({leads:[24,48]}),48);assert.equal(firstLead({leads:[72]}),72);assert.equal(firstLead({}),168);assert.equal(firstLead({leads:[999]}),168);});

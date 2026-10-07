@@ -1,6 +1,6 @@
 import { withSupabase } from 'npm:@supabase/server';
 import webpush from 'npm:web-push@3.6.7';
-import { LEADS, evaluate, leadFor, shouldNotify } from './engine.js';
+import { LEADS, firstLead, evaluate, leadFor, shouldNotify } from './engine.js';
 const origin='https://yuriaguiar97.github.io';
 const cors={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}});
@@ -9,7 +9,7 @@ const dayOf=(time:Date)=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_
 function validSubscription(s:any){
   try{const u=new URL(s.endpoint);const h=u.hostname;return u.protocol==='https:' && !u.port && !u.username && !u.password && (h==='fcm.googleapis.com'||h==='updates.push.services.mozilla.com'||h.endsWith('.push.apple.com')||h.endsWith('.notify.windows.com')) && /^[A-Za-z0-9_-]{87}$/.test(s.keys?.p256dh||'') && /^[A-Za-z0-9_-]{22}$/.test(s.keys?.auth||'') && s.endpoint.length<2048;}catch{return false;}
 }
-function settings(s:any){return {enabled:s?.enabled===true,leads:Array.isArray(s?.leads)?s.leads.filter((n:any)=>LEADS.includes(n)):LEADS,daily:s?.daily!==false,spots:Object.fromEntries(Object.entries(s?.spots||{}).slice(0,100).filter(([k,v])=>k.length<=120&&typeof v==='boolean'))};}
+function settings(s:any){return {enabled:s?.enabled===true,leads:[firstLead(s)],daily:s?.daily!==false,spots:Object.fromEntries(Object.entries(s?.spots||{}).slice(0,100).filter(([k,v])=>k.length<=120&&typeof v==='boolean'))};}
 async function json(url:string){const r=await fetch(url,{signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error('forecast_http_'+r.status);return r.json();}
 async function send(db:any,config:any,device:any,payload:any){
   try{await webpush.sendNotification(device.subscription,JSON.stringify(payload),{vapidDetails:{subject:'https://yuriaguiar97.github.io/code-surf/',publicKey:config.public_key,privateKey:config.private_key},TTL:3600,urgency:'normal',timeout:15000});return true;}
@@ -35,7 +35,7 @@ async function monitor(db:any,config:any,dryRun=false){
     let sent=0,failed=0;
     for(const device of active){for(const spot of spotsResult.data){
       if(device.settings.spots?.[spot.id]===false)continue;
-      const leads=device.settings.leads||LEADS,maxLead=Math.max(0,...leads);
+      const leads=[firstLead(device.settings)],maxLead=leads[0];
       const candidates=hours.map((c:any)=>({...c,...evaluate(c,spot,sessions)}));
       const previous=eventsResult.data.filter((e:any)=>e.device_id===device.id && e.spot_id===spot.id);
       // Track existing windows even if the forecast deteriorates; discover the next favorable window.

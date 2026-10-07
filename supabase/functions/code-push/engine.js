@@ -42,9 +42,10 @@ export function evaluate(c,spot,sessions=[]) {
   const score=spot.seed?learned*learnedWeight+Number(seed)*(1-learnedWeight):learned;
   return {favorable:score>=0.7,score};
 }
+export function firstLead(settings={}) {const values=Array.isArray(settings?.leads)?settings.leads.map(Number).filter(n=>LEADS.includes(n)):LEADS.includes(Number(settings?.lead))?[Number(settings?.lead)]:[];return values.length?Math.max(...values):168;}
 export function leadFor(hours,leads) {return [...leads].sort((a,b)=>a-b).find(v=>hours>0 && hours<=v)??null;}
 export function shouldNotify(previous,{day,lead,favorable,daily}) {
   if(!previous)return favorable && lead!==null;
   if(previous.last_day===day)return false;
-  return daily || (lead!==null && !(previous.sent_leads||[]).includes(lead) && favorable);
+  return daily===true;
 }
