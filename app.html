@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/code-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261007directions16">
+<link rel="stylesheet" href="styles.css?v=20261008wgmanual1">
 </head>
 <body>
 <section id="splash">
@@ -47,6 +47,8 @@
   <header class="top"><div class="logo">CODE</div><div style="display:flex;align-items:center;gap:8px"><div class="place">⌖ Ubatuba, SP</div><button id="refreshForecast" class="ghost-btn" aria-label="Atualizar previsão">↻</button></div></header>
   <main class="content">
     <h1>Previsão</h1><div class="sub">Próximos 7 dias · escolha o dia para ver a leitura completa</div>
+    <div class="forecast-switch" role="tablist" aria-label="Fonte de previsão"><button id="codeForecastTab" type="button" role="tab" aria-controls="codeForecastPanel" aria-selected="true" class="active">CODE</button><button id="windguruForecastTab" type="button" role="tab" aria-controls="windguruForecastPanel" aria-selected="false">Windguru</button></div>
+    <div id="codeForecastPanel" role="tabpanel" aria-labelledby="codeForecastTab">
     <div id="status" class="status"><span class="dot"></span>sincronizando previsão…</div>
     <div id="days" class="forecast-days"></div>
 
@@ -73,6 +75,13 @@
       <div id="tideSource" class="source">tábua astronômica</div>
     </div>
 
+    </div>
+    <div id="windguruForecastPanel" class="windguru-panel" role="tabpanel" aria-labelledby="windguruForecastTab" hidden>
+      <div class="section-head"><div><h2>Windguru · Ubatuba</h2><div class="sub">Nossa referência para comparar o mar e o vento.</div></div><a class="windguru-link" href="https://www.windguru.cz/185085" target="_blank" rel="noopener noreferrer">Abrir WG ↗</a></div>
+      <div class="windguru-card"><div id="windguruWidget" class="windguru-widget"></div></div>
+      <div id="windguruWidgetStatus" class="sub windguru-help" aria-live="polite">O gráfico será carregado ao abrir esta aba.</div>
+      <div class="windguru-session-note">Ao registrar, as condições são preenchidas pelo CODE. Você pode ajustá-las antes de salvar.</div>
+    </div>
     <div class="version">2026.10.07 · PUSH</div>
   </main>
   <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
@@ -122,12 +131,12 @@
 <section id="register" class="screen">
   <header class="top"><a class="back" href="#forecast">‹ Previsão</a><div class="logo" style="font-size:18px">REGISTRAR</div><div style="width:42px"></div></header>
   <main class="content">
-    <h1>Registrar sessão</h1><div class="sub">Escolha quando você surfou. As condições são capturadas da previsão desse horário.</div><div id="registerIdentity" class="register-identity"></div>
+    <h1>Registrar sessão</h1><div class="sub">Escolha quando você surfou. O CODE preenche as condições e você pode ajustá-las.</div><div id="registerIdentity" class="register-identity"></div>
     <select id="spotSelect" class="field"></select>
     <div id="noSpot" class="notice hidden">Você ainda não cadastrou nenhum pico. <a href="#spots"><b>Criar pico →</b></a></div>
     <div class="session-time-fields"><label for="sessionDay">Dia do surf<select id="sessionDay" class="field"></select></label><label for="sessionHour">Horário do surf<select id="sessionHour" class="field"></select></label></div>
     <div class="sub session-time-help">Escolha um horário de referência da sua sessão. Os valores seguem a previsão por hora.</div>
-    <div class="card"><b>Condições capturadas</b><div id="sessionForecastMoment" class="sub session-forecast-moment" aria-live="polite"></div><div class="capture-grid"><div class="capture"><small>Ondulação</small><b id="rs">—</b></div><div class="capture"><small>Período</small><b id="rp">—</b></div><div class="capture"><small>Vento</small><b id="rw">—</b></div><div class="capture"><small>Energia</small><b id="re">—</b></div><div class="capture"><small>Maré</small><b id="rt">—</b></div></div></div>
+    <div class="card"><b>Condições da sessão</b><div id="sessionForecastMoment" class="sub session-forecast-moment" aria-live="polite"></div><div class="capture-grid"><div class="capture"><small>Ondulação</small><b id="rs">—</b></div><div class="capture"><small>Período</small><b id="rp">—</b></div><div class="capture"><small>Vento</small><b id="rw">—</b></div><div class="capture"><small>Energia</small><b id="re">—</b></div><div class="capture"><small>Maré</small><b id="rt">—</b></div></div><details id="sessionEditDetails" class="session-edit"><summary>Ajustar condições ✎</summary><div class="sub">Direções em graus: N 0° · L 90° · S 180° · O 270°.</div><div class="session-edit-grid"><label>Ondulação (m)<input id="sessionEdit-wave" data-session-edit="wave" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Ondulação (m)"></label><label>Direção da ondulação (°)<input id="sessionEdit-waveDir" data-session-edit="waveDir" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Direção da ondulação (°)"></label><label>Período (s)<input id="sessionEdit-period" data-session-edit="period" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Período (s)"></label><label>Vento (nós)<input id="sessionEdit-wind" data-session-edit="wind" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Vento (nós)"></label><label>Direção do vento (°)<input id="sessionEdit-windDir" data-session-edit="windDir" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Direção do vento (°)"></label><label>Rajadas (nós)<input id="sessionEdit-gust" data-session-edit="gust" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Rajadas (nós)"></label><label>Energia (J/m²)<input id="sessionEdit-energy" data-session-edit="energy" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Energia (J/m²)"></label><label>Maré (m)<input id="sessionEdit-tide" data-session-edit="tide" type="text" inputmode="decimal" maxlength="14" class="field" autocomplete="off" aria-label="Maré (m)"></label></div></details><div id="sessionEditStatus" class="session-edit-status" aria-live="polite">Previsão original do CODE.</div><button id="resetSessionForecast" type="button" class="ghost-btn session-reset" hidden>Usar previsão do CODE</button></div>
     <small>Sua avaliação</small><div class="score-select"><label><input type="radio" name="score" value="6">6</label><label><input type="radio" name="score" value="7">7</label><label><input type="radio" name="score" value="8">8</label><label><input type="radio" name="score" value="9">9</label><label><input type="radio" name="score" value="10">10</label></div>
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
@@ -178,6 +187,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008windblend3"></script>
+<script src="app.js?v=20261008wgmanual1"></script>
 </body>
 </html>
