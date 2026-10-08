@@ -6,9 +6,9 @@ function app(){
   const element=id=>{if(!elements.has(id)){const classes=new Set();elements.set(id,{value:'',textContent:'',innerHTML:'',disabled:false,style:{},dataset:{},attrs:{},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c),toggle(c,on){on?classes.add(c):classes.delete(c)}},setAttribute(k,v){this.attrs[k]=v},querySelectorAll:()=>[],querySelector:()=>null,addEventListener(){},focus(){}})}return elements.get(id)};
   const storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
   class Clock extends Date{constructor(...args){super(...(args.length?args:[NOW]))}static now(){return NOW}}
-  const context={Date:Clock,Intl,Math,JSON,URLSearchParams,AbortController,localStorage:storage,sessionStorage:storage,navigator:{},location:{hash:'#register'},window:{addEventListener(){}},document:{getElementById:element,querySelector:s=>s.includes('score')?score:null,querySelectorAll:s=>s.includes('score')?[score]:[],addEventListener(){}},alert:s=>alerts.push(s),console:{error(){},warn(){}},setTimeout:()=>0,clearTimeout(){},fetch:async(url,opts)=>{const body=JSON.parse(opts.body);requests.push(body);return{ok:true,json:async()=>({session:body.session})}}};
+  const context={Date:Clock,Intl,Math,JSON,URLSearchParams,AbortController,localStorage:storage,sessionStorage:storage,navigator:{},location:{hash:'#register'},window:{addEventListener(){}},document:{getElementById:element,querySelector:s=>s.includes('score')?score:null,querySelectorAll:s=>s.includes('score')?[score]:[],addEventListener(){}},alert:s=>alerts.push(s),confirm:()=>true,console:{error(){},warn(){}},setTimeout:()=>0,clearTimeout(){},fetch:async(url,opts)=>{const body=JSON.parse(opts.body);requests.push(body);return{ok:true,json:async()=>({session:body.session})}}};
   let source=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
-  source=source.replace(/bootAccess\(\);bind\(\);renderSpots\(\);[^\n]+/, 'globalThis.api={state,storage,bind,saveSession,renderRegisterCapture,sessionForecastAt,sessionHours,renderSpotDetail};');
+  source=source.replace(/bootAccess\(\);bind\(\);renderSpots\(\);[^\n]+/, 'globalThis.api={state,storage,bind,saveSession,renderRegisterCapture,sessionForecastAt,sessionHours,renderSpotDetail,openSessionEditor,cancelSessionEdit,deleteSession};');
   vm.runInNewContext(source,context);
   const api=context.api,times=['2026-10-07T07:00','2026-10-07T15:00','2026-10-07T21:00','2026-10-07T22:00','2026-10-08T15:00'];
   api.state.marine={hourly:{time:times,wave_height:[.7,1.5,2.1,2.2,3],wave_direction:[90,135,180,180,225],wave_period:[7,12,9,10,14]}};
@@ -72,4 +72,40 @@ test('tide movement follows the selected surf hour and is saved with its forecas
 test('incomplete tide table never invents a movement',()=>{
  const a=app();choose(a,'2026-10-07T07:00');assert.equal(a.api.state.registerCapture.forecast.tideMovement,null);assert.equal(a.element('sessionTideMovement').textContent,'');
  a.api.state.tides=null;choose(a,'2026-10-07T15:00');assert.equal(a.element('rt').textContent,'—');assert.equal(a.element('sessionTideMovement').textContent,'');
+});
+
+function savedSession(a,ts='2026-10-07T15:00'){
+ const capture=a.api.sessionForecastAt(ts);return{id:'saved-1',...capture,spotId:'spot-1',spotName:'Pico teste',registeredBy:'Outro surfista',date:'07/10/2026',score:9,size:'1 m',comment:'Manter comentário',originalForecast:capture,manualAdjustments:null};
+}
+test('history pencil hides actions until enabled and opens the existing record',()=>{
+ const a=app(),s=savedSession(a);a.api.storage.setSessions([s]);a.api.state.currentSpotId=s.spotId;a.api.renderSpotDetail();
+ assert.ok(!a.element('history').innerHTML.includes('data-edit-session'));a.element('editHistory').onclick();assert.match(a.element('history').innerHTML,/data-edit-session="saved-1"/);
+ a.api.openSessionEditor(s.id);assert.equal(a.context.location.hash,'register');assert.equal(a.element('registerTitle').textContent,'Editar sessão');assert.equal(a.element('comment').value,s.comment);assert.equal(a.score.checked,true);assert.equal(a.element('cancelSessionEdit').hidden,false);
+});
+test('correcting the hour updates one session, all conditions and preserves its author',async()=>{
+ const a=app(),s=savedSession(a);a.api.storage.setSessions([s]);a.api.state.historyEditMode=true;a.api.openSessionEditor(s.id);
+ choose(a,'2026-10-07T21:00');a.score.value='0';a.element('comment').value='Horário corrigido';await a.api.saveSession();
+ const r=a.requests[0];assert.equal(r.action,'update_session');assert.equal(r.session.id,s.id);assert.equal(r.session.waveDir,180);assert.equal(r.session.wind,12);assert.equal(r.session.ts,'2026-10-07T21:00');assert.equal(r.session.registeredBy,'Outro surfista');assert.equal(r.session.score,0);
+ assert.equal(a.api.storage.sessions().length,1);assert.equal(a.api.storage.sessions()[0].comment,'Horário corrigido');assert.equal(a.api.state.editingSession,null);assert.equal(a.api.state.historyEditMode,false);assert.equal(a.element('saveSession').textContent,'SALVAR SESSÃO');assert.equal(a.element('spotSelect').disabled,false);
+});
+test('old sessions retain stored precision and manual audit when forecast is unavailable',async()=>{
+ const a=app(),s=savedSession(a);s.ts='2026-09-01T15:00';s.date='01/09/2026';s.waveDir=157.1234;s.originalForecast={...s.originalForecast,ts:s.ts};s.manualAdjustments={fields:{waveDir:{from:135,to:157.1234,source:'manual'}},by:'Outro surfista'};
+ a.api.storage.setSessions([s]);a.api.openSessionEditor(s.id);assert.equal(a.api.state.registerCapture.waveDir,157.1234);a.api.renderRegisterCapture();a.element('comment').value='Só o comentário';await a.api.saveSession();
+ assert.equal(a.requests[0].session.waveDir,157.1234);assert.equal(a.requests[0].session.ts,s.ts);assert.deepEqual(a.requests[0].session.manualAdjustments,s.manualAdjustments);
+});
+test('failed edit preserves draft and cancel never writes it',async()=>{
+ const a=app(),s=savedSession(a);a.api.storage.setSessions([s]);a.api.openSessionEditor(s.id);choose(a,'2026-10-07T21:00');a.element('comment').value='Rascunho';a.context.fetch=async()=>({ok:false,json:async()=>({error:'failure'})});await a.api.saveSession();
+ assert.equal(a.api.state.editingSession.id,s.id);assert.equal(a.element('comment').value,'Rascunho');assert.equal(a.api.storage.sessions()[0].ts,s.ts);assert.equal(a.element('saveSession').disabled,false);
+ a.api.cancelSessionEdit(true);assert.equal(a.api.state.editingSession,null);assert.equal(a.api.storage.sessions()[0].comment,s.comment);assert.equal(a.context.location.hash,'spot');
+});
+test('delete requires confirmation, keeps records on error and removes only the chosen session',async()=>{
+ const a=app(),s=savedSession(a);a.api.storage.setSessions([s,{...s,id:'saved-2'}]);a.api.state.currentSpotId=s.spotId;
+ a.context.confirm=()=>false;await a.api.deleteSession(s.id);assert.equal(a.requests.length,0);assert.equal(a.api.storage.sessions().length,2);
+ a.context.confirm=()=>true;a.context.fetch=async()=>({ok:false,json:async()=>({error:'failure'})});await a.api.deleteSession(s.id);assert.equal(a.api.storage.sessions().length,2);
+ a.context.fetch=async(url,opts)=>{a.requests.push(JSON.parse(opts.body));return{ok:true,json:async()=>({ok:true})}};await a.api.deleteSession(s.id);
+ assert.equal(a.requests[0].action,'delete_session');assert.equal(a.requests[0].sessionId,s.id);assert.equal(a.api.storage.sessions().length,1);assert.equal(a.api.storage.sessions()[0].id,'saved-2');assert.equal(a.api.state.historyEditMode,false);
+});
+test('changing back to stored time restores saved conditions; missing new time blocks save',async()=>{
+ const a=app(),s=savedSession(a);s.waveDir=157;a.api.storage.setSessions([s]);a.api.openSessionEditor(s.id);choose(a,'2026-10-07T21:00');choose(a,s.ts);assert.equal(a.api.state.registerCapture.waveDir,157);
+ choose(a,'2026-09-01T15:00');await a.api.saveSession();assert.equal(a.requests.length,0);assert.equal(a.api.storage.sessions()[0].waveDir,157);
 });

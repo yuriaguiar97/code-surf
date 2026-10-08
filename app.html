@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261008sessiontide1">
+<link rel="stylesheet" href="styles.css?v=20261008sessionhistory1">
 </head>
 <body>
 <section id="splash">
@@ -110,7 +110,7 @@
       <h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div>
     </section>
 
-    <section class="spot-panel" data-panel="history"><div class="panel-heading"><h2>Histórico</h2><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
+    <section class="spot-panel" data-panel="history"><div class="panel-heading"><div class="history-heading"><h2>Histórico</h2><button id="editHistory" type="button" class="edit-round" aria-label="Editar histórico de sessões" aria-pressed="false" aria-controls="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button></div><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
 
     <section class="spot-panel" data-panel="code">
       <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button>
@@ -132,7 +132,7 @@
 <section id="register" class="screen">
   <header class="top"><a class="back" href="#forecast">‹ Previsão</a><div class="logo" style="font-size:18px">REGISTRAR</div><div style="width:42px"></div></header>
   <main class="content">
-    <h1>Registrar sessão</h1><div id="registerIdentity" class="register-identity"></div>
+    <h1 id="registerTitle">Registrar sessão</h1><div id="registerIdentity" class="register-identity"></div>
     <select id="spotSelect" class="field"></select>
     <div id="noSpot" class="notice hidden">Você ainda não cadastrou nenhum pico. <a href="#spots"><b>Criar pico →</b></a></div>
     <div class="session-time-fields"><label for="sessionDay">Dia do surf<select id="sessionDay" class="field"></select></label><label for="sessionHour">Horário do surf<select id="sessionHour" class="field"></select></label></div>
@@ -145,7 +145,7 @@
     <small>Sua avaliação</small><div class="score-select" role="radiogroup" aria-label="Sua avaliação de 0 a 10"><label><input type="radio" name="score" value="0" aria-label="Nota 0 de 10">0</label><label><input type="radio" name="score" value="1" aria-label="Nota 1 de 10">1</label><label><input type="radio" name="score" value="2" aria-label="Nota 2 de 10">2</label><label><input type="radio" name="score" value="3" aria-label="Nota 3 de 10">3</label><label><input type="radio" name="score" value="4" aria-label="Nota 4 de 10">4</label><label><input type="radio" name="score" value="5" aria-label="Nota 5 de 10">5</label><label><input type="radio" name="score" value="6" aria-label="Nota 6 de 10">6</label><label><input type="radio" name="score" value="7" aria-label="Nota 7 de 10">7</label><label><input type="radio" name="score" value="8" aria-label="Nota 8 de 10">8</label><label><input type="radio" name="score" value="9" aria-label="Nota 9 de 10">9</label><label><input type="radio" name="score" value="10" aria-label="Nota 10 de 10">10</label></div>
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
-    <button id="saveSession" class="btn">SALVAR SESSÃO</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
+    <button id="saveSession" class="btn">SALVAR SESSÃO</button><button id="cancelSessionEdit" type="button" class="ghost-btn session-cancel" hidden>Cancelar edição</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
     <div class="version">2026.10.07 · PUSH</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
@@ -192,6 +192,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008sessiontide1"></script>
+<script src="app.js?v=20261008sessionhistory1"></script>
 </body>
 </html>

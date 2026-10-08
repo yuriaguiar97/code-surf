@@ -183,3 +183,6 @@ body:not(.access-granted){padding-bottom:0;background:#02060a!important}
 
 /* Keep all eleven scores readable with comfortable touch targets. */
 .score-select{display:grid;grid-template-columns:repeat(11,minmax(0,1fr))}.score-select label{min-width:0;min-height:44px;display:grid;place-items:center}@media(max-width:520px){.score-select{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* Quiet history controls follow the spot pencil pattern. */
+.history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.history-heading .edit-round{width:44px;height:44px;flex:none}.history-actions{display:flex;gap:10px;margin:12px 0 6px}.history-actions button{min-height:44px;flex:1;font-size:12px}.history-delete{color:var(--red);border-color:rgba(255,108,112,.22)}.session-cancel{width:100%;margin-top:10px;min-height:44px}.history-actions button:disabled{opacity:.45;cursor:wait}.edit-round:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}

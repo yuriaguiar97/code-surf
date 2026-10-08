@@ -116,6 +116,24 @@ export default {
       return ok({ session: toSession(data) })
     }
 
+    if (action === 'update_session') {
+      const row = sessionRow(body?.session, actor)
+      if (!row.id || !row.spot_id || !Number.isFinite(row.score) || row.score < 0 || row.score > 10) return ok({ error: 'invalid_session' }, 400)
+      const { id, author, ...changes } = row
+      const { data, error } = await db.from('code_sessions').update(changes).eq('id', id).select('*').maybeSingle()
+      if (error) return ok({ error: error.message }, 500)
+      if (!data) return ok({ error: 'session_not_found' }, 404)
+      return ok({ session: toSession(data) })
+    }
+
+    if (action === 'delete_session') {
+      const id = String(body?.sessionId || '').trim().slice(0, 120)
+      if (!id) return ok({ error: 'invalid_session' }, 400)
+      const { error } = await db.from('code_sessions').delete().eq('id', id)
+      if (error) return ok({ error: error.message }, 500)
+      return ok({ ok: true })
+    }
+
     if (action === 'migrate') {
       const spots = Array.isArray(body?.spots) ? body.spots.map((x: any) => spotRow(x, actor)).filter((x: any) => x.id && x.name) : []
       if (spots.length) {
