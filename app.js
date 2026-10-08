@@ -344,7 +344,7 @@ function renderRegisterCapture(updateTime=true){
 }
 async function saveSession(){
   const spots=storage.spots(),spotId=$('spotSelect').value,spot=spots.find(s=>s.id===spotId),score=document.querySelector('input[name="score"]:checked');
-  if(state.sessionSaving)return;if(!spot)return alert('Crie um pico antes de registrar a sessão.');renderRegisterCapture();const capture=state.registerCapture;if(!capture)return alert(state.registerError||'Escolha um horário com previsão disponível.');if(!score)return alert('Escolha uma nota de 6 a 10.');
+  if(state.sessionSaving)return;if(!spot)return alert('Crie um pico antes de registrar a sessão.');renderRegisterCapture();const capture=state.registerCapture;if(!capture)return alert(state.registerError||'Escolha um horário com previsão disponível.');if(!score)return alert('Escolha uma nota de 0 a 10.');
   const session={id:uid(),...capture,spotId,spotName:spot.name,registeredBy:currentUserName()||'Surfista',score:Number(score.value),size:$('size').value.trim(),comment:$('comment').value.trim(),date:localDate(capture.ts).toLocaleDateString('pt-BR',{timeZone:CFG.tz})};
   state.sessionSaving=true;const btn=$('saveSession');if(btn){btn.disabled=true;btn.textContent='SALVANDO…'}
   try{

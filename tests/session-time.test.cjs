@@ -24,7 +24,7 @@ test('15h uses the exact table indices, independently of the forecast day',()=>{
  const a=app();a.api.state.selectedDay='2026-10-08';choose(a,'2026-10-07T15:00');
  const x=a.api.state.registerCapture;
  assert.equal(x.ts,'2026-10-07T15:00');assert.equal(x.wave,1.5);assert.equal(x.waveDir,135);assert.equal(x.period,12);assert.equal(x.wind,5);assert.equal(x.windDir,270);assert.equal(x.gust,8);assert.equal(x.energy,1025*9.81*1.5**2/16);assert.ok(Math.abs(x.tide-.7)<1e-10);
- assert.equal(a.element('rs').textContent,'1.5 m · SE 135°');assert.match(a.element('sessionForecastMoment').textContent,/07\/10\/2026 às 15:00/);
+ assert.equal(a.element('rs').textContent,'1.5 m');assert.equal(a.element('rd').textContent,'SE');assert.match(a.element('sessionForecastMoment').textContent,/07\/10\/2026 às 15:00/);
 });
 test('night defaults to the current Ubatuba hour and never lists future timestamps',()=>{
  const a=app();assert.equal(a.api.state.registerDay,'2026-10-07');assert.equal(a.api.state.registerCapture.ts,'2026-10-07T21:00');
@@ -55,4 +55,10 @@ test('a failed save preserves the selected hour and evaluation for retry',async(
 });
 test('selecting a surf date with no data blocks saving instead of using another date',()=>{
  const a=app();a.element('sessionDay').value='2026-10-06';a.element('sessionDay').onchange();assert.equal(a.api.state.registerCapture,null);assert.equal(a.element('saveSession').disabled,true);assert.equal(a.element('sessionHour').disabled,true);
+});
+
+test('zero score is saved, contributes to the average and appears as 0/10 in history',async()=>{
+ const a=app();a.score.value='0';choose(a,'2026-10-07T15:00');await a.api.saveSession();
+ assert.equal(a.requests[0].session.score,0);assert.equal(a.api.storage.sessions()[0].score,0);
+ a.api.renderSpotDetail();assert.equal(a.element('spotScore').textContent,'0.0');assert.match(a.element('history').innerHTML,/>0\/10</);
 });
