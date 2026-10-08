@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/code-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261008yesterdayunits4">
+<link rel="stylesheet" href="styles.css?v=20261008cleanlabels5">
 </head>
 <body>
 <section id="splash">
@@ -89,7 +89,7 @@
 <section id="spots" class="screen">
   <header class="top"><div class="logo">CODE</div><div class="place">MEUS PICOS</div></header>
   <main class="content">
-    <div class="spots-head"><div><h1>Meus Picos</h1><div class="sub">Histórico, Confidence e código de cada spot</div></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
+    <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
     <div id="spotsList" class="spots-list"></div>
     <div class="version">2026.10.07 · PUSH</div>
@@ -152,10 +152,10 @@
 <section id="alerts" class="screen">
   <header class="top"><div class="logo">CODE</div><div class="place">ALERTAS</div></header>
   <main class="content">
-    <h1>Alertas</h1><div class="sub">Configure quais picos você quer monitorar</div>
+    <h1>Alertas</h1>
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
-    <h2>Primeiro aviso</h2><div class="card alerts-card alert-leads-card" id="alertLeads" role="radiogroup" aria-label="Primeiro aviso"><label class="toggle-row first-alert-option"><b>7 dias</b><input type="radio" name="firstAlertLead" data-alert-lead="168" aria-label="Avisar com até 7 dias"></label><label class="toggle-row first-alert-option"><b>5 dias</b><input type="radio" name="firstAlertLead" data-alert-lead="120" aria-label="Avisar com até 5 dias"></label><label class="toggle-row first-alert-option"><b>3 dias</b><input type="radio" name="firstAlertLead" data-alert-lead="72" aria-label="Avisar com até 3 dias"></label><label class="toggle-row first-alert-option"><b>2 dias</b><input type="radio" name="firstAlertLead" data-alert-lead="48" aria-label="Avisar com até 2 dias"></label><label class="toggle-row first-alert-option"><b>1 dia</b><input type="radio" name="firstAlertLead" data-alert-lead="24" aria-label="Avisar com até 1 dia"></label></div><div class="sub lead-help">Avisar com até este prazo de antecedência. Escolha uma opção.</div>
+    <h2>Primeiro aviso</h2><div class="card alerts-card alert-leads-card" id="alertLeads" role="radiogroup" aria-label="Primeiro aviso"><label class="toggle-row first-alert-option"><b>7 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="168" aria-label="Avisar 7 dias antes"></label><label class="toggle-row first-alert-option"><b>5 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="120" aria-label="Avisar 5 dias antes"></label><label class="toggle-row first-alert-option"><b>3 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="72" aria-label="Avisar 3 dias antes"></label><label class="toggle-row first-alert-option"><b>2 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="48" aria-label="Avisar 2 dias antes"></label><label class="toggle-row first-alert-option"><b>1 dia antes</b><input type="radio" name="firstAlertLead" data-alert-lead="24" aria-label="Avisar 1 dia antes"></label></div>
     <div class="card alerts-card"><div class="toggle-row"><div><b>Monitoramento do swell</b><small>Após o primeiro aviso, receba uma atualização por dia, inclusive se as condições piorarem.</small></div><label class="switch"><input id="dailyAlert" type="checkbox" aria-label="Monitoramento do swell"><span class="slider"></span></label></div></div>
     <div class="card alerts-card push-card"><button id="activatePush" class="btn" type="button">ATIVAR NOTIFICAÇÕES</button><button id="testPush" class="btn secondary" type="button" hidden>ENVIAR NOTIFICAÇÃO DE TESTE</button><p id="pushStatus" class="sub" role="status" aria-live="polite">Ative as notificações neste aparelho para receber os alertas.</p></div>
     <div class="version">2026.10.07 · PUSH</div>
@@ -190,6 +190,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008yesterdayunits4"></script>
+<script src="app.js?v=20261008cleanlabels5"></script>
 </body>
 </html>
