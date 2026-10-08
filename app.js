@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const CFG={lat:-23.4347,lon:-45.0711,marineLat:-23.4347,marineLon:-45.0711,forecastVersion:'ubatuba-coastal-v1',tz:'America/Sao_Paulo',forecastDays:7,refreshMs:30*60*1000,staleMs:15*60*1000};
+const CFG={lat:-23.4347,lon:-45.0711,marineLat:-23.75,marineLon:-44.75,forecastVersion:'ubatuba-offshore-south-v1',tz:'America/Sao_Paulo',forecastDays:7,refreshMs:30*60*1000,staleMs:15*60*1000};
 const $=id=>document.getElementById(id);
 const dirs=['N','NNE','NE','ENE','L','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
 const state={marine:null,wind:null,tides:null,selectedDay:'',latest:null,registerDay:'',registerTs:'',registerCapture:null,sessionSaving:false,lastLoad:0,sourceMode:'primary',currentSpotId:localStorage.getItem('code_current_spot')||'',editingSpotId:null,map:null,mapMarker:null,pendingPoint:null,spotsEditMode:false,pendingSpotPhoto:null};
