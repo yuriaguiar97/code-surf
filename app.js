@@ -297,6 +297,12 @@ function loadWindguruWidget(){
   host.insertBefore(script,anchor);
 }
 
+function sessionTideMovement(ts){
+  if(!ts)return null;
+  const ms=localDate(ts).getTime(),series=tideSeries(ts.slice(0,10));
+  if(!series.some(e=>e.ms<=ms)||!series.some(e=>e.ms>ms))return null;
+  const status=tideStatus(ts);return status?(status.rising?'rising':'falling'):null;
+}
 function sessionForecastAt(ts){
   const H=state.marine?.hourly,W=state.wind?.hourly;
   if(!H||!W||!ts||localDate(ts).getTime()>Date.now())return null;
@@ -304,7 +310,7 @@ function sessionForecastAt(ts){
   const number=v=>v===null||v===undefined||v===''?null:Number(v);
   const x={wave:number(H.wave_height[i]),waveDir:number(H.wave_direction[i]),period:periodAt(i),wind:number(W.wind_speed_10m[wi]),windDir:number(W.wind_direction_10m[wi]),gust:number(W.wind_gusts_10m[wi])};
   if(!['wave','waveDir','period','wind','windDir'].every(k=>Number.isFinite(x[k]))||x.period<=0)return null;
-  return {...x,energy:energy(x.wave),tide:tideValue(ts),ts,forecast:forecastMetadata(ts)};
+  return {...x,energy:energy(x.wave),tide:tideValue(ts),ts,forecast:{...forecastMetadata(ts),tideMovement:sessionTideMovement(ts)}};
 }
 function sessionHours(day){return (state.marine?.hourly?.time||[]).filter(ts=>ts.startsWith(day)&&sessionForecastAt(ts))}
 function renderSessionTime(){
@@ -326,7 +332,7 @@ function renderRegisterCapture(updateTime=true){
   else if(!Object.keys(state.registerEdits).length)state.registerOriginal=base;
   const result=adjustedSessionCapture(state.registerOriginal,state.registerEdits),x=result.capture;state.registerCapture=x;state.registerError=result.error;
   const shown=x||state.registerOriginal;
-  $('rs').textContent=shown?fmt(shown.wave)+' m':'—';$('rd').textContent=shown?dir(shown.waveDir):'—';$('rp').textContent=shown?fmt(shown.period,0)+' s':'—';$('rw').textContent=shown?fmt(shown.wind,0)+' kt':'—';$('re').textContent=shown?fmt(shown.energy,0)+' J/m²':'—';$('rt').textContent=Number.isFinite(shown?.tide)?fmt(shown.tide,2)+' m':'—';
+  $('rs').textContent=shown?fmt(shown.wave)+' m':'—';$('rd').textContent=shown?dir(shown.waveDir):'—';$('rp').textContent=shown?fmt(shown.period,0)+' s':'—';$('rw').textContent=shown?fmt(shown.wind,0)+' kt':'—';$('re').textContent=shown?fmt(shown.energy,0)+' J/m²':'—';const tideMovement=Number.isFinite(shown?.tide)?shown?.forecast?.tideMovement:null;$('rt').textContent=Number.isFinite(shown?.tide)?fmt(shown.tide,2)+' m'+(tideMovement==='rising'?' ↑':tideMovement==='falling'?' ↓':''):'—';if($('sessionTideMovement'))$('sessionTideMovement').textContent=tideMovement==='rising'?'enchendo':tideMovement==='falling'?'vazando':'';
   $('sessionWaveDirection').innerHTML=shown?`${fmt(shown.waveDir,0)}° ${directionArrow(shown.waveDir)}`:'';
   $('sessionWindDirection').innerHTML=shown?`${dir(shown.windDir)} · ${fmt(shown.windDir,0)}° ${directionArrow(shown.windDir)}`:'';
   $('sessionConditions').classList.toggle('editing',state.sessionEditing);

@@ -2,9 +2,9 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),asse
 const source=fs.readFileSync(path.join(__dirname,'../supabase/functions/code-sync/index.ts'),'utf8');
 const code=source.slice(source.indexOf('const corsHeaders'),source.indexOf('export default')).replace(/: unknown/g,'').replace(/: any/g,'');
 const context={Response};vm.createContext(context);vm.runInContext(code+'\nglobalThis.test={sessionRow,toSession};',context);
-const session={id:'test',spotId:'test-spot',score:8,wave:1.5,waveDir:143,period:9,wind:3,windDir:133,gust:null,energy:1428,tide:null,ts:'2026-10-08T12:00',forecast:{windModel:'code_wind_blend_v1'},originalForecast:{wave:1.46,windDir:135,forecast:{windModel:'code_wind_blend_v1'}},manualAdjustments:{fields:{windDir:{from:135,to:133,source:'manual'}},by:'Teste'}};
+const session={id:'test',spotId:'test-spot',score:8,wave:1.5,waveDir:143,period:9,wind:3,windDir:133,gust:null,energy:1428,tide:null,ts:'2026-10-08T12:00',forecast:{windModel:'code_wind_blend_v1',tideMovement:'falling'},originalForecast:{wave:1.46,windDir:135,forecast:{windModel:'code_wind_blend_v1'}},manualAdjustments:{fields:{windDir:{from:135,to:133,source:'manual'}},by:'Teste'}};
 const row=context.test.sessionRow(session,'Teste'),result=context.test.toSession(row);
-assert.equal(result.forecast.windModel,session.forecast.windModel);
+assert.equal(result.forecast.windModel,session.forecast.windModel);assert.equal(result.forecast.tideMovement,'falling');
 assert.equal(result.originalForecast.wave,1.46);
 assert.equal(result.manualAdjustments.fields.windDir.from,135);
 assert.equal(result.manualAdjustments.fields.windDir.to,133);

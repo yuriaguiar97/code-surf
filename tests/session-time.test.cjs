@@ -62,3 +62,14 @@ test('zero score is saved, contributes to the average and appears as 0/10 in his
  assert.equal(a.requests[0].session.score,0);assert.equal(a.api.storage.sessions()[0].score,0);
  a.api.renderSpotDetail();assert.equal(a.element('spotScore').textContent,'0.0');assert.match(a.element('history').innerHTML,/>0\/10</);
 });
+
+test('tide movement follows the selected surf hour and is saved with its forecast',async()=>{
+ const a=app();a.api.state.tides.events['2026-10-07'].push({time:'22:00',height:.2,type:'low'});
+ choose(a,'2026-10-07T15:00');assert.equal(a.api.state.registerCapture.forecast.tideMovement,'rising');assert.equal(a.element('sessionTideMovement').textContent,'enchendo');assert.match(a.element('rt').textContent,/↑/);
+ choose(a,'2026-10-07T21:00');assert.equal(a.api.state.registerCapture.forecast.tideMovement,'falling');assert.equal(a.element('sessionTideMovement').textContent,'vazando');assert.match(a.element('rt').textContent,/↓/);
+ await a.api.saveSession();assert.equal(a.requests[0].session.forecast.tideMovement,'falling');assert.equal(a.api.storage.sessions()[0].forecast.tideMovement,'falling');assert.equal(a.requests[0].session.originalForecast.forecast.tideMovement,'falling');
+});
+test('incomplete tide table never invents a movement',()=>{
+ const a=app();choose(a,'2026-10-07T07:00');assert.equal(a.api.state.registerCapture.forecast.tideMovement,null);assert.equal(a.element('sessionTideMovement').textContent,'');
+ a.api.state.tides=null;choose(a,'2026-10-07T15:00');assert.equal(a.element('rt').textContent,'—');assert.equal(a.element('sessionTideMovement').textContent,'');
+});
