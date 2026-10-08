@@ -2,12 +2,12 @@
 'use strict';
 const CFG={lat:-23.4347,lon:-45.0711,marineLat:-23.5,marineLon:-44.25,tz:'America/Sao_Paulo',forecastDays:7,refreshMs:30*60*1000,staleMs:15*60*1000};
 const $=id=>document.getElementById(id);
-const dirs=['N','NE','L','SE','S','SO','O','NO'];
+const dirs=['N','NNE','NE','ENE','L','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
 const state={marine:null,wind:null,tides:null,selectedDay:'',latest:null,registerDay:'',registerTs:'',registerCapture:null,sessionSaving:false,lastLoad:0,sourceMode:'primary',currentSpotId:localStorage.getItem('code_current_spot')||'',editingSpotId:null,map:null,mapMarker:null,pendingPoint:null,spotsEditMode:false,pendingSpotPhoto:null};
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const fmt=(n,d=1)=>Number.isFinite(Number(n))?Number(n).toFixed(d):'—';
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
-const dir=d=>Number.isFinite(Number(d))?dirs[Math.round((((Number(d)%360)+360)%360)/45)%8]:'—';
+const dir=d=>d!==null&&d!==undefined&&d!==''&&Number.isFinite(Number(d))?dirs[Math.round((((Number(d)%360)+360)%360)/22.5)%16]:'—';
 const localDate=ts=>new Date(ts+':00-03:00');
 const dayPlus=(day,n)=>{const d=new Date(day+'T12:00:00-03:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
 const dayName=(day,long=false)=>new Intl.DateTimeFormat('pt-BR',long?{weekday:'long',day:'2-digit',month:'2-digit'}:{weekday:'short'}).format(new Date(day+'T12:00:00-03:00')).replace('.','');
