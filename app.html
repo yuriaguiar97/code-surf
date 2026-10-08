@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/code-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261008cleanlabels5">
+<link rel="stylesheet" href="styles.css?v=20261008codeinfo6">
 </head>
 <body>
 <section id="splash">
@@ -111,16 +111,15 @@
     <section class="spot-panel" data-panel="history"><div class="panel-heading"><h2>Histórico</h2><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
 
     <section class="spot-panel" data-panel="code">
-      <div class="panel-heading"><h2>CODE do pico</h2><div class="panel-copy">O padrão ideal deste pico é atualizado automaticamente conforme você registra sessões.</div></div>
-      <div id="codeOrigin" class="code-origin-card">Ainda sem dados suficientes para formar o CODE.</div>
+      <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button></div>
+      <div id="codeInfo" class="notice code-learning-notice" hidden>O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
       <div class="code-metrics-grid">
         <div class="code-metric-card"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
         <div class="code-metric-card"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
         <div class="code-metric-card"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
         <div class="code-metric-card"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
       </div>
-      <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span><small>cresce conforme o histórico fica mais consistente</small></div><b id="codeConfValue" class="code-confidence-value">0%</b></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
-      <div class="notice code-learning-notice">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
+      <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span></div><div class="code-confidence-reading"><b id="codeConfValue" class="code-confidence-value">0%</b><span id="codeConfLevel" class="code-confidence-level">Baixa confiança</span></div></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
     </section>
     <div class="version">2026.10.07 · PUSH</div>
   </main>
@@ -190,6 +189,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008cleanlabels5"></script>
+<script src="app.js?v=20261008codeinfo6"></script>
 </body>
 </html>
