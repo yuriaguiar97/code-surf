@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/code-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261007neutral1">
+<link rel="stylesheet" href="styles.css?v=20261007session1">
 </head>
 <body>
 <section id="splash">
@@ -122,10 +122,12 @@
 <section id="register" class="screen">
   <header class="top"><a class="back" href="#forecast">‹ Previsão</a><div class="logo" style="font-size:18px">REGISTRAR</div><div style="width:42px"></div></header>
   <main class="content">
-    <h1>Registrar sessão</h1><div class="sub">As condições do momento são capturadas automaticamente. Você só avalia o surf.</div><div id="registerIdentity" class="register-identity"></div>
+    <h1>Registrar sessão</h1><div class="sub">Escolha quando você surfou. As condições são capturadas da previsão desse horário.</div><div id="registerIdentity" class="register-identity"></div>
     <select id="spotSelect" class="field"></select>
     <div id="noSpot" class="notice hidden">Você ainda não cadastrou nenhum pico. <a href="#spots"><b>Criar pico →</b></a></div>
-    <div class="card"><b>Condições capturadas</b><div class="capture-grid"><div class="capture"><small>Ondulação</small><b id="rs">—</b></div><div class="capture"><small>Período</small><b id="rp">—</b></div><div class="capture"><small>Vento</small><b id="rw">—</b></div><div class="capture"><small>Energia</small><b id="re">—</b></div><div class="capture"><small>Maré</small><b id="rt">—</b></div></div></div>
+    <div class="session-time-fields"><label for="sessionDay">Dia do surf<select id="sessionDay" class="field"></select></label><label for="sessionHour">Horário do surf<select id="sessionHour" class="field"></select></label></div>
+    <div class="sub session-time-help">Escolha um horário de referência da sua sessão. Os valores seguem a previsão por hora.</div>
+    <div class="card"><b>Condições capturadas</b><div id="sessionForecastMoment" class="sub session-forecast-moment" aria-live="polite"></div><div class="capture-grid"><div class="capture"><small>Ondulação</small><b id="rs">—</b></div><div class="capture"><small>Período</small><b id="rp">—</b></div><div class="capture"><small>Vento</small><b id="rw">—</b></div><div class="capture"><small>Energia</small><b id="re">—</b></div><div class="capture"><small>Maré</small><b id="rt">—</b></div></div></div>
     <small>Sua avaliação</small><div class="score-select"><label><input type="radio" name="score" value="6">6</label><label><input type="radio" name="score" value="7">7</label><label><input type="radio" name="score" value="8">8</label><label><input type="radio" name="score" value="9">9</label><label><input type="radio" name="score" value="10">10</label></div>
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
@@ -176,6 +178,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261007neutral1"></script>
+<script src="app.js?v=20261007session1"></script>
 </body>
 </html>
