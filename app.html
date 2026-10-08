@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/code-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261008codeinfo6">
+<link rel="stylesheet" href="styles.css?v=20261008spotpopover7">
 </head>
 <body>
 <section id="splash">
@@ -101,7 +101,7 @@
   <header class="top"><a class="back" href="#spots">‹ Picos</a><div id="spotTitle" class="spot-title">Pico</div><div style="width:42px"></div></header>
   <main class="content">
     <div class="cover"></div>
-    <div class="spot-tabs"><button class="spot-tab active" data-tab="overview">Visão geral</button><button class="spot-tab" data-tab="history">Histórico</button><button class="spot-tab" data-tab="code">Código</button></div>
+    <div class="spot-tabs"><button class="spot-tab active" data-tab="overview">Visão geral</button><button class="spot-tab" data-tab="history">Histórico</button><button class="spot-tab" data-tab="code">CODE do pico</button></div>
 
     <section class="spot-panel active" data-panel="overview">
       <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div></div>
@@ -111,8 +111,9 @@
     <section class="spot-panel" data-panel="history"><div class="panel-heading"><h2>Histórico</h2><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
 
     <section class="spot-panel" data-panel="code">
-      <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button></div>
-      <div id="codeInfo" class="notice code-learning-notice" hidden>O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div>
+      <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button>
+      <div id="codeInfo" class="code-info-popover" role="note" aria-label="Como funciona o CODE do pico" hidden><div class="code-info-copy">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div></div>
+      </div>
       <div class="code-metrics-grid">
         <div class="code-metric-card"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
         <div class="code-metric-card"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
@@ -163,7 +164,7 @@
 </section>
 
 <div id="spotModal" class="modal"><div class="sheet">
-  <h2 id="modalTitle">Novo pico</h2><div class="sub">Marque o ponto e, se souber, salve um norte inicial do spot.</div>
+  <div class="spot-editor-head"><h2 id="modalTitle">Novo pico</h2><button id="closeSpotModal" class="spot-editor-close" type="button" aria-label="Fechar formulário do pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="sub">Marque o ponto e, se souber, salve um norte inicial do spot.</div>
   <input id="spotName" class="field" maxlength="50" placeholder="Nome do pico">
   <div class="section-label">FOTO DO PICO</div>
   <div class="spot-photo-editor">
@@ -189,6 +190,6 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008codeinfo6"></script>
+<script src="app.js?v=20261008spotpopover7"></script>
 </body>
 </html>
