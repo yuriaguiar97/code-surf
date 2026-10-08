@@ -275,11 +275,11 @@ function showForecastTab(name){
 function loadWindguruWidget(){
   if(windguruLoaded)return;windguruLoaded=true;
   const uid='wg_fwdg_185085_100_1791428441581',host=$('windguruWidget'),anchor=document.createElement('script');anchor.id=uid;host.appendChild(anchor);
-  const params=new URLSearchParams({s:'185085',m:'100',mw:'83',uid,wj:'knots',tj:'c',waj:'m',tij:'cm',odh:'0',doh:'24',fhours:'168',hrsm:'2',vt:'forecasts',lng:'pt',idbs:'1',p:'WINDSPD,GUST,SMER,HTSGW,PERPW,DIRPW'}),script=document.createElement('script');
+  const params=new URLSearchParams({s:'185085',m:'100',mw:'83',uid,wj:'knots',tj:'c',waj:'m',tij:'cm',odh:'0',doh:'24',fhours:'168',hrsm:'2',vt:'forecasts',lng:'pt',idbs:'1',ts:'2',p:'WINDSPD,GUST,SMER,HTSGW,PERPW,DIRPW'}),script=document.createElement('script');
   script.src='https://www.windguru.cz/js/widget.php?'+params;script.async=true;
-  $('windguruWidgetStatus').textContent='Carregando Windguru…';
-  script.onload=()=>{$('windguruWidgetStatus').textContent='Deslize a tabela para consultar os próximos horários. Se não carregar, use Abrir WG.';host.querySelector('iframe')?.setAttribute('title','Previsão oficial Windguru de Ubatuba')};
-  script.onerror=()=>{$('windguruWidgetStatus').textContent='Windguru indisponível neste momento. Use Abrir WG para consultar a referência.';windguruLoaded=false;host.replaceChildren()};
+  $('windguruWidgetStatus').hidden=false;$('windguruWidgetStatus').textContent='Carregando Windguru…';
+  script.onload=()=>{$('windguruWidgetStatus').textContent='';$('windguruWidgetStatus').hidden=true;host.querySelector('iframe')?.setAttribute('title','Previsão oficial Windguru de Ubatuba, com maré')};
+  script.onerror=()=>{$('windguruWidgetStatus').hidden=false;$('windguruWidgetStatus').textContent='Windguru indisponível. Use Abrir WG ↗';windguruLoaded=false;host.replaceChildren()};
   host.insertBefore(script,anchor);
 }
 
