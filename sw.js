@@ -4,7 +4,7 @@ self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 // No fetch caching: forecast and shared data remain fresh.
 self.addEventListener('push',event=>{
   let data={};try{data=event.data?.json()||{}}catch{}
-  event.waitUntil(self.registration.showNotification(data.title||'CODE',{body:data.body||'Confira as condições dos seus picos.',tag:data.tag||'code-alert',icon:'icons/code-192.png',badge:'icons/code-192.png',data:{url:data.url||'app.html#alerts'}}));
+  event.waitUntil(self.registration.showNotification(data.title||'CODE',{body:data.body||'Confira as condições dos seus picos.',tag:data.tag||'code-alert',icon:'icons/code-192.png?v=20261008logo1',badge:'icons/code-192.png',data:{url:data.url||'app.html#alerts'}}));
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();
