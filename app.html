@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261013radardirection1">
+<link rel="stylesheet" href="styles.css?v=20261013swellpicker1">
 </head>
 <body>
 <section id="splash">
@@ -178,7 +178,8 @@
   <div class="section-label">LOCALIZAÇÃO · RECOMENDADA</div><button id="openMapPicker" class="btn secondary" type="button">⌖ BUSCAR E MARCAR NO MAPA</button><div id="spotLocationSummary" class="location-summary">Nenhum local marcado</div><input id="spotLat" type="hidden"><input id="spotLon" type="hidden">
   <div class="section-label">NORTE INICIAL · “OUÇO DIZER”</div>
   <div class="form-grid"><input id="seedWaveMin" class="field" inputmode="decimal" placeholder="Onda mín. · m"><input id="seedWaveMax" class="field" inputmode="decimal" placeholder="Onda máx. · m"><input id="seedPeriodMin" class="field" inputmode="numeric" placeholder="Período mín. · s"><input id="seedPeriodMax" class="field" inputmode="numeric" placeholder="Período máx. · s"></div>
-  <div class="form-grid"><input id="seedSwellDir" class="field" placeholder="Swell ideal · ex. SE"><input id="seedWindDir" class="field" placeholder="Vento ideal · ex. NO"></div>
+  <fieldset class="swell-direction-picker"><legend>Swell ideal</legend><input id="seedSwellDir" type="hidden"><div class="swell-direction-grid"><label class="swell-direction-option"><input type="checkbox" value="N" data-swell-direction aria-label="N · Norte"><span aria-hidden="true">N</span></label><label class="swell-direction-option"><input type="checkbox" value="NNE" data-swell-direction aria-label="NNE · Norte-Nordeste"><span aria-hidden="true">NNE</span></label><label class="swell-direction-option"><input type="checkbox" value="NE" data-swell-direction aria-label="NE · Nordeste"><span aria-hidden="true">NE</span></label><label class="swell-direction-option"><input type="checkbox" value="ENE" data-swell-direction aria-label="ENE · Leste-Nordeste"><span aria-hidden="true">ENE</span></label><label class="swell-direction-option"><input type="checkbox" value="L" data-swell-direction aria-label="L · Leste"><span aria-hidden="true">L</span></label><label class="swell-direction-option"><input type="checkbox" value="ESE" data-swell-direction aria-label="ESE · Leste-Sudeste"><span aria-hidden="true">ESE</span></label><label class="swell-direction-option"><input type="checkbox" value="SE" data-swell-direction aria-label="SE · Sudeste"><span aria-hidden="true">SE</span></label><label class="swell-direction-option"><input type="checkbox" value="SSE" data-swell-direction aria-label="SSE · Sul-Sudeste"><span aria-hidden="true">SSE</span></label><label class="swell-direction-option"><input type="checkbox" value="S" data-swell-direction aria-label="S · Sul"><span aria-hidden="true">S</span></label><label class="swell-direction-option"><input type="checkbox" value="SSO" data-swell-direction aria-label="SSO · Sul-Sudoeste"><span aria-hidden="true">SSO</span></label><label class="swell-direction-option"><input type="checkbox" value="SO" data-swell-direction aria-label="SO · Sudoeste"><span aria-hidden="true">SO</span></label><label class="swell-direction-option"><input type="checkbox" value="OSO" data-swell-direction aria-label="OSO · Oeste-Sudoeste"><span aria-hidden="true">OSO</span></label><label class="swell-direction-option"><input type="checkbox" value="O" data-swell-direction aria-label="O · Oeste"><span aria-hidden="true">O</span></label><label class="swell-direction-option"><input type="checkbox" value="ONO" data-swell-direction aria-label="ONO · Oeste-Noroeste"><span aria-hidden="true">ONO</span></label><label class="swell-direction-option"><input type="checkbox" value="NO" data-swell-direction aria-label="NO · Noroeste"><span aria-hidden="true">NO</span></label><label class="swell-direction-option"><input type="checkbox" value="NNO" data-swell-direction aria-label="NNO · Norte-Noroeste"><span aria-hidden="true">NNO</span></label></div><p class="swell-direction-hint">Selecione as direções que funcionam no pico.</p></fieldset>
+  <input id="seedWindDir" class="field" placeholder="Vento ideal · ex. NO">
   <input id="seedWindMax" class="field" inputmode="decimal" placeholder="Vento máx. bom · nós (opcional)"><textarea id="seedNote" class="field" rows="3" placeholder="Ex.: dizem que funciona com sul longo e terral fraco"></textarea>
   <div class="hintbox">Energia é calculada automaticamente. O norte inicial começa com baixa confiança e perde peso conforme entram sessões reais.</div>
   <div class="sheet-actions"><button id="cancelSpot" class="btn secondary">CANCELAR</button><button id="saveSpot" class="btn">SALVAR</button></div>
@@ -194,6 +195,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261013strictswell2"></script>
-<script src="app.js?v=20261013radardirection1"></script>
+<script src="app.js?v=20261013swellpicker1"></script>
 </body>
 </html>
