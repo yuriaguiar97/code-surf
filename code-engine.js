@@ -7,6 +7,9 @@ function directions(text='') {
   const names={NNE:22.5,ENE:67.5,ESE:112.5,SSE:157.5,SSO:202.5,SSW:202.5,OSO:247.5,WSW:247.5,ONO:292.5,WNW:292.5,NNO:337.5,NNW:337.5,N:0,NORTE:0,NE:45,NORDESTE:45,L:90,E:90,LESTE:90,SE:135,SUDESTE:135,S:180,SUL:180,SO:225,SW:225,SUDOESTE:225,O:270,W:270,OESTE:270,NO:315,NW:315,NOROESTE:315};
   return String(text).toUpperCase().split(/[^A-Z]+/).filter(t=>t in names).map(t=>names[t]);
 }
+// Use the same half-open 16-direction sectors displayed by the forecast.
+const directionSector = degrees => Math.floor((((degrees%360)+360)%360+11.25)/22.5)%16;
+function swellDirectionMatch(degrees,text){const ds=directions(text);return !ds.length || (number(degrees)!==null && ds.some(d=>directionSector(degrees)===directionSector(d)));}
 function seedMatch(c,s) {
   const bounds=[['wave','waveMin','waveMax'],['period','periodMin','periodMax'],['wind',null,'windMax']];
   let criteria=0;
@@ -16,7 +19,7 @@ function seedMatch(c,s) {
     }
   }
   for(const [key,field] of [['waveDir','swellDir'],['windDir','windDir']]) {
-    const ds=directions(s[field]);if(ds.length){criteria++;if(number(c[key])===null || !ds.some(d=>angleDistance(c[key],d)<=45))return false;}
+    const ds=directions(s[field]);if(ds.length){criteria++;if(number(c[key])===null || !(key==='waveDir'?swellDirectionMatch(c[key],s[field]):ds.some(d=>angleDistance(c[key],d)<=45)))return false;}
   }
   // A note alone is not a measurable CODE.
   return criteria>=2;
@@ -34,6 +37,8 @@ function sessionMatch(c,s) {
 }
 function evaluate(c,spot,sessions=[]) {
   if(['wave','period','wind','waveDir','windDir'].some(k=>number(c[k])===null))return {favorable:false,score:0};
+  // A configured swell direction is required even when sessions contribute to the score.
+  if(!swellDirectionMatch(c.waveDir,spot.seed?.swellDir))return {favorable:false,score:0};
   const good=sessions.filter(s=>s.spotId===spot.id && s.score>=8);
   const seed=seedMatch(c,spot.seed||{});
   if(!good.length)return {favorable:seed,score:seed?1:0};
