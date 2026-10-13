@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261012radar1">
+<link rel="stylesheet" href="styles.css?v=20261012sorticon1">
 </head>
 <body>
 <section id="splash">
@@ -91,9 +91,8 @@
 <section id="spots" class="screen">
   <header class="top"><div class="logo">CODE</div><div class="place">MEUS PICOS</div></header>
   <main class="content">
-    <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
+    <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><label class="edit-round sort-trigger" title="Organizar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><select id="spotSort" aria-label="Organizar picos"><option value="radar">Radar CODE</option><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option><option value="confidence-desc">Confidence · maior primeiro</option><option value="confidence-asc">Confidence · menor primeiro</option></select></label><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
-    <div class="spot-sort"><label for="spotSort">Organizar por</label><select id="spotSort" class="field"><option value="radar">Radar CODE</option><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option><option value="confidence-desc">Confidence · maior primeiro</option><option value="confidence-asc">Confidence · menor primeiro</option></select></div>
     <div id="spotsList" class="spots-list"></div>
     <div class="version">2026.10.12 · CODE</div>
   </main>
@@ -194,7 +193,7 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="code-engine.js?v=20261012radar1"></script>
-<script src="app.js?v=20261012radar1"></script>
+<script src="code-engine.js?v=20261012sorticon1"></script>
+<script src="app.js?v=20261012sorticon1"></script>
 </body>
 </html>
