@@ -30,7 +30,7 @@ test('daily follow-up includes deterioration, avoids duplicates and respects ind
  const args={day:'2026-10-08',lead:120,favorable:true,daily:false};
  assert.equal(shouldNotify(null,args),true);
  assert.equal(shouldNotify(null,{...args,favorable:false}),false);
- const previous={last_day:'2026-10-07',sent_leads:[168,120]};
+ const previous={last_day:'2026-10-07',sent_leads:[168,120],favorable:true};
  assert.equal(shouldNotify(previous,args),false);
  assert.equal(shouldNotify(previous,{...args,daily:true,favorable:false}),true);
  assert.equal(shouldNotify({...previous,last_day:args.day},{...args,daily:true}),false);
@@ -38,3 +38,13 @@ test('daily follow-up includes deterioration, avoids duplicates and respects ind
 });
 
 test('first notice migrates multiple leads to the earliest horizon',()=>{assert.equal(firstLead({leads:[24,48,168]}),168);assert.equal(firstLead({leads:[24,48]}),48);assert.equal(firstLead({leads:[72]}),72);assert.equal(firstLead({}),168);assert.equal(firstLead({leads:[999]}),168);});
+
+test('incompatible windows stay silent; loss and recovery notify immediately',()=>{
+ const prev={last_day:'2026-10-12',favorable:true};const args={day:'2026-10-12',lead:168,daily:true};
+ assert.equal(shouldNotify(prev,{...args,favorable:false}),true);
+ assert.equal(shouldNotify({...prev,favorable:false},{...args,day:'2026-10-13',favorable:false}),false);
+ assert.equal(shouldNotify({...prev,favorable:false},{...args,favorable:true}),true);
+ assert.equal(shouldNotify(prev,{...args,favorable:true}),false);
+ assert.equal(shouldNotify(prev,{...args,day:'2026-10-13',favorable:true}),true);
+ assert.equal(shouldNotify(prev,{...args,daily:false,favorable:false}),false);
+});

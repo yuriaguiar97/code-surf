@@ -9,6 +9,7 @@ function app(){
   const context={Date:Clock,Intl,Math,JSON,URLSearchParams,AbortController,localStorage:storage,sessionStorage:storage,navigator:{},location:{hash:'#register'},window:{addEventListener(){}},document:{getElementById:element,querySelector:s=>s.includes('score')?score:null,querySelectorAll:s=>s.includes('score')?[score]:[],addEventListener(){}},alert:s=>alerts.push(s),confirm:()=>true,console:{error(){},warn(){}},setTimeout:()=>0,clearTimeout(){},fetch:async(url,opts)=>{const body=JSON.parse(opts.body);requests.push(body);return{ok:true,json:async()=>({session:body.session})}}};
   let source=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
   source=source.replace(/bootAccess\(\);bind\(\);renderSpots\(\);[^\n]+/, 'globalThis.api={state,storage,bind,saveSession,renderRegisterCapture,sessionForecastAt,sessionHours,renderSpotDetail,openSessionEditor,cancelSessionEdit,deleteSession};');
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../code-engine.js'),'utf8'),context);
   vm.runInNewContext(source,context);
   const api=context.api,times=['2026-10-07T07:00','2026-10-07T15:00','2026-10-07T21:00','2026-10-07T22:00','2026-10-08T15:00'];
   api.state.marine={hourly:{time:times,wave_height:[.7,1.5,2.1,2.2,3],wave_direction:[90,135,180,180,225],wave_period:[7,12,9,10,14]}};

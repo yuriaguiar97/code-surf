@@ -1,4 +1,5 @@
 import { withSupabase } from 'npm:@supabase/server';
+import './forecast-source.js';
 import webpush from 'npm:web-push@3.6.7';
 import { LEADS, firstLead, evaluate, leadFor, shouldNotify } from './engine.js';
 const origin='https://yuriaguiar97.github.io';
@@ -11,6 +12,19 @@ function validSubscription(s:any){
 }
 function settings(s:any){return {enabled:s?.enabled===true,leads:[firstLead(s)],daily:s?.daily!==false,spots:Object.fromEntries(Object.entries(s?.spots||{}).slice(0,100).filter(([k,v])=>k.length<=120&&typeof v==='boolean'))};}
 async function json(url:string){const r=await fetch(url,{signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error('forecast_http_'+r.status);return r.json();}
+
+let tideCache:any=null,tideCacheUntil=0;
+async function fetchTides(){
+  if(tideCache&&Date.now()<tideCacheUntil)return tideCache;
+  try {const snapshot=await json('https://yuriaguiar97.github.io/code-surf/tides.json?v='+dayOf(new Date()));const end=dayOf(new Date(Date.now()+6*86400000));if(snapshot?.events?.[dayOf(new Date())]?.length&&snapshot.events[end]?.length){tideCache=snapshot;tideCacheUntil=Date.now()+3600000;return snapshot;}}catch{}
+  const raw=await json('https://tidecheck.com/api/station/ubatuba-282a-bra-uhslc_rq/tides?datum=LAT&days=14');
+  if(raw?.station?.id!=='ubatuba-282a-bra-uhslc_rq'||raw?.datum!=='LAT'||!Array.isArray(raw.extremes))throw new Error('invalid_tide_source');
+  const events:any={};
+  for(const e of raw.extremes){if(!/^\d{4}-\d{2}-\d{2}$/.test(e.localDate)||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(e.localTime)||!Number.isFinite(e.height)||!['low','high'].includes(e.type))continue;(events[e.localDate]??=[]).push({type:e.type,time:e.localTime.slice(11,16),height:e.height});}
+  const today=dayOf(new Date());if(!events[today]?.length)throw new Error('tide_source_outdated');
+  tideCache={location:'Ubatuba, SP',timezone:'America/Sao_Paulo',datum:'LAT',source:'TideCheck / TICON-4 (SHOM)',updated:new Date().toISOString(),events};tideCacheUntil=Date.now()+3600000;return tideCache;
+}
+
 async function send(db:any,config:any,device:any,payload:any){
   try{await webpush.sendNotification(device.subscription,JSON.stringify(payload),{vapidDetails:{subject:'https://yuriaguiar97.github.io/code-surf/',publicKey:config.public_key,privateKey:config.private_key},TTL:3600,urgency:'normal',timeout:15000});return true;}
   catch(e:any){if(e.statusCode===404||e.statusCode===410){const {error}=await db.from('code_push_devices').update({active:false}).eq('id',device.id);if(error)throw error;}throw new Error('push_http_'+(e.statusCode||'failed'));}
@@ -22,15 +36,15 @@ async function monitor(db:any,config:any,dryRun=false){
     const {data:devices,error:de}=await db.from('code_push_devices').select('*').eq('active',true);if(de)throw de;
     const active=(devices||[]).filter((d:any)=>d.settings.enabled);
     if(!active.length&&!dryRun){await db.from('code_push_runs').update({status:'ok',detail:{devices:0,sent:0}}).eq('bucket',bucket);return {ok:true,devices:0,sent:0};}
+    const forecast=globalThis.CODEForecast.load(8);
     const [marine,wind,spotsResult,sessionsResult,eventsResult]=await Promise.all([
-      json('https://marine-api.open-meteo.com/v1/marine?latitude=-23.5&longitude=-44.25&hourly=wave_height,wave_direction,wave_period&models=ncep_gfswave025&timezone=America%2FSao_Paulo&forecast_days=8&cell_selection=sea'),
-      json('https://api.open-meteo.com/v1/forecast?latitude=-23.4347&longitude=-45.0711&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&models=gfs_seamless&timezone=America%2FSao_Paulo&forecast_days=8'),
+      forecast.then(x=>x[0]),forecast.then(x=>x[1]),
       db.from('code_spots').select('id,name,seed'),db.from('code_sessions').select('spot_id,score,wave,wave_dir,period,wind,wind_dir,energy'),db.from('code_push_events').select('*').gte('target_day',day)
     ]);
     for(const result of [spotsResult,sessionsResult,eventsResult])if(result.error)throw result.error;
     const sessions=sessionsResult.data.map((s:any)=>({...s,spotId:s.spot_id,waveDir:s.wave_dir,windDir:s.wind_dir}));
     const winds=new Map(wind.hourly.time.map((t:string,i:number)=>[t,{wind:wind.hourly.wind_speed_10m[i],windDir:wind.hourly.wind_direction_10m[i]}]));
-    const hours=marine.hourly.time.map((t:string,i:number)=>({ts:t,time:new Date(t+':00-03:00').getTime(),wave:marine.hourly.wave_height[i],waveDir:marine.hourly.wave_direction[i],period:marine.hourly.wave_period[i],energy:1025*9.81*marine.hourly.wave_height[i]**2/16,...(winds.get(t)||{})})).filter((c:any)=>c.time>now.getTime() && Number(c.ts.slice(11,13))>=6 && Number(c.ts.slice(11,13))<=18);
+    const hours=marine.hourly.time.map((t:string,i:number)=>({ts:t,time:new Date(t+':00-03:00').getTime(),wave:marine.hourly.wave_height[i],waveDir:marine.hourly.wave_direction[i],period:marine.hourly.wave_period[i],energy:1025*9.81*marine.hourly.wave_height[i]**2/16,...(winds.get(t)||{})})).filter((c:any)=>c.time+3600000>now.getTime() && Number(c.ts.slice(11,13))>=6 && Number(c.ts.slice(11,13))<18);
     if(dryRun)return {ok:true,dryRun:true,forecastHours:hours.length,spots:spotsResult.data.map((spot:any)=>({id:spot.id,favorableHours:hours.filter((c:any)=>evaluate(c,spot,sessions).favorable).length}))};
     let sent=0,failed=0;
     for(const device of active){for(const spot of spotsResult.data){
@@ -45,11 +59,11 @@ async function monitor(db:any,config:any,dryRun=false){
         const candidatesForDay=candidates.filter((c:any)=>c.ts.startsWith(target));if(!candidatesForDay.length)continue;
         const best=candidatesForDay.reduce((a:any,b:any)=>b.score>a.score?b:a);
         const event=previous.find((e:any)=>e.target_day===target);
-        const lead=leadFor((best.time-now.getTime())/3600000,leads);
+        const lead=leadFor(Math.max(0.001,(best.time-now.getTime())/3600000),leads);
         if(!shouldNotify(event,{day,lead,favorable:best.favorable,daily:device.settings.daily}))continue;
-        const title=!event?'Swell no radar · '+spot.name:best.favorable?'Swell se confirmando · '+spot.name:'Swell mudou · '+spot.name;
+        const title=!event?'Swell no radar · '+spot.name:best.favorable?(event.favorable===false?'Swell voltou · ':'Swell se confirmando · ')+spot.name:'Swell mudou · '+spot.name;
         const when=new Date(target+'T12:00:00-03:00').toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo',weekday:'long',day:'2-digit',month:'2-digit'});
-        const body=best.favorable?`Condições compatíveis com o CODE para ${when}. ${best.wave.toFixed(1)} m · ${best.period.toFixed(0)} s · vento ${best.wind.toFixed(0)} kt.`:`A previsão para ${when} perdeu compatibilidade com o CODE. Acompanhe a evolução.`;
+        const body=best.favorable?`Condições compatíveis com o CODE para ${when}. ${best.wave.toFixed(1)} m · ${best.period.toFixed(0)} s · vento ${best.wind.toFixed(0)} kt.`:`A previsão para ${when} deixou de ser favorável. Avisaremos se voltar a atender ao CODE.`;
         try{
           await send(db,config,device,{title,body,tag:`code-${spot.id}-${target}`,url:'app.html#alerts'});
           const {error}=await db.from('code_push_events').upsert({device_id:device.id,spot_id:spot.id,target_day:target,last_day:day,favorable:best.favorable,sent_leads:[...new Set([...(event?.sent_leads||[]),...(lead===null?[]:[lead])])],sent_at:new Date().toISOString()});if(error)throw error;sent++;
@@ -73,6 +87,7 @@ export default {fetch:withSupabase({auth:'none'},async(req,ctx)=>{
       return reply(await monitor(db,config,b.dryRun===true));
     }
     if(typeof b.pin!=='string'||await hash(b.pin)!==await hash(config.group_pin))return reply({error:'invalid_pin'},401);
+    if(b.action==='tides')return reply(await fetchTides());
     if(b.action==='config')return reply({publicKey:config.public_key});
     if(!/^[a-f0-9]{64}$/.test(b.deviceToken||''))return reply({error:'invalid_device'},400);
     const id=await hash(b.deviceToken);

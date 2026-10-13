@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261008sessionhistory1">
+<link rel="stylesheet" href="styles.css?v=20261012radar1">
 </head>
 <body>
 <section id="splash">
@@ -83,7 +83,7 @@
       <div class="windguru-card"><div id="windguruWidget" class="windguru-widget"></div></div>
       <div id="windguruWidgetStatus" class="sub windguru-help" aria-live="polite" hidden></div>
     </div>
-    <div class="version">2026.10.07 · PUSH</div>
+    <div class="version">2026.10.12 · CODE</div>
   </main>
   <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -93,8 +93,9 @@
   <main class="content">
     <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
+    <div class="spot-sort"><label for="spotSort">Organizar por</label><select id="spotSort" class="field"><option value="radar">Radar CODE</option><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option><option value="confidence-desc">Confidence · maior primeiro</option><option value="confidence-asc">Confidence · menor primeiro</option></select></div>
     <div id="spotsList" class="spots-list"></div>
-    <div class="version">2026.10.07 · PUSH</div>
+    <div class="version">2026.10.12 · CODE</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -106,6 +107,7 @@
     <div class="spot-tabs"><button class="spot-tab active" data-tab="overview">Visão geral</button><button class="spot-tab" data-tab="history">Histórico</button><button class="spot-tab" data-tab="code">CODE do pico</button></div>
 
     <section class="spot-panel active" data-panel="overview">
+      <div id="spotRadar" aria-live="polite"></div>
       <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div></div>
       <h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div>
     </section>
@@ -124,7 +126,7 @@
       </div>
       <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span></div><div class="code-confidence-reading"><b id="codeConfValue" class="code-confidence-value">0%</b><span id="codeConfLevel" class="code-confidence-level">Baixa confiança</span></div></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
     </section>
-    <div class="version">2026.10.07 · PUSH</div>
+    <div class="version">2026.10.12 · CODE</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -146,7 +148,7 @@
     <input id="size" class="field" placeholder="Tamanho observado · ex. 1–1,5 m">
     <textarea id="comment" class="field" rows="4" placeholder="Comentário sobre o surf…"></textarea>
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><button id="cancelSessionEdit" type="button" class="ghost-btn session-cancel" hidden>Cancelar edição</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
-    <div class="version">2026.10.07 · PUSH</div>
+    <div class="version">2026.10.12 · CODE</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -158,9 +160,9 @@
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
     <h2>Primeiro aviso</h2><div class="card alerts-card alert-leads-card" id="alertLeads" role="radiogroup" aria-label="Primeiro aviso"><label class="toggle-row first-alert-option"><b>7 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="168" aria-label="Avisar 7 dias antes"></label><label class="toggle-row first-alert-option"><b>5 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="120" aria-label="Avisar 5 dias antes"></label><label class="toggle-row first-alert-option"><b>3 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="72" aria-label="Avisar 3 dias antes"></label><label class="toggle-row first-alert-option"><b>2 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="48" aria-label="Avisar 2 dias antes"></label><label class="toggle-row first-alert-option"><b>1 dia antes</b><input type="radio" name="firstAlertLead" data-alert-lead="24" aria-label="Avisar 1 dia antes"></label></div>
-    <div class="card alerts-card"><div class="toggle-row"><div><b>Monitoramento do swell</b><small>Após o primeiro aviso, receba uma atualização por dia, inclusive se as condições piorarem.</small></div><label class="switch"><input id="dailyAlert" type="checkbox" aria-label="Monitoramento do swell"><span class="slider"></span></label></div></div>
+    <div class="card alerts-card"><div class="toggle-row"><div><b>Monitoramento do swell</b><small>Atualizações enquanto houver compatibilidade. Avisaremos se mudar ou voltar.</small></div><label class="switch"><input id="dailyAlert" type="checkbox" aria-label="Monitoramento do swell"><span class="slider"></span></label></div></div>
     <div class="card alerts-card push-card"><button id="activatePush" class="btn" type="button">ATIVAR NOTIFICAÇÕES</button><button id="testPush" class="btn secondary" type="button" hidden>ENVIAR NOTIFICAÇÃO DE TESTE</button><p id="pushStatus" class="sub" role="status" aria-live="polite">Ative as notificações neste aparelho para receber os alertas.</p></div>
-    <div class="version">2026.10.07 · PUSH</div>
+    <div class="version">2026.10.12 · CODE</div>
   </main>
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
@@ -192,6 +194,7 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js?v=20261008sessionhistory1"></script>
+<script src="code-engine.js?v=20261012radar1"></script>
+<script src="app.js?v=20261012radar1"></script>
 </body>
 </html>
