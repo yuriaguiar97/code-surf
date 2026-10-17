@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261017windpolicy1">
+<link rel="stylesheet" href="styles.css?v=20261017historyradar1">
 </head>
 <body>
 <section id="splash">
@@ -111,7 +111,13 @@
       <h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div>
     </section>
 
-    <section class="spot-panel" data-panel="history"><div class="panel-heading"><div class="history-heading"><h2>Histórico</h2><button id="editHistory" type="button" class="edit-round" aria-label="Editar histórico de sessões" aria-pressed="false" aria-controls="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button></div><div class="panel-copy">As sessões ficam organizadas da mais recente para a mais antiga.</div></div><div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div></section>
+    <section class="spot-panel" data-panel="history">
+      <div class="panel-heading"><div class="history-heading"><h2>Histórico</h2><div class="history-tools">
+        <label class="history-sort"><select id="historySort" aria-label="Organizar sessões"><option value="recent">Mais recentes</option><option value="oldest">Mais antigas</option><option value="score">Maior nota</option></select></label>
+        <button id="editHistory" type="button" class="edit-round" aria-label="Editar histórico de sessões" aria-pressed="false" aria-controls="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button>
+      </div></div></div>
+      <div id="history" class="card history-card"><small>Nenhuma sessão registrada.</small></div>
+    </section>
 
     <section class="spot-panel" data-panel="code">
       <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button>
@@ -197,6 +203,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017windpolicy1"></script>
-<script src="app.js?v=20261017windpolicy1"></script>
+<script src="app.js?v=20261017historyradar1"></script>
 </body>
 </html>
