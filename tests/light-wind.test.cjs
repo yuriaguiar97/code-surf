@@ -25,6 +25,6 @@ test('learned direction fit does not penalize light wind',()=>{
 test('only qualifying morning hours become a radar window',()=>{
  const hours=Array.from({length:12},(_,i)=>{const hour=i+6,ts='2026-10-20T'+String(hour).padStart(2,'0')+':00';return{...c,ts,time:new Date(ts+':00-03:00').getTime(),wind:hour<10?3:7}});
  const result=radarFor(spot,[],hours,new Date('2026-10-17T08:32:46-03:00').getTime());
- assert.equal(result.state,'radar');assert.equal(result.windows.length,1);assert.equal(result.windows[0].startHour,6);assert.equal(result.windows[0].endHour,10);
+ assert.equal(result.state,'radar');assert.equal(result.windows.length,2);assert.equal(result.windows[0].kind,'compatible');assert.equal(result.windows[1].kind,'swell');assert.equal(result.windows[0].startHour,6);assert.equal(result.windows[0].endHour,10);
  assert.equal(result.windows[0].samples.length,4);
 });
