@@ -10,6 +10,9 @@ function directions(text='') {
 // Use the same half-open 16-direction sectors displayed by the forecast.
 const directionSector = degrees => Math.floor((((degrees%360)+360)%360+11.25)/22.5)%16;
 function swellDirectionMatch(degrees,text){const ds=directions(text);return !ds.length || (number(degrees)!==null && ds.some(d=>directionSector(degrees)===directionSector(d)));}
+const LIGHT_WIND_KT=5;
+const lightWind=c=>number(c.wind)!==null && c.wind>=0 && c.wind<=LIGHT_WIND_KT;
+function missingConditions(c){return ['wave','period','wind','waveDir'].some(k=>number(c[k])===null) || (!lightWind(c)&&number(c.windDir)===null)}
 function seedMatch(c,s) {
   const bounds=[['wave','waveMin','waveMax'],['period','periodMin','periodMax'],['wind',null,'windMax']];
   let criteria=0;
@@ -19,7 +22,7 @@ function seedMatch(c,s) {
     }
   }
   for(const [key,field] of [['waveDir','swellDir'],['windDir','windDir']]) {
-    const ds=directions(s[field]);if(ds.length){criteria++;if(number(c[key])===null || !(key==='waveDir'?swellDirectionMatch(c[key],s[field]):ds.some(d=>angleDistance(c[key],d)<=45)))return false;}
+    const ds=directions(s[field]);if(ds.length){criteria++;if(key==='windDir'&&lightWind(c))continue;if(number(c[key])===null || !(key==='waveDir'?swellDirectionMatch(c[key],s[field]):ds.some(d=>angleDistance(c[key],d)<=45)))return false;}
   }
   // A note alone is not a measurable CODE.
   return criteria>=2;
@@ -32,11 +35,11 @@ function sessionMatch(c,s) {
     if(number(c[key])===null)return 0;
     total+=Math.max(0,1-Math.abs(c[key]-v)/Math.max(tol,Math.abs(v)*0.3));
   }
-  for(const key of ['waveDir','windDir']){if(number(s[key])!==null){criteria++;if(number(c[key])===null)return 0;total+=Math.max(0,1-angleDistance(c[key],s[key])/90);}}
+  for(const key of ['waveDir','windDir']){if(number(s[key])!==null){criteria++;if(key==='windDir'&&lightWind(c)){total+=1;continue}if(number(c[key])===null)return 0;total+=Math.max(0,1-angleDistance(c[key],s[key])/90);}}
   return criteria>=4?total/criteria:0;
 }
 function evaluate(c,spot,sessions=[]) {
-  if(['wave','period','wind','waveDir','windDir'].some(k=>number(c[k])===null))return {favorable:false,score:0};
+  if(missingConditions(c))return {favorable:false,score:0};
   // A configured swell direction is required even when sessions contribute to the score.
   if(!swellDirectionMatch(c.waveDir,spot.seed?.swellDir))return {favorable:false,score:0};
   const good=sessions.filter(s=>s.spotId===spot.id && s.score>=8);
@@ -62,7 +65,7 @@ function radarFor(spot,sessions,hours,now=Date.now(),available=true){
   if(!available)return {state:'unavailable',windows:[]};
   const today=new Date(now-3*3600000).toISOString().slice(0,10),last=new Date(new Date(today+'T12:00:00-03:00').getTime()+6*86400000).toISOString().slice(0,10);
   const valid=hours.filter(c=>c.ts.slice(0,10)>=today&&c.ts.slice(0,10)<=last&&Number(c.ts.slice(11,13))>=6&&Number(c.ts.slice(11,13))<18);
-  if(!valid.length)return {state:'unavailable',windows:[]};const incomplete=valid.some(c=>['wave','period','waveDir','wind','windDir'].some(k=>number(c[k])===null));
+  if(!valid.length)return {state:'unavailable',windows:[]};const incomplete=valid.some(missingConditions);
   if(Object.entries(spot.seed||{}).filter(([k,v])=>k!=='note'&&v!==null&&v!==''&&v!==undefined).length<2&&!sessions.some(s=>s.spotId===spot.id&&s.score>=8))return {state:'insufficient',windows:[]};
   const windows=[];
   for(const c of valid){if(!evaluate(c,spot,sessions).favorable)continue;const prior=windows.at(-1);if(prior&&prior.day===c.ts.slice(0,10)&&c.time===prior.end){prior.end=c.time+3600000;prior.endHour=Number(c.ts.slice(11,13))+1;prior.samples.push(c);}else windows.push({day:c.ts.slice(0,10),start:c.time,end:c.time+3600000,startHour:Number(c.ts.slice(11,13)),endHour:Number(c.ts.slice(11,13))+1,samples:[c]});}
