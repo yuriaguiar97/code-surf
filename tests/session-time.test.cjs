@@ -61,7 +61,7 @@ test('selecting a surf date with no data blocks saving instead of using another 
 test('zero score is saved, contributes to the average and appears as 0/10 in history',async()=>{
  const a=app();a.score.value='0';choose(a,'2026-10-07T15:00');await a.api.saveSession();
  assert.equal(a.requests[0].session.score,0);assert.equal(a.api.storage.sessions()[0].score,0);
- a.api.renderSpotDetail();assert.equal(a.element('spotScore').textContent,'0.0');assert.match(a.element('history').innerHTML,/>0\/10</);
+ a.api.renderSpotDetail();assert.equal(a.element('spotScore').textContent,'0.0');assert.match(a.element('history').innerHTML.replace(/<[^>]*>/g,''),/0\/10/);
 });
 
 test('tide movement follows the selected surf hour and is saved with its forecast',async()=>{
