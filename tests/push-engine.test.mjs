@@ -5,7 +5,7 @@ const conditions={wave:2.3,period:12,wind:4,waveDir:180,windDir:90,energy:3320};
 const spot={id:'test',seed:{waveMin:2,periodMin:10,swellDir:'S/SE',windDir:'L'}};
 test('seed matches all measured variables jointly',()=>{
  assert.equal(evaluate(conditions,spot).favorable,true);
- for(const mismatch of [{wave:1},{period:8},{windDir:270},{waveDir:0},{wave:null}])assert.equal(evaluate({...conditions,...mismatch},spot).favorable,false);
+ for(const mismatch of [{wave:1},{period:8},{wind:6,windDir:270},{waveDir:0},{wave:null}])assert.equal(evaluate({...conditions,...mismatch},spot).favorable,false);
  assert.equal(evaluate(conditions,{id:'empty',seed:{note:'good waves'}}).favorable,false);
 });
 test('Portuguese and English directions wrap at north',()=>{
