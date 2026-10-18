@@ -10,17 +10,20 @@ function directions(text='') {
 // Use the same half-open 16-direction sectors displayed by the forecast.
 const directionSector = degrees => Math.floor((((degrees%360)+360)%360+11.25)/22.5)%16;
 function swellDirectionMatch(degrees,text){const ds=directions(text);return !ds.length || (number(degrees)!==null && ds.some(d=>directionSector(degrees)===directionSector(d)));}
-const LIGHT_WIND_KT=5;
-const lightWind=c=>number(c.wind)!==null && c.wind>=0 && c.wind<=LIGHT_WIND_KT;
-function missingConditions(c){return ['wave','period','wind','waveDir'].some(k=>number(c[k])===null) || (!lightWind(c)&&number(c.windDir)===null)}
-function windMatch(c,s={}){
+const LIGHT_WIND_KT=3;
+function lightWindLimit(s={}){const value=number(s?.lightWindMax);return value!==null&&value>=0&&value<=200?value:LIGHT_WIND_KT;}
+const lightWind=(c,s)=>number(c.wind)!==null && c.wind>=0 && c.wind<=lightWindLimit(s);
+function missingConditions(c,s){return ['wave','period','wind','waveDir'].some(k=>number(c[k])===null) || (!lightWind(c,s)&&number(c.windDir)===null)}
+function windMatch(c,s){
   if(number(c.wind)===null||c.wind<0)return false;
+  // Without an initial CODE, successful sessions continue to provide the wind reference.
+  if(!s)return true;
   if(number(s.windMax)!==null&&c.wind>s.windMax)return false;
   if(number(s.windMin)!==null&&c.wind<=s.windMin)return false;
   const ds=directions(s.windDir),strict=s.windMode==='strict';
   if(strict&&(c.wind===0||!ds.length))return false;
-  if(!strict&&lightWind(c))return true;
-  if(!ds.length)return true;
+  if(!strict&&lightWind(c,s))return true;
+  if(!ds.length)return false;
   if(number(c.windDir)===null)return false;
   return strict?swellDirectionMatch(c.windDir,s.windDir):ds.some(d=>angleDistance(c.windDir,d)<=45);
 }
@@ -39,7 +42,7 @@ function seedMatch(c,s,ignoreWind=false) {
   }
   return criteria>=2;
 }
-function sessionMatch(c,s,ignoreWind=false,strictWind=false) {
+function sessionMatch(c,s,ignoreWind=false,strictWind=false,windSeed={}) {
   const tolerances={wave:0.5,period:2,wind:5,energy:700};
   let criteria=0,total=0;
   for(const [key,tol] of Object.entries(tolerances)){
@@ -50,17 +53,17 @@ function sessionMatch(c,s,ignoreWind=false,strictWind=false) {
   }
   for(const key of ['waveDir','windDir']){
     if(ignoreWind&&key==='windDir')continue;
-    if(number(s[key])!==null){criteria++;if(key==='windDir'&&!strictWind&&lightWind(c)){total+=1;continue}if(number(c[key])===null)return 0;total+=Math.max(0,1-angleDistance(c[key],s[key])/90);}
+    if(number(s[key])!==null){criteria++;if(key==='windDir'&&!strictWind&&lightWind(c,windSeed)){total+=1;continue}if(number(c[key])===null)return 0;total+=Math.max(0,1-angleDistance(c[key],s[key])/90);}
   }
   return criteria>=4?total/criteria:0;
 }
 function evaluate(c,spot,sessions=[],ignoreWind=false) {
-  if(ignoreWind?['wave','period','waveDir'].some(k=>number(c[k])===null):missingConditions(c))return {favorable:false,score:0};
+  if(ignoreWind?['wave','period','waveDir'].some(k=>number(c[k])===null):missingConditions(c,spot.seed))return {favorable:false,score:0};
   if(!swellDirectionMatch(c.waveDir,spot.seed?.swellDir))return {favorable:false,score:0};
-  if(!ignoreWind&&!windMatch(c,spot.seed||{}))return {favorable:false,score:0};
+  if(!ignoreWind&&!windMatch(c,spot.seed))return {favorable:false,score:0};
   const good=sessions.filter(s=>s.spotId===spot.id&&s.score>=8),seed=seedMatch(c,spot.seed||{},ignoreWind);
   if(!good.length)return {favorable:seed,score:seed?1:0};
-  const weighted=good.map(s=>({fit:sessionMatch(c,s,ignoreWind,spot.seed?.windMode==='strict'),weight:s.score*s.score}));
+  const weighted=good.map(s=>({fit:sessionMatch(c,s,ignoreWind,spot.seed?.windMode==='strict',spot.seed),weight:s.score*s.score}));
   const learned=weighted.reduce((n,s)=>n+s.fit*s.weight,0)/weighted.reduce((n,s)=>n+s.weight,0),learnedWeight=Math.min(0.85,good.length/(good.length+3));
   const score=spot.seed?learned*learnedWeight+Number(seed)*(1-learnedWeight):learned;
   return {favorable:score>=0.7,score};
@@ -80,8 +83,8 @@ function radarFor(spot,sessions,hours,now=Date.now(),available=true){
   const today=new Date(now-3*3600000).toISOString().slice(0,10),last=new Date(new Date(today+'T12:00:00-03:00').getTime()+6*86400000).toISOString().slice(0,10);
   const valid=hours.filter(c=>c.ts.slice(0,10)>=today&&c.ts.slice(0,10)<=last&&Number(c.ts.slice(11,13))>=6&&Number(c.ts.slice(11,13))<18);
   if(!valid.length)return {state:'unavailable',windows:[]};
-  const incomplete=valid.some(missingConditions);
-  if(Object.entries(spot.seed||{}).filter(([k,v])=>!['note','windMode'].includes(k)&&v!==null&&v!==''&&v!==undefined).length<2&&!sessions.some(s=>s.spotId===spot.id&&s.score>=8))return {state:'insufficient',windows:[]};
+  const incomplete=valid.some(c=>missingConditions(c,spot.seed));
+  if(Object.entries(spot.seed||{}).filter(([k,v])=>!['note','windMode','lightWindMax'].includes(k)&&v!==null&&v!==''&&v!==undefined).length<2&&!sessions.some(s=>s.spotId===spot.id&&s.score>=8))return {state:'insufficient',windows:[]};
   const windows=[];
   for(const c of valid){
     const full=evaluate(c,spot,sessions).favorable;
@@ -99,5 +102,5 @@ function sortSpots(spots,mode,radars,confidence){
   return [...spots].sort((a,b)=>{if(mode==='name-asc')return compare(a,b);if(mode==='name-desc')return compare(b,a);if(mode==='confidence-asc')return confidence(a)-confidence(b)||compare(a,b);if(mode==='confidence-desc')return confidence(b)-confidence(a)||compare(a,b);const x=radars[a.id],y=radars[b.id];return (ranks[x.state]-ranks[y.state])||((x.windows[0]?.start||0)-(y.windows[0]?.start||0))||compare(a,b);});
 }
 
-globalThis.CODEEngine={LEADS,firstLead,evaluate,leadFor,shouldNotify,angleDistance,directions,radarFor,sortSpots};
+globalThis.CODEEngine={lightWindLimit,LEADS,firstLead,evaluate,leadFor,shouldNotify,angleDistance,directions,radarFor,sortSpots};
 })();
