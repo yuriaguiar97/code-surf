@@ -17,7 +17,7 @@
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="styles.css?v=20261018forecastpolish1">
-<link rel="stylesheet" href="spot-design.css?v=20261018spotinterior1">
+<link rel="stylesheet" href="spot-design.css?v=20261018confidenceranges1">
 <link rel="stylesheet" href="typography.css?v=20261018refinement2">
 </head>
 <body>
@@ -109,8 +109,8 @@
 
     <section class="spot-panel active" data-panel="overview">
       <div id="spotRadar" aria-live="polite"></div>
-      <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div></div>
-      <div class="spot-best-card"><h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div></div>
+      <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div><div class="summary-confidence"><div class="confidence-meter" data-confidence-meter role="meter" aria-label="Confiança do aprendizado do pico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="--confidence:0%"><div class="confidence-track"><i aria-hidden="true"></i></div></div><div class="confidence-scale" aria-hidden="true"><span>Baixa confiança</span><span>Alta confiança</span></div></div></div>
+      <div class="spot-best-card"><h2>Melhores condições registradas</h2><p id="overviewRangeSource" class="range-source"></p><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div></div>
     </section>
 
     <section class="spot-panel" data-panel="history">
@@ -123,16 +123,10 @@
 
     <section class="spot-panel" data-panel="code">
       <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button>
-      <div id="codeInfo" class="code-info-popover" role="note" aria-label="Como funciona o CODE do pico" hidden><div class="code-info-copy">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div></div>
+      <div id="codeInfo" class="code-info-popover" role="note" aria-label="Como funciona o CODE do pico" hidden><div class="code-info-copy">As faixas resumem as sessões com nota 8 ou mais. Sem essas sessões, usamos o norte inicial cadastrado. Direções respeitam a passagem pelo norte. As faixas são referências do histórico; o radar avalia as condições em conjunto com o norte inicial e as melhores sessões. O Confidence indica a confiança nesse aprendizado.</div></div>
       </div>
-      <div class="code-learning-card"><div class="learning-kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M1 12h6m10 0h6"/></svg>CONDIÇÕES DO PICO</div><div class="code-metrics-grid">
-        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 27c6 0 8-4 10-10C17 6 29 7 31 16c-6-5-12 1-7 6 3 3 7 4 12 3M5 32h30"/></svg><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
-        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/></svg><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
-        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 13h18c8 0 8-10 2-10-3 0-4 2-4 4M4 20h27c8 0 8 11 1 11-3 0-5-2-5-4M4 27h13c7 0 7 9 1 9"/></svg><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
-        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/></svg><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
-      </div>
-      </div>
-      <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span></div><div class="code-confidence-reading"><b id="codeConfValue" class="code-confidence-value">0%</b><span id="codeConfLevel" class="code-confidence-level">Baixa confiança</span></div></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
+      <div class="code-learning-card"><div class="learning-kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M1 12h6m10 0h6"/></svg>CONDIÇÕES DO PICO</div><p id="codeRangeSource" class="range-source"></p><div id="codeRanges" class="code-metrics-grid"></div></div>
+      <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span></div><div class="code-confidence-reading"><b id="codeConfValue" class="code-confidence-value">0%</b></div></div><div class="confidence-meter" data-confidence-meter role="meter" aria-label="Confiança do aprendizado do pico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="--confidence:0%"><div class="confidence-track"><i id="confBar" aria-hidden="true"></i></div></div><div class="confidence-scale" aria-hidden="true"><span>Baixa confiança</span><span>Alta confiança</span></div></div>
     </section>
     <div class="version">2026.10.12 · CODE</div>
   </main>
@@ -212,6 +206,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017calmlimit1"></script>
-<script src="app.js?v=20261018spotinterior1"></script>
+<script src="app.js?v=20261018confidenceranges1"></script>
 </body>
 </html>

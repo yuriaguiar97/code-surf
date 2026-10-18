@@ -257,7 +257,67 @@ function renderSpots(){
 function stars(n){return'★★★★★'.split('').map((x,i)=>i<n?'★':'☆').join('')}
 function renderSpotSelect(){const sel=$('spotSelect'),spots=storage.spots();if(!sel)return;sel.innerHTML=spots.length?spots.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''):'<option value="">Nenhum pico cadastrado</option>';sel.disabled=!spots.length;if(state.currentSpotId&&spots.some(s=>s.id===state.currentSpotId))sel.value=state.currentSpotId;$('noSpot').classList.toggle('hidden',!!spots.length);$('saveSession').disabled=!spots.length;$('saveSession').style.opacity=spots.length?'1':'.45';renderRegisterCapture()}
 function openSpot(id){closeCodeInfo();state.currentSpotId=id;localStorage.setItem('code_current_spot',id);renderSpotDetail();location.hash='spot'}
-function learnedRange(arr,key,d=1,u=''){const v=arr.map(x=>Number(x[key])).filter(Number.isFinite);return v.length?`${Math.min(...v).toFixed(d)}–${Math.max(...v).toFixed(d)}${u}`:'Dados insuficientes'}
+function rangeNumber(value){return value!==null&&value!==undefined&&typeof value!=='boolean'&&String(value).trim()!==''&&Number.isFinite(Number(value))?Number(value):null}
+function learnedRange(arr,key,d=1,u=''){
+  const values=arr.map(x=>rangeNumber(x[key])).filter(x=>x!==null);
+  if(!values.length)return 'Sem registro';
+  const min=Math.min(...values).toFixed(d),max=Math.max(...values).toFixed(d);
+  return (min===max?min:`${min}–${max}`)+u;
+}
+function directionRange(values){
+  const angles=[...new Set(values.map(rangeNumber).filter(x=>x!==null&&x>=0&&x<=360).map(x=>x%360))].sort((a,b)=>a-b);
+  if(!angles.length)return 'Sem registro';
+  let gap=-1,index=0;
+  angles.forEach((angle,i)=>{const next=i===angles.length-1?angles[0]+360:angles[i+1];if(next-angle>gap){gap=next-angle;index=i}});
+  const start=angles[(index+1)%angles.length],end=angles[index],names=dir(start)===dir(end)?dir(start):`${dir(start)}–${dir(end)}`;
+  const degrees=start===end?`${fmt(start,0)}°`:`${fmt(start,0)}°–${fmt(end,0)}°${start>end?' (via N)':''}`;
+  return `${names} · ${degrees}`;
+}
+function seedDirectionRange(value,tolerance=11.25){
+  return [...new Set(CODEEngine.directions(value))].map(angle=>{
+    const start=(angle-tolerance+360)%360,end=(angle+tolerance)%360;
+    return `${dir(angle)} · ${fmt(start,2)}°–${fmt(end,2)}°${start>end?' (via N)':''}`;
+  }).join(' / ')||'Sem referência';
+}
+function seedRange(min,max,d,unit,exclusive=false){
+  const lo=rangeNumber(min),hi=rangeNumber(max);
+  if(lo===null&&hi===null)return 'Sem referência';
+  if(lo===null)return `≤ ${fmt(hi,d)}${unit}`;
+  if(hi===null)return `${exclusive?'>':'≥'} ${fmt(lo,d)}${unit}`;
+  if(exclusive)return `> ${fmt(lo,d)} a ${fmt(hi,d)}${unit}`;
+  return (lo===hi?fmt(lo,d):`${fmt(lo,d)}–${fmt(hi,d)}`)+unit;
+}
+function spotConditionRanges(spot,sessions){
+  const good=sessions.filter(s=>s.spotId===spot.id&&rangeNumber(s.score)!==null&&Number(s.score)>=8),seed=spot.seed;
+  const fields=[
+    {key:'wave',id:'learnWave',label:'Ondulação',decimals:1,unit:' m'},
+    {key:'waveDir',id:'learnWaveDir',label:'Direção do swell'},
+    {key:'period',id:'learnPeriod',label:'Período',decimals:0,unit:' s'},
+    {key:'wind',id:'learnWind',label:'Vento',decimals:0,unit:' kt'},
+    {key:'windDir',id:'learnWindDir',label:'Direção do vento'},
+    {key:'gust',id:'learnGust',label:'Rajadas',decimals:0,unit:' kt'},
+    {key:'energy',id:'learnEnergy',label:'Energia',decimals:0,unit:' J/m²'},
+    {key:'tide',id:'learnTide',label:'Altura da maré',decimals:2,unit:' m'},
+    {key:'tideMovement',id:'learnTideMovement',label:'Movimento da maré'}
+  ];
+  const movements=new Set(good.map(s=>s.forecast?.tideMovement).filter(x=>x==='rising'||x==='falling'));
+  const values=good.length?{
+    waveDir:directionRange(good.map(s=>s.waveDir)),windDir:directionRange(good.map(s=>s.windDir)),
+    tideMovement:[movements.has('rising')?'Enchendo ↑':'',movements.has('falling')?'Vazando ↓':''].filter(Boolean).join(' / ')||'Sem registro'
+  }:seed?{
+    wave:seedRange(seed.waveMin,seed.waveMax,1,' m'),waveDir:seedDirectionRange(seed.swellDir),period:seedRange(seed.periodMin,seed.periodMax,0,' s'),
+    wind:seedRange(seed.windMin,seed.windMax,0,' kt',true),
+    windDir:seed.windMode==='strict'?seedDirectionRange(seed.windDir):`${seedDirectionRange(seed.windDir,45)} · até ${fmt(CODEEngine.lightWindLimit(seed),1)} kt, qualquer direção`
+  }:{};
+  fields.forEach(field=>{field.value=values[field.key]||(good.length?learnedRange(good,field.key,field.decimals,field.unit):'Sem referência')});
+  const source=good.length?`Faixas observadas em ${good.length} ${plural(good.length,'sessão','sessões')} com nota 8 ou mais.`:seed?'Referências do norte inicial. Ainda sem sessões com nota 8 ou mais.':'Registre sessões ou preencha o norte inicial para formar as faixas.';
+  return {fields,source};
+}
+function spotRangeIcon(key){
+  const wave='<path d="M4 27c6 0 8-4 10-10C17 6 29 7 31 16c-6-5-12 1-7 6 3 3 7 4 12 3M5 32h30"/>',wind='<path d="M4 13h18c8 0 8-10 2-10-3 0-4 2-4 4M4 20h27c8 0 8 11 1 11-3 0-5-2-5-4M4 27h13c7 0 7 9 1 9"/>',compass='<circle cx="20" cy="20" r="14"/><path d="m26 13-4 11-9 3 4-11 9-3ZM20 3v3M20 34v3M3 20h3M34 20h3"/>';
+  const paths={wave,waveDir:compass,period:'<circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/>',wind,windDir:compass,gust:wind,energy:'<path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/>',tide:'<path d="M3 16c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0M3 24c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0"/>',tideMovement:'<path d="M12 32V8m-6 6 6-6 6 6M28 8v24m-6-6 6 6 6-6"/>'};
+  return `<svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true">${paths[key]}</svg>`;
+}
 function sessionHistoryTime(session){
   if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(session.ts||''))return localDate(session.ts).getTime();
   const match=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(session.date||'');
@@ -297,7 +357,7 @@ function renderSpotDetail(){
   if(!spot){$('spotTitle').textContent='Pico';return}
   state.radarSpot=spot;
   if($('spotRadar'))$('spotRadar').innerHTML=radarMarkup(radarStates()[spot.id],true);
-  const all=storage.sessions().filter(s=>s.spotId===spot.id),good=all.filter(s=>Number(s.score)>=8),conf=confidenceFor(spot),avg=avgFor(spot),seed=spot.seed||null;
+  const all=storage.sessions().filter(s=>s.spotId===spot.id),conf=confidenceFor(spot),avg=avgFor(spot);
   $('spotTitle').textContent=spot.name;
   const cover=document.querySelector('#spot .cover');
   if(cover){cover.style.backgroundImage=`linear-gradient(180deg,rgba(5,15,22,.08),rgba(3,10,15,.34)),url('${spot.photo||spotImage(storage.spots().findIndex(x=>x.id===spot.id),spot.name)}')`;cover.classList.toggle('has-custom-photo',!!spot.photo)}
@@ -305,26 +365,12 @@ function renderSpotDetail(){
   $('spotSessionCount').textContent=all.length?`${all.length} ${plural(all.length,'sessão registrada','sessões registradas')}`:'Nenhuma sessão registrada';
   $('spotConf').textContent=`Confidence ${conf}%`;
   if($('codeConfValue'))$('codeConfValue').textContent=conf+'%';
-  $('confBar').style.width=conf+'%';
-  $('codeConfLevel').textContent=confidenceLevel(conf);
-  if(good.length){
-    $('learnWave').textContent=learnedRange(good,'wave',1,' m');
-    $('learnPeriod').textContent=learnedRange(good,'period',0,' s');
-    $('learnWind').textContent=learnedRange(good,'wind',0,' kt');
-    $('learnEnergy').textContent=learnedRange(good,'energy',0,' J/m²');
-  }else if(seed){
-    const rr=(a,b,u='')=>a!=null||b!=null?`${a??'—'}${b!=null?'–'+b:''}${u}`:'Dados insuficientes';
-    $('learnWave').textContent=rr(seed.waveMin,seed.waveMax,' m')+(seed.swellDir?' · '+seed.swellDir:'');
-    $('learnPeriod').textContent=rr(seed.periodMin,seed.periodMax,' s');
-    $('learnWind').textContent=(seed.windDir||'—')+(seed.windMode==='strict'?' · obrigatório':'')+(seed.windMin!=null?' · acima de '+seed.windMin+' kt':'')+(seed.windMax!=null?' · até '+seed.windMax+' kt':'');
-    $('learnEnergy').textContent='—';
-  }else ['learnWave','learnPeriod','learnWind','learnEnergy'].forEach(id=>$(id).textContent='Dados insuficientes');
+  document.querySelectorAll('[data-confidence-meter]').forEach(meter=>{meter.style.setProperty('--confidence',conf+'%');meter.setAttribute('aria-valuenow',String(conf));meter.setAttribute('aria-valuetext',`${conf}% de confiança no aprendizado`)});
+  const ranges=spotConditionRanges(spot,all);
+  $('overviewRangeSource').textContent=ranges.source;$('codeRangeSource').textContent=ranges.source;
+  $('codeRanges').innerHTML=ranges.fields.map(field=>`<div class="code-metric-card" data-range-key="${field.key}">${spotRangeIcon(field.key)}<span>${field.label}</span><b id="${field.id}">${esc(field.value)}</b></div>`).join('');
   renderHistoryEditMode(all.length);renderHistory(all);
-  const icon=path=>`<svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true">${path}</svg>`;
-  const waveIcon=icon('<path d="M4 27c6 0 8-4 10-10C17 6 29 7 31 16c-6-5-12 1-7 6 3 3 7 4 12 3M5 32h30"/>');
-  const periodIcon=icon('<circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/>');
-  const windIcon=icon('<path d="M4 13h18c8 0 8-10 2-10-3 0-4 2-4 4M4 20h27c8 0 8 11 1 11-3 0-5-2-5-4M4 27h13c7 0 7 9 1 9"/>');
-  $('overviewBest').innerHTML=`<div class="row"><span>${waveIcon}Ondulação</span><b>${esc($('learnWave').textContent)}</b></div><div class="row"><span>${periodIcon}Período</span><b>${esc($('learnPeriod').textContent)}</b></div><div class="row"><span>${windIcon}Vento</span><b>${esc($('learnWind').textContent)}</b></div>`;
+  $('overviewBest').innerHTML=ranges.fields.map(field=>`<div class="row" data-range-key="${field.key}"><span>${spotRangeIcon(field.key)}${field.label}</span><b>${esc(field.value)}</b></div>`).join('');
 }
 function showSpotTab(name){closeCodeInfo();document.querySelectorAll('.spot-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.spot-panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===name))}
 function updateSpotPhotoPreview(photo,fallback=''){const el=$('spotPhotoPreview');if(!el)return;const image=photo||fallback;if(image){el.style.backgroundImage=`linear-gradient(180deg,rgba(5,15,22,.04),rgba(3,10,15,.18)),url('${image}')`;el.classList.add('has-photo')}else{el.style.backgroundImage='';el.classList.remove('has-photo')}}

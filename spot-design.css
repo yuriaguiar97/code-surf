@@ -127,6 +127,19 @@ body:has(#spot:target) { background: #05090b; padding-bottom: 0; }
 #spot .confidence { height: 4px; background: #34444d; border-radius: 9px; overflow: hidden; }
 #spot .confidence i { display: block; height: 100%; background: linear-gradient(90deg,#48c4ce,#68e5d8); }
 #spot .code-info-popover { border-color: #43555f; background: #14232d; border-radius: 12px; }
+#spot .range-source { margin: 10px 0 16px; color: var(--muted); font-size: var(--type-label); font-weight: var(--weight-body); line-height: var(--leading-body); }
+#spot .code-metric-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+#spot .summary-confidence { grid-column: 1 / -1; min-width: 0; }
+/* One passive meter shared by both tabs. The fill reveals a fixed full-scale
+   gradient; the thin index line lives outside the clipped track. */
+#spot .confidence-meter { position: relative; margin-top: 14px; padding: 4px 0; }
+#spot .summary-confidence .confidence-meter { margin-top: 0; }
+#spot .confidence-track { position: relative; height: 6px; overflow: hidden; border-radius: 99px; background: #34444d; }
+#spot .confidence-track i { position: absolute; inset: 0; display: block; background: linear-gradient(90deg,#2877ad 0%,#4dd3e1 50%,#7ac67d 100%); clip-path: inset(0 calc(100% - var(--confidence,0%)) 0 0); }
+#spot .confidence-meter:after { content: ""; position: absolute; top: 1px; left: clamp(1px,var(--confidence,0%),calc(100% - 1px)); width: 1.5px; height: 12px; transform: translateX(-50%); background: #edf8f4; pointer-events: none; }
+#spot .confidence-scale { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; }
+#spot .summary-confidence .confidence-scale span,#spot .code-confidence-card .confidence-scale span { color: var(--muted); font-size: var(--type-label); font-weight: var(--weight-body); line-height: 1.5; }
+#spot .confidence-scale span:last-child { text-align: right; }
 /* Photo-first editor with persistent labels and paired wave / period fields. */
 #spotModal { background: #02070bd6; backdrop-filter: blur(9px); }
 #spotModal .sheet { max-width: 620px; max-height: 94dvh; padding: 0; background: linear-gradient(135deg,#172128,#0b1318); border: 1px solid var(--spot-border); border-radius: 18px 18px 12px 12px; }
