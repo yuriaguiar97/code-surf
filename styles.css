@@ -224,15 +224,62 @@ details.history-item:last-child{border-bottom:1px solid rgba(152,187,205,.16)}
 @media(max-width:370px){.history-tools{gap:6px}.history-sort select{max-width:128px;padding-left:8px;font-size:11px}.history-item>.history-head{gap:7px;padding:13px}.history-session-meta>b{font-size:12px}.history-grade-label{font-size:9px}.history-score>strong,.history-score>strong>span{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.history-chevron{transition:none}}
 
-/* Graphite cards carry a restrained status tint and a thin colored border. */
-.spot-card.spot-state-off,.spot-card.spot-state-unavailable,.spot-card.spot-state-insufficient{background:linear-gradient(145deg,#181c21,#11161b);border-color:rgba(157,170,183,.23)}
-.spot-card.spot-state-swell{background:linear-gradient(145deg,#131e27,#0d161e);border-color:rgba(118,157,190,.32)}
-.spot-card.spot-state-radar{background:linear-gradient(145deg,#15221e,#0f1916);border-color:rgba(117,169,144,.32)}
-.spot-card.spot-state-on{background:linear-gradient(145deg,#101c17,#0b1510);border-color:rgba(87,147,112,.36)}
-.spot-card .spot-radar{background:transparent;border:0;border-top:1px solid rgba(211,237,228,.16);border-radius:0;padding:10px 0 0;margin-top:10px}
-.spot-card .radar-summary,.spot-card .spot-main>small,.spot-card .confidence-num{color:#c5d4dd}
-.spot-card .spot-chevron{color:#bad0d9}
-.spot-card.spot-state-off .radar-label,.spot-card.spot-state-unavailable .radar-label,.spot-card.spot-state-insufficient .radar-label{color:#b5bec8}
-.spot-card.spot-state-swell .radar-label{color:#a5c1d8}
-.spot-card.spot-state-radar .radar-label{color:#a3cbb4}
-.spot-card.spot-state-on .radar-label{color:#8ebca1}
+/* CODE spot dossiers — the approved photographic coastline concept. */
+body:has(#spots:target){padding-bottom:0;background:#05090b}
+#spots.screen{padding-bottom:0}
+#spots .spots-top{max-width:760px;margin:0 auto;min-height:107px;padding:calc(22px + env(safe-area-inset-top)) 18px 17px;align-items:flex-start}
+.spots-brand .logo{font-size:26px;font-weight:300;letter-spacing:.36em;line-height:1}
+.spots-tagline{margin-top:11px;font-size:7px;line-height:1.4;letter-spacing:.4em;color:#c3c9cc;white-space:nowrap}
+.spots-top .place{margin-top:7px;font-size:9px;letter-spacing:.38em;color:#afb7bd}
+#spots .content{padding:0 12px calc(145px + env(safe-area-inset-bottom))}
+#spots .spots-head{align-items:center;gap:12px;margin:0 6px 13px}
+#spots .spots-head h1{margin:0;font-size:28px;line-height:1.15;font-weight:600;letter-spacing:-.025em}
+#spots .spots-tools{margin:0;gap:9px}
+#spots .spots-tools .edit-round,#spots .spots-tools .add-round{position:relative;width:35px;height:35px;min-width:35px;flex-basis:35px;padding:7px;border-radius:8px;border:1px solid rgba(183,200,207,.23);background:rgba(255,255,255,.025);color:#e4ebee;box-shadow:none}
+#spots .spots-tools button:before{content:'';position:absolute;inset:-4px}
+#spots .spots-tools svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+#spots .sort-trigger svg circle{fill:#101619}
+#spots .spots-tools .edit-round.active{background:rgba(66,192,207,.12);border-color:#49bbc8;color:#83e3e9}
+#spots .spots-list{gap:10px;margin-top:0}
+.spot-card.spot-card-button{position:relative;isolation:isolate;display:grid;grid-template-columns:34% minmax(0,1fr);align-items:stretch;gap:0;width:100%;min-height:132px;padding:0;overflow:hidden;border:1px solid rgba(175,196,204,.23);border-radius:12px;background:linear-gradient(135deg,#101719,#090e10);box-shadow:0 8px 24px rgba(0,0,0,.12);backdrop-filter:none}
+.spot-card:after{content:'';position:absolute;z-index:0;right:-4px;top:0;width:42%;height:100%;background:url('assets/code-contours.svg') right center/auto 135% no-repeat;opacity:.16;pointer-events:none}
+.spot-card .spot-thumb{position:relative;z-index:1;display:block;align-self:stretch;width:auto;height:auto;min-height:100%;border:0;border-radius:0;background-image:linear-gradient(0deg,rgba(2,8,10,.1),rgba(2,8,10,.1)),var(--spot-img);background-size:cover;background-position:center;filter:saturate(.6)}
+.spot-index{position:absolute;top:10px;left:8px;font-size:9px;font-weight:400;line-height:1;color:#bac6cb;letter-spacing:.02em}
+.photo-crosshair{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);width:20px;height:20px;fill:none;stroke:#dce7e7;stroke-width:.7;opacity:.38}
+.spot-card .spot-main{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;padding:14px 12px 12px}
+.spot-signal{display:flex;align-items:center;gap:7px;min-height:13px;color:#a8b2b9}
+.signal-marker{display:grid;place-items:center;width:13px;height:13px;flex:none}
+.signal-marker svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round}
+.signal-dot{display:block;width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor}
+.spot-card .radar-label{font-size:9px;line-height:1.3;font-weight:500;letter-spacing:.1em;color:inherit}
+.spot-card.spot-state-on .spot-signal{color:#4dd3e1}
+.spot-card.spot-state-on .signal-marker{filter:drop-shadow(0 0 4px rgba(77,211,225,.3))}
+.spot-card.spot-state-radar .spot-signal{color:#7ac67d}
+.spot-card.spot-state-swell .spot-signal{color:#65b8dc}
+.spot-card.spot-state-off .spot-signal,.spot-card.spot-state-unavailable .spot-signal,.spot-card.spot-state-insufficient .spot-signal{color:#a0a6ac}
+.spot-card.spot-state-off .signal-dot,.spot-card.spot-state-unavailable .signal-dot,.spot-card.spot-state-insufficient .signal-dot{box-shadow:none}
+.spot-card .spot-name{display:block;margin:9px 0 0;padding-right:12px;font-size:21px;line-height:1.18;font-weight:600;letter-spacing:-.025em;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;color:#f2f5f6}
+.spot-window{display:block;margin-top:6px;font-size:12px;line-height:1.4;font-weight:400;color:#e1e6e8}
+.spot-window-note{display:block;margin-top:4px;font-size:10px;line-height:1.3;color:#aebec8}
+.spot-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;margin-top:14px;padding-top:10px;border-top:1px solid rgba(202,221,223,.2)}
+.spot-card .spot-meta>small{display:block;margin:0;line-height:1.2;font-size:9px;white-space:nowrap;color:#b3c0c9}
+.spot-stars{padding:0 7px;border-left:1px solid rgba(202,221,223,.2);border-right:1px solid rgba(202,221,223,.2);font-size:12px;line-height:1;letter-spacing:.015em;color:#e4e9ea;white-space:nowrap}
+.spot-meta .confidence-num{margin-left:auto}
+.spot-meta .confidence-num strong{font-size:9px;line-height:1.2;font-weight:500;color:#edf1f2}
+.spot-card .spot-chevron{position:absolute;z-index:2;right:11px;top:45%;margin:0;color:#b9c6cf}
+.spot-chevron svg{display:block;width:7px;height:13px;fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+.spot-card .edit-indicator{position:absolute;z-index:2;right:8px;top:8px;width:25px;height:25px;border-radius:7px}
+.spot-card.edit-mode{border-color:rgba(77,211,225,.5)}
+#spots .version{display:none}
+@media(min-width:620px){.spot-card.spot-card-button{grid-template-columns:30% minmax(0,1fr);min-height:192px}.spot-card .spot-main{padding:23px}.spot-card .spot-name{font-size:29px}.spot-window{font-size:15px}.spot-card .radar-label{font-size:11px}.spot-meta{margin-top:auto}.spot-card .spot-meta>small,.spot-meta .confidence-num strong{font-size:12px}.spot-stars{font-size:16px}}
+@media(max-width:370px){#spots .spots-head h1{font-size:24px}#spots .spots-tools{gap:6px}#spots .spots-tools .edit-round,#spots .spots-tools .add-round{width:32px;height:32px;min-width:32px;flex-basis:32px}#spots .spots-top{padding-left:16px;padding-right:16px}.spots-tagline{font-size:6px;letter-spacing:.36em}.spots-top .place{font-size:8px}.spot-card .spot-main{padding:12px 9px}.spot-card .spot-name{font-size:18px}.spot-window{font-size:11px}.spot-window-note{font-size:9px}.spot-card .radar-label{font-size:8px;letter-spacing:.08em}.spot-card .spot-meta>small,.spot-meta .confidence-num strong{font-size:8px}.spot-meta{gap:4px;padding-top:9px}.spot-stars{padding:0 4px;font-size:10px}.spot-card .spot-chevron{right:8px}}
+
+/* Wave, location and bell icons and the global Register CODE action. */
+.nav{left:0;right:0;bottom:0;height:calc(91px + env(safe-area-inset-bottom));padding:7px 0 env(safe-area-inset-bottom);border:0;border-top:1px solid rgba(182,205,215,.18);border-radius:0;background:rgba(6,11,14,.95);box-shadow:none;backdrop-filter:blur(20px)}
+.nav>a:not(.nav-register){position:relative;gap:7px;padding-top:10px;font-size:11px;font-weight:400;letter-spacing:.02em;color:#a2afba}
+.nav .nav-icon{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.nav>a.active{color:#48d8e5}
+.nav>a.active:after{content:'';width:4px;height:4px;position:absolute;bottom:5px;left:calc(50% - 2px);border-radius:50%;background:#48d8e5}
+.nav .nav-register{top:-33px!important;width:64px!important;height:64px!important;min-width:64px!important;gap:2px!important;border:1px solid #28b9d0!important;background:linear-gradient(145deg,#1798b2 0,#00617a 55%,#003b50 100%)!important;box-shadow:0 0 22px rgba(18,172,204,.16),inset 0 1px 4px rgba(155,241,255,.15)!important}
+.nav-register .register-word,.nav-register .code-word{font-size:10px!important;font-weight:600!important;line-height:1.15!important;letter-spacing:0!important}
+.nav-register .code-word{text-transform:uppercase!important}

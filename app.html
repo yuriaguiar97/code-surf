@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261017softstatus1">
+<link rel="stylesheet" href="styles.css?v=20261017dossiers1">
 </head>
 <body>
 <section id="splash">
@@ -85,18 +85,18 @@
     </div>
     <div class="version">2026.10.12 · CODE</div>
   </main>
-  <nav class="nav"><a class="active" href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
+  <nav class="nav"><a class="active" href="#forecast"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 21c7 0 6-14 14-14 4 0 6 3 6 6-3-2-6-1-6 2 0 4 4 5 8 5M3 24h22"/></svg>Previsão</a><a href="#spots"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25S5 16 5 10a9 9 0 0 1 18 0c0 6-9 15-9 15Z"/></svg>Picos</a><a href="#alerts"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 20h18l-3-5V9a6 6 0 0 0-12 0v6l-3 5ZM11 24a3 3 0 0 0 6 0"/></svg>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
 <section id="spots" class="screen">
-  <header class="top"><div class="logo">CODE</div><div class="place">MEUS PICOS</div></header>
+  <header class="top spots-top"><div class="spots-brand"><div class="logo">CODE</div><div class="spots-tagline">EVERY SPOT HAS A CODE</div></div><div class="place">UBATUBA</div></header>
   <main class="content">
-    <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><label class="edit-round sort-trigger" title="Organizar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><select id="spotSort" aria-label="Organizar picos"><option value="radar">Radar CODE</option><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option><option value="confidence-desc">Confidence · maior primeiro</option><option value="confidence-asc">Confidence · menor primeiro</option></select></label><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico">＋</button></div></div>
+    <div class="spots-head"><div><h1>Meus Picos</h1></div><div class="spots-tools"><label class="edit-round sort-trigger" title="Organizar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg><select id="spotSort" aria-label="Organizar picos"><option value="radar">Radar CODE</option><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option><option value="confidence-desc">Confidence · maior primeiro</option><option value="confidence-asc">Confidence · menor primeiro</option></select></label><button id="editSpots" class="edit-round" aria-label="Editar picos" title="Editar picos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg></button><button id="addSpot" class="add-round" aria-label="Criar novo pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg></button></div></div>
     <div id="spotsEditHint" class="spots-edit-hint hidden"><span>✎</span> Modo de edição ativo · toque em um pico para editar ou excluir.</div>
     <div id="spotsList" class="spots-list"></div>
     <div class="version">2026.10.12 · CODE</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
+  <nav class="nav"><a href="#forecast"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 21c7 0 6-14 14-14 4 0 6 3 6 6-3-2-6-1-6 2 0 4 4 5 8 5M3 24h22"/></svg>Previsão</a><a class="active" href="#spots"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25S5 16 5 10a9 9 0 0 1 18 0c0 6-9 15-9 15Z"/></svg>Picos</a><a href="#alerts"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 20h18l-3-5V9a6 6 0 0 0-12 0v6l-3 5ZM11 24a3 3 0 0 0 6 0"/></svg>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
 <section id="spot" class="screen">
@@ -133,7 +133,7 @@
     </section>
     <div class="version">2026.10.12 · CODE</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a class="active" href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
+  <nav class="nav"><a href="#forecast"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 21c7 0 6-14 14-14 4 0 6 3 6 6-3-2-6-1-6 2 0 4 4 5 8 5M3 24h22"/></svg>Previsão</a><a class="active" href="#spots"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25S5 16 5 10a9 9 0 0 1 18 0c0 6-9 15-9 15Z"/></svg>Picos</a><a href="#alerts"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 20h18l-3-5V9a6 6 0 0 0-12 0v6l-3 5ZM11 24a3 3 0 0 0 6 0"/></svg>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
 <section id="register" class="screen">
@@ -155,7 +155,7 @@
     <button id="saveSession" class="btn">SALVAR SESSÃO</button><button id="cancelSessionEdit" type="button" class="ghost-btn session-cancel" hidden>Cancelar edição</button><div id="saved" class="saved">SESSÃO SALVA · CODE ATUALIZADO</div>
     <div class="version">2026.10.12 · CODE</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
+  <nav class="nav"><a href="#forecast"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 21c7 0 6-14 14-14 4 0 6 3 6 6-3-2-6-1-6 2 0 4 4 5 8 5M3 24h22"/></svg>Previsão</a><a href="#spots"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25S5 16 5 10a9 9 0 0 1 18 0c0 6-9 15-9 15Z"/></svg>Picos</a><a href="#alerts"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 20h18l-3-5V9a6 6 0 0 0-12 0v6l-3 5ZM11 24a3 3 0 0 0 6 0"/></svg>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
 <section id="alerts" class="screen">
@@ -169,7 +169,7 @@
     <div class="card alerts-card push-card"><button id="activatePush" class="btn" type="button">ATIVAR NOTIFICAÇÕES</button><button id="testPush" class="btn secondary" type="button" hidden>ENVIAR NOTIFICAÇÃO DE TESTE</button><p id="pushStatus" class="sub" role="status" aria-live="polite">Ative as notificações neste aparelho para receber os alertas.</p></div>
     <div class="version">2026.10.12 · CODE</div>
   </main>
-  <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
+  <nav class="nav"><a href="#forecast"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M3 21c7 0 6-14 14-14 4 0 6 3 6 6-3-2-6-1-6 2 0 4 4 5 8 5M3 24h22"/></svg>Previsão</a><a href="#spots"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 25S5 16 5 10a9 9 0 0 1 18 0c0 6-9 15-9 15Z"/></svg>Picos</a><a class="active" href="#alerts"><svg class="nav-icon" viewBox="0 0 28 28" aria-hidden="true"><path d="M5 20h18l-3-5V9a6 6 0 0 0-12 0v6l-3 5ZM11 24a3 3 0 0 0 6 0"/></svg>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
 <div id="spotModal" class="modal"><div class="sheet">
@@ -203,6 +203,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017windpolicy1"></script>
-<script src="app.js?v=20261017scorecircle1"></script>
+<script src="app.js?v=20261017dossiers1"></script>
 </body>
 </html>
