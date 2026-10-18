@@ -224,15 +224,15 @@ details.history-item:last-child{border-bottom:1px solid rgba(152,187,205,.16)}
 @media(max-width:370px){.history-tools{gap:6px}.history-sort select{max-width:128px;padding-left:8px;font-size:11px}.history-item>.history-head{gap:7px;padding:13px}.history-session-meta>b{font-size:12px}.history-grade-label{font-size:9px}.history-score>strong,.history-score>strong>span{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.history-chevron{transition:none}}
 
-/* The complete spot card carries the same status shown in its radar label. */
-.spot-card.spot-state-off,.spot-card.spot-state-unavailable,.spot-card.spot-state-insufficient{background:linear-gradient(145deg,#272d34,#191f26);border-color:#4b545f}
-.spot-card.spot-state-swell{background:linear-gradient(145deg,#163c57,#0c263b);border-color:#386a91}
-.spot-card.spot-state-radar{background:linear-gradient(145deg,#1b503c,#123c2e);border-color:#3a8563}
-.spot-card.spot-state-on{background:linear-gradient(145deg,#0d3425,#072217);border-color:#2f7650}
+/* Graphite cards carry a restrained status tint and a thin colored border. */
+.spot-card.spot-state-off,.spot-card.spot-state-unavailable,.spot-card.spot-state-insufficient{background:linear-gradient(145deg,#181c21,#11161b);border-color:rgba(157,170,183,.23)}
+.spot-card.spot-state-swell{background:linear-gradient(145deg,#131e27,#0d161e);border-color:rgba(118,157,190,.32)}
+.spot-card.spot-state-radar{background:linear-gradient(145deg,#15221e,#0f1916);border-color:rgba(117,169,144,.32)}
+.spot-card.spot-state-on{background:linear-gradient(145deg,#101c17,#0b1510);border-color:rgba(87,147,112,.36)}
 .spot-card .spot-radar{background:transparent;border:0;border-top:1px solid rgba(211,237,228,.16);border-radius:0;padding:10px 0 0;margin-top:10px}
 .spot-card .radar-summary,.spot-card .spot-main>small,.spot-card .confidence-num{color:#c5d4dd}
 .spot-card .spot-chevron{color:#bad0d9}
-.spot-card.spot-state-off .radar-label,.spot-card.spot-state-unavailable .radar-label,.spot-card.spot-state-insufficient .radar-label{color:#c8d0d8}
-.spot-card.spot-state-swell .radar-label{color:#a9d8ff}
-.spot-card.spot-state-radar .radar-label{color:#91efb4}
-.spot-card.spot-state-on .radar-label{color:#71e8a1}
+.spot-card.spot-state-off .radar-label,.spot-card.spot-state-unavailable .radar-label,.spot-card.spot-state-insufficient .radar-label{color:#b5bec8}
+.spot-card.spot-state-swell .radar-label{color:#a5c1d8}
+.spot-card.spot-state-radar .radar-label{color:#a3cbb4}
+.spot-card.spot-state-on .radar-label{color:#8ebca1}
