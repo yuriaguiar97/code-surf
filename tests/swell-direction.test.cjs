@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const context={};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../code-engine.js'),'utf8'),context);
 const {evaluate,radarFor}=context.CODEEngine;
-const base={wave:1.2,period:8,wind:5,windDir:90,energy:905};
+const base={wave:1.2,period:8,wind:3,windDir:90,energy:905};
 const east={id:'fora',seed:{waveMin:1,periodMin:8,swellDir:'L'}};
 test('Leste requires its exact half-open sector',()=>{
  for(const [degree,expected] of [[78.749,false],[78.75,true],[90,true],[101.249,true],[101.25,false],[112.5,false],[134,false],[135,false],[null,false]]){
