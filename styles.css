@@ -273,13 +273,3 @@ body:has(#spots:target){padding-bottom:0;background:#05090b}
 #spots .version{display:none}
 @media(min-width:620px){.spot-card.spot-card-button{grid-template-columns:30% minmax(0,1fr);min-height:192px}.spot-card .spot-main{padding:23px}.spot-card .spot-name{font-size:29px}.spot-window{font-size:15px}.spot-card .radar-label{font-size:11px}.spot-meta{margin-top:auto}.spot-card .spot-meta>small,.spot-meta .confidence-num strong{font-size:12px}.spot-stars{font-size:16px}}
 @media(max-width:370px){#spots .spots-head h1{font-size:24px}#spots .spots-tools{gap:6px}#spots .spots-tools .edit-round,#spots .spots-tools .add-round{width:32px;height:32px;min-width:32px;flex-basis:32px}#spots .spots-top{padding-left:16px;padding-right:16px}.spots-tagline{font-size:6px;letter-spacing:.36em}.spots-top .place{font-size:8px}.spot-card .spot-main{padding:12px 9px}.spot-card .spot-name{font-size:18px}.spot-window{font-size:11px}.spot-window-note{font-size:9px}.spot-card .radar-label{font-size:8px;letter-spacing:.08em}.spot-card .spot-meta>small,.spot-meta .confidence-num strong{font-size:8px}.spot-meta{gap:4px;padding-top:9px}.spot-stars{padding:0 4px;font-size:10px}.spot-card .spot-chevron{right:8px}}
-
-/* Wave, location and bell icons and the global Register CODE action. */
-.nav{left:0;right:0;bottom:0;height:calc(91px + env(safe-area-inset-bottom));padding:7px 0 env(safe-area-inset-bottom);border:0;border-top:1px solid rgba(182,205,215,.18);border-radius:0;background:rgba(6,11,14,.95);box-shadow:none;backdrop-filter:blur(20px)}
-.nav>a:not(.nav-register){position:relative;gap:7px;padding-top:10px;font-size:11px;font-weight:400;letter-spacing:.02em;color:#a2afba}
-.nav .nav-icon{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
-.nav>a.active{color:#48d8e5}
-.nav>a.active:after{content:'';width:4px;height:4px;position:absolute;bottom:5px;left:calc(50% - 2px);border-radius:50%;background:#48d8e5}
-.nav .nav-register{top:-33px!important;width:64px!important;height:64px!important;min-width:64px!important;gap:2px!important;border:1px solid #28b9d0!important;background:linear-gradient(145deg,#1798b2 0,#00617a 55%,#003b50 100%)!important;box-shadow:0 0 22px rgba(18,172,204,.16),inset 0 1px 4px rgba(155,241,255,.15)!important}
-.nav-register .register-word,.nav-register .code-word{font-size:10px!important;font-weight:600!important;line-height:1.15!important;letter-spacing:0!important}
-.nav-register .code-word{text-transform:uppercase!important}
