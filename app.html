@@ -17,7 +17,7 @@
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="styles.css?v=20261018forecastpolish1">
-<link rel="stylesheet" href="spot-design.css?v=20261018confidenceranges1">
+<link rel="stylesheet" href="spot-design.css?v=20261018rangelayout1">
 <link rel="stylesheet" href="typography.css?v=20261018refinement2">
 </head>
 <body>
@@ -109,7 +109,7 @@
 
     <section class="spot-panel active" data-panel="overview">
       <div id="spotRadar" aria-live="polite"></div>
-      <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div><div class="summary-confidence"><div class="confidence-meter" data-confidence-meter role="meter" aria-label="Confiança do aprendizado do pico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="--confidence:0%"><div class="confidence-track"><i aria-hidden="true"></i></div></div><div class="confidence-scale" aria-hidden="true"><span>Baixa confiança</span><span>Alta confiança</span></div></div></div>
+      <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small></div><div class="summary-confidence"><span id="spotConf" class="badge">Confidence 0%</span><div class="confidence-meter" data-confidence-meter role="meter" aria-label="Confiança do aprendizado do pico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="--confidence:0%"><div class="confidence-track"><i aria-hidden="true"></i></div></div><div class="confidence-scale" aria-hidden="true"><span>Baixa confiança</span><span>Alta confiança</span></div></div></div>
       <div class="spot-best-card"><h2>Melhores condições registradas</h2><p id="overviewRangeSource" class="range-source"></p><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div></div>
     </section>
 
@@ -206,6 +206,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017calmlimit1"></script>
-<script src="app.js?v=20261018confidenceranges1"></script>
+<script src="app.js?v=20261018rangelayout1"></script>
 </body>
 </html>

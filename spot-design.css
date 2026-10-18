@@ -129,7 +129,9 @@ body:has(#spot:target) { background: #05090b; padding-bottom: 0; }
 #spot .code-info-popover { border-color: #43555f; background: #14232d; border-radius: 12px; }
 #spot .range-source { margin: 10px 0 16px; color: var(--muted); font-size: var(--type-label); font-weight: var(--weight-body); line-height: var(--leading-body); }
 #spot .code-metric-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
-#spot .summary-confidence { grid-column: 1 / -1; min-width: 0; }
+#spot .summary-confidence { grid-column: 1 / -1; min-width: 0; border-top: 1px solid #34434a; padding-top: 14px; }
+#spot .summary-confidence #spotConf { display: inline-block; padding: 0; margin-bottom: 12px; border: 0; background: none; color: #b7d8d4; letter-spacing: .03em; }
+#spot [data-range-key] b .range-degrees { display: inline-block; white-space: nowrap; overflow-wrap: normal; word-break: normal; margin: 0; font: inherit; color: inherit; letter-spacing: inherit; }
 /* One passive meter shared by both tabs. The fill reveals a fixed full-scale
    gradient; the thin index line lives outside the clipped track. */
 #spot .confidence-meter { position: relative; margin-top: 14px; padding: 4px 0; }
@@ -185,7 +187,11 @@ body:has(#spot:target) { background: #05090b; padding-bottom: 0; }
   #spot .code-metric-card { display: grid; grid-template-columns: 40px minmax(0,1fr); column-gap: 12px; align-content: center; }
   #spot .detail-metric-icon { grid-row: 1 / 3; margin: 0; align-self: center; }
 }
+@media(max-width:430px) {
+  #spot .code-metrics-grid:has(.range-degrees-precise) { grid-template-columns: 1fr; }
+}
 @media(max-width:370px) {
+  #spot .code-metrics-grid { grid-template-columns: 1fr; }
   #spot .spot-detail-top { grid-template-columns: 47px minmax(0,1fr) 48px; gap: 5px; padding-left: 12px; padding-right: 12px; }
   #spot .spot-detail-top .logo { font-size: 23px; }
   #spot .spot-detail-top .spots-tagline { font-size: 5px; }

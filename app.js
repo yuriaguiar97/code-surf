@@ -318,6 +318,10 @@ function spotRangeIcon(key){
   const paths={wave,waveDir:compass,period:'<circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/>',wind,windDir:compass,gust:wind,energy:'<path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/>',tide:'<path d="M3 16c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0M3 24c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0"/>',tideMovement:'<path d="M12 32V8m-6 6 6-6 6 6M28 8v24m-6-6 6 6 6-6"/>'};
   return `<svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true">${paths[key]}</svg>`;
 }
+function spotRangeValueMarkup(field){
+  const value=esc(field.value);
+  return ['waveDir','windDir'].includes(field.key)?value.replace(/\d+(?:\.\d+)?°(?:–\d+(?:\.\d+)?°)?/g,range=>`<span class="range-degrees${range.includes('.')?' range-degrees-precise':''}">${range}</span>`):value;
+}
 function sessionHistoryTime(session){
   if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(session.ts||''))return localDate(session.ts).getTime();
   const match=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(session.date||'');
@@ -368,9 +372,9 @@ function renderSpotDetail(){
   document.querySelectorAll('[data-confidence-meter]').forEach(meter=>{meter.style.setProperty('--confidence',conf+'%');meter.setAttribute('aria-valuenow',String(conf));meter.setAttribute('aria-valuetext',`${conf}% de confiança no aprendizado`)});
   const ranges=spotConditionRanges(spot,all);
   $('overviewRangeSource').textContent=ranges.source;$('codeRangeSource').textContent=ranges.source;
-  $('codeRanges').innerHTML=ranges.fields.map(field=>`<div class="code-metric-card" data-range-key="${field.key}">${spotRangeIcon(field.key)}<span>${field.label}</span><b id="${field.id}">${esc(field.value)}</b></div>`).join('');
+  $('codeRanges').innerHTML=ranges.fields.map(field=>`<div class="code-metric-card" data-range-key="${field.key}">${spotRangeIcon(field.key)}<span>${field.label}</span><b id="${field.id}">${spotRangeValueMarkup(field)}</b></div>`).join('');
   renderHistoryEditMode(all.length);renderHistory(all);
-  $('overviewBest').innerHTML=ranges.fields.map(field=>`<div class="row" data-range-key="${field.key}"><span>${spotRangeIcon(field.key)}${field.label}</span><b>${esc(field.value)}</b></div>`).join('');
+  $('overviewBest').innerHTML=ranges.fields.map(field=>`<div class="row" data-range-key="${field.key}"><span>${spotRangeIcon(field.key)}${field.label}</span><b>${spotRangeValueMarkup(field)}</b></div>`).join('');
 }
 function showSpotTab(name){closeCodeInfo();document.querySelectorAll('.spot-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.spot-panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===name))}
 function updateSpotPhotoPreview(photo,fallback=''){const el=$('spotPhotoPreview');if(!el)return;const image=photo||fallback;if(image){el.style.backgroundImage=`linear-gradient(180deg,rgba(5,15,22,.04),rgba(3,10,15,.18)),url('${image}')`;el.classList.add('has-photo')}else{el.style.backgroundImage='';el.classList.remove('has-photo')}}
