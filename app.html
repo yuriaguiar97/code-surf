@@ -17,6 +17,7 @@
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="styles.css?v=20261018forecastpolish1">
+<link rel="stylesheet" href="spot-design.css?v=20261018spotinterior1">
 <link rel="stylesheet" href="typography.css?v=20261018refinement2">
 </head>
 <body>
@@ -101,15 +102,15 @@
 </section>
 
 <section id="spot" class="screen">
-  <header class="top"><a class="back" href="#spots">‹ Picos</a><div id="spotTitle" class="spot-title">Pico</div><div style="width:42px"></div></header>
+  <header class="top spot-detail-top"><a class="back" href="#spots"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>Picos</a><div class="spots-brand"><div class="logo">CODE</div><div class="spots-tagline">EVERY SPOT HAS A CODE</div></div><div class="place">UBATUBA</div></header>
   <main class="content">
-    <div class="cover"></div>
+    <div class="cover spot-cover"><svg class="cover-reticle" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3v34M3 20h34"/><circle cx="20" cy="20" r="9"/></svg><h1 id="spotTitle" class="spot-cover-title">Pico</h1></div>
     <div class="spot-tabs"><button class="spot-tab active" data-tab="overview">Visão geral</button><button class="spot-tab" data-tab="history">Histórico</button><button class="spot-tab" data-tab="code">CODE do pico</button></div>
 
     <section class="spot-panel active" data-panel="overview">
       <div id="spotRadar" aria-live="polite"></div>
       <div class="card score-card spot-summary-card"><div class="spot-score-main"><small>NOTA MÉDIA</small><div id="spotScore" class="score-number">—</div></div><div class="spot-summary-meta"><small id="spotSessionCount">Nenhuma sessão registrada</small><span id="spotConf" class="badge">Confidence 0%</span></div></div>
-      <h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div>
+      <div class="spot-best-card"><h2>Melhores condições registradas</h2><div id="overviewBest" class="card"><small>Ainda não há dados suficientes.</small></div></div>
     </section>
 
     <section class="spot-panel" data-panel="history">
@@ -124,11 +125,12 @@
       <div class="panel-heading code-heading"><h2>CODE do pico</h2><button id="codeInfoToggle" class="code-info-button" type="button" aria-label="Como funciona o CODE do pico" aria-expanded="false" aria-controls="codeInfo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle class="info-dot" cx="12" cy="7" r="1"/></svg></button>
       <div id="codeInfo" class="code-info-popover" role="note" aria-label="Como funciona o CODE do pico" hidden><div class="code-info-copy">O CODE começa com o norte inicial do pico. A cada sessão registrada, ondulação, período, vento e energia são recalculados automaticamente. As melhores sessões ganham mais peso para aproximar o CODE das condições ideais deste pico; conforme o histórico cresce, o Confidence também aumenta.</div></div>
       </div>
-      <div class="code-metrics-grid">
-        <div class="code-metric-card"><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
-        <div class="code-metric-card"><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
-        <div class="code-metric-card"><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
-        <div class="code-metric-card"><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
+      <div class="code-learning-card"><div class="learning-kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M1 12h6m10 0h6"/></svg>CONDIÇÕES DO PICO</div><div class="code-metrics-grid">
+        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 27c6 0 8-4 10-10C17 6 29 7 31 16c-6-5-12 1-7 6 3 3 7 4 12 3M5 32h30"/></svg><span>Ondulação</span><b id="learnWave">Dados insuficientes</b></div>
+        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/></svg><span>Período</span><b id="learnPeriod">Dados insuficientes</b></div>
+        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 13h18c8 0 8-10 2-10-3 0-4 2-4 4M4 20h27c8 0 8 11 1 11-3 0-5-2-5-4M4 27h13c7 0 7 9 1 9"/></svg><span>Vento</span><b id="learnWind">Dados insuficientes</b></div>
+        <div class="code-metric-card"><svg class="detail-metric-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/></svg><span>Energia</span><b id="learnEnergy">Dados insuficientes</b></div>
+      </div>
       </div>
       <div class="code-confidence-card"><div class="code-confidence-head"><div><span>Confidence do CODE</span></div><div class="code-confidence-reading"><b id="codeConfValue" class="code-confidence-value">0%</b><span id="codeConfLevel" class="code-confidence-level">Baixa confiança</span></div></div><div class="confidence"><i id="confBar" style="width:0"></i></div></div>
     </section>
@@ -173,27 +175,32 @@
   <nav class="nav"><a href="#forecast"><span>≈</span>Previsão</a><a href="#spots"><span>⌖</span>Picos</a><a class="active" href="#alerts"><span>♢</span>Alertas</a><a class="nav-register" href="#register" aria-label="Register CODE"><span class="register-word">Register</span><span class="code-word">CODE</span></a></nav>
 </section>
 
-<div id="spotModal" class="modal"><div class="sheet">
-  <div class="spot-editor-head"><h2 id="modalTitle">Novo pico</h2><button id="closeSpotModal" class="spot-editor-close" type="button" aria-label="Fechar formulário do pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="sub">Marque o ponto e, se souber, salve um norte inicial do spot.</div>
-  <input id="spotName" class="field" maxlength="50" placeholder="Nome do pico">
-  <div class="section-label">FOTO DO PICO</div>
+<div id="spotModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet">
+  <div class="spot-editor-head"><h2 id="modalTitle">Novo pico</h2><button id="closeSpotModal" class="spot-editor-close" type="button" aria-label="Fechar formulário do pico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="spot-editor-body">
   <div class="spot-photo-editor">
     <div id="spotPhotoPreview" class="spot-photo-preview"><span>Sem foto personalizada</span></div>
     <input id="spotPhotoInput" type="file" accept="image/*" hidden>
     <button id="chooseSpotPhoto" class="btn secondary spot-photo-button" type="button">ESCOLHER FOTO</button>
   </div>
-  <div class="section-label">LOCALIZAÇÃO · RECOMENDADA</div><button id="openMapPicker" class="btn secondary" type="button">⌖ BUSCAR E MARCAR NO MAPA</button><div id="spotLocationSummary" class="location-summary">Nenhum local marcado</div><input id="spotLat" type="hidden"><input id="spotLon" type="hidden">
-  <div class="section-label">NORTE INICIAL · “OUÇO DIZER”</div>
-  <div class="form-grid"><input id="seedWaveMin" class="field" inputmode="decimal" placeholder="Onda mín. · m"><input id="seedWaveMax" class="field" inputmode="decimal" placeholder="Onda máx. · m"><input id="seedPeriodMin" class="field" inputmode="numeric" placeholder="Período mín. · s"><input id="seedPeriodMax" class="field" inputmode="numeric" placeholder="Período máx. · s"></div>
+  <label class="editor-field-label" for="spotName">Nome do pico</label><input id="spotName" class="field" maxlength="50" placeholder="Nome do pico">
+  <label class="editor-field-label" for="openMapPicker">Localização</label><button id="openMapPicker" class="btn secondary editor-map-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-8 8-14a8 8 0 0 0-16 0c0 6 8 14 8 14Z"/><circle cx="12" cy="8" r="3"/></svg>Buscar e marcar no mapa<svg class="map-button-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button><div id="spotLocationSummary" class="location-summary">Nenhum local marcado</div><input id="spotLat" type="hidden"><input id="spotLon" type="hidden">
+  <section class="editor-north"><h3>Norte inicial</h3><div class="section-label">PONTO DE PARTIDA DO CODE</div>
+  <div class="form-grid"><label class="editor-field-label" for="seedWaveMin">Onda mín. · m<input id="seedWaveMin" class="field" inputmode="decimal" placeholder="Ex.: 1,0"></label><label class="editor-field-label" for="seedWaveMax">Onda máx. · m<input id="seedWaveMax" class="field" inputmode="decimal" placeholder="Ex.: 2,0"></label><label class="editor-field-label" for="seedPeriodMin">Período mín. · s<input id="seedPeriodMin" class="field" inputmode="numeric" placeholder="Ex.: 8"></label><label class="editor-field-label" for="seedPeriodMax">Período máx. · s<input id="seedPeriodMax" class="field" inputmode="numeric" placeholder="Ex.: 12"></label></div>
   <fieldset class="swell-direction-picker"><legend>Swell ideal</legend><input id="seedSwellDir" type="hidden"><div class="swell-direction-grid"><label class="swell-direction-option"><input type="checkbox" value="N" data-swell-direction aria-label="N · Norte"><span aria-hidden="true">N</span></label><label class="swell-direction-option"><input type="checkbox" value="NNE" data-swell-direction aria-label="NNE · Norte-Nordeste"><span aria-hidden="true">NNE</span></label><label class="swell-direction-option"><input type="checkbox" value="NE" data-swell-direction aria-label="NE · Nordeste"><span aria-hidden="true">NE</span></label><label class="swell-direction-option"><input type="checkbox" value="ENE" data-swell-direction aria-label="ENE · Leste-Nordeste"><span aria-hidden="true">ENE</span></label><label class="swell-direction-option"><input type="checkbox" value="L" data-swell-direction aria-label="L · Leste"><span aria-hidden="true">L</span></label><label class="swell-direction-option"><input type="checkbox" value="ESE" data-swell-direction aria-label="ESE · Leste-Sudeste"><span aria-hidden="true">ESE</span></label><label class="swell-direction-option"><input type="checkbox" value="SE" data-swell-direction aria-label="SE · Sudeste"><span aria-hidden="true">SE</span></label><label class="swell-direction-option"><input type="checkbox" value="SSE" data-swell-direction aria-label="SSE · Sul-Sudeste"><span aria-hidden="true">SSE</span></label><label class="swell-direction-option"><input type="checkbox" value="S" data-swell-direction aria-label="S · Sul"><span aria-hidden="true">S</span></label><label class="swell-direction-option"><input type="checkbox" value="SSO" data-swell-direction aria-label="SSO · Sul-Sudoeste"><span aria-hidden="true">SSO</span></label><label class="swell-direction-option"><input type="checkbox" value="SO" data-swell-direction aria-label="SO · Sudoeste"><span aria-hidden="true">SO</span></label><label class="swell-direction-option"><input type="checkbox" value="OSO" data-swell-direction aria-label="OSO · Oeste-Sudoeste"><span aria-hidden="true">OSO</span></label><label class="swell-direction-option"><input type="checkbox" value="O" data-swell-direction aria-label="O · Oeste"><span aria-hidden="true">O</span></label><label class="swell-direction-option"><input type="checkbox" value="ONO" data-swell-direction aria-label="ONO · Oeste-Noroeste"><span aria-hidden="true">ONO</span></label><label class="swell-direction-option"><input type="checkbox" value="NO" data-swell-direction aria-label="NO · Noroeste"><span aria-hidden="true">NO</span></label><label class="swell-direction-option"><input type="checkbox" value="NNO" data-swell-direction aria-label="NNO · Norte-Noroeste"><span aria-hidden="true">NNO</span></label></div><p class="swell-direction-hint">Selecione as direções que funcionam no pico.</p></fieldset>
   <label class="wind-policy-label" for="seedWindMode">Regra do vento</label><select id="seedWindMode" class="field"><option value="flexible">Flexível · aceita vento fraco</option><option value="strict">Exigente · direção obrigatória</option></select><p id="windPolicyHint" class="swell-direction-hint"></p>
   <div id="windLightLimit"><label class="wind-policy-label" for="seedLightWindMax">Vento fraco tolerado até</label><div class="session-edit-value"><input id="seedLightWindMax" class="field" inputmode="decimal" value="3" aria-label="Vento fraco tolerado até, em nós"><span class="session-unit">nós</span></div></div>
-  <input id="seedWindDir" class="field" placeholder="Vento ideal · ex. L">
+  <label class="wind-policy-label" for="seedWindDir">Direção do vento ideal</label><input id="seedWindDir" class="field" placeholder="Ex.: L">
   <label class="wind-policy-label" for="seedWindMin">Vento acima de (nós, opcional)</label><input id="seedWindMin" class="field" inputmode="decimal" placeholder="Ex.: 5 exige mais de 5 nós" disabled>
-  <input id="seedWindMax" class="field" inputmode="decimal" placeholder="Vento máx. bom · nós (opcional)"><textarea id="seedNote" class="field" rows="3" placeholder="Ex.: dizem que funciona com sul longo e terral fraco"></textarea>
+  <label class="wind-policy-label" for="seedWindMax">Vento máximo · nós (opcional)</label><input id="seedWindMax" class="field" inputmode="decimal" placeholder="Ex.: 10">
+  </section>
+  <label class="editor-field-label" for="seedNote">Observações do pico</label><textarea id="seedNote" class="field" rows="3" placeholder="Ex.: dizem que funciona com sul longo e terral fraco"></textarea>
   <div class="hintbox">Energia é calculada automaticamente. O norte inicial começa com baixa confiança e perde peso conforme entram sessões reais.</div>
+  </div>
+  <div class="spot-editor-actions">
   <div class="sheet-actions"><button id="cancelSpot" class="btn secondary">CANCELAR</button><button id="saveSpot" class="btn">SALVAR</button></div>
   <button id="deleteSpotInModal" class="btn danger modal-delete hidden" type="button">EXCLUIR PICO</button>
+  </div>
 </div></div>
 
 <div id="mapModal" class="modal"><div class="sheet">
@@ -205,6 +212,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017calmlimit1"></script>
-<script src="app.js?v=20261018forecastalerts1"></script>
+<script src="app.js?v=20261018spotinterior1"></script>
 </body>
 </html>
