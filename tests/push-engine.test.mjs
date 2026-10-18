@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { firstLead,evaluate,angleDistance,directions,leadFor,shouldNotify } from '../supabase/functions/code-push/engine.js';
-const conditions={wave:2.3,period:12,wind:4,waveDir:180,windDir:90,energy:3320};
+const conditions={wave:2.3,period:12,wind:3,waveDir:180,windDir:90,energy:3320};
 const spot={id:'test',seed:{waveMin:2,periodMin:10,swellDir:'S/SE',windDir:'L'}};
 test('seed matches all measured variables jointly',()=>{
  assert.equal(evaluate(conditions,spot).favorable,true);
