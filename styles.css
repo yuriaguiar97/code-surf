@@ -243,7 +243,13 @@ body:has(#spots:target){padding-bottom:0;background:#05090b}
 #spots .spots-list{gap:10px;margin-top:0}
 .spot-card.spot-card-button{position:relative;isolation:isolate;display:grid;grid-template-columns:34% minmax(0,1fr);align-items:stretch;gap:0;width:100%;min-height:132px;padding:0;overflow:hidden;border:1px solid rgba(175,196,204,.23);border-radius:12px;background:linear-gradient(135deg,#101719,#090e10);box-shadow:0 8px 24px rgba(0,0,0,.12);backdrop-filter:none}
 .spot-card:after{content:'';position:absolute;z-index:0;right:-4px;top:0;width:42%;height:100%;background:url('assets/code-contours.svg') right center/auto 135% no-repeat;opacity:.16;pointer-events:none}
-.spot-card .spot-thumb{position:relative;z-index:1;display:block;align-self:stretch;width:auto;height:auto;min-height:100%;border:0;border-radius:0;background-image:linear-gradient(0deg,rgba(2,8,10,.1),rgba(2,8,10,.1)),var(--spot-img);background-size:cover;background-position:center;filter:saturate(.6)}
+.spot-card .spot-thumb{position:relative;z-index:1;display:block;align-self:stretch;width:auto;height:auto;min-height:100%;border:0;border-radius:0;background:none;filter:none;--spot-photo-filter:grayscale(1) brightness(.62)}
+/* Filter only the photograph, not its index, reticle or the dossier content. */
+.spot-card .spot-thumb:before{content:'';position:absolute;inset:0;z-index:-1;background-image:var(--spot-img);background-size:cover;background-position:center;filter:var(--spot-photo-filter);transition:filter .45s ease;pointer-events:none}
+.spot-card.spot-state-on .spot-thumb{--spot-photo-filter:grayscale(0) saturate(1) brightness(1)}
+.spot-card.spot-state-radar .spot-thumb,.spot-card.spot-state-swell .spot-thumb{--spot-photo-filter:grayscale(.4) saturate(.8) brightness(.88)}
+.spot-card.spot-state-off .spot-thumb,.spot-card.spot-state-unavailable .spot-thumb,.spot-card.spot-state-insufficient .spot-thumb{--spot-photo-filter:grayscale(1) brightness(.62)}
+@media(prefers-reduced-motion:reduce){.spot-card .spot-thumb:before{transition:none}}
 .spot-index{position:absolute;top:10px;left:8px;font-size:9px;font-weight:400;line-height:1;color:#bac6cb;letter-spacing:.02em}
 .photo-crosshair{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);width:20px;height:20px;fill:none;stroke:#dce7e7;stroke-width:.7;opacity:.38}
 .spot-card .spot-main{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;padding:14px 12px 12px}
