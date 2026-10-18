@@ -16,7 +16,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261018refinement2">
+<link rel="stylesheet" href="styles.css?v=20261018forecastpolish1">
 <link rel="stylesheet" href="typography.css?v=20261018refinement2">
 </head>
 <body>
@@ -47,7 +47,7 @@
 </section>
 
 <section id="forecast" class="screen">
-  <header class="top design-top"><div class="spots-brand"><div class="logo">CODE</div><div class="spots-tagline">EVERY SPOT HAS A CODE</div></div><div style="display:flex;align-items:center;gap:8px"><div class="place">UBATUBA</div><button id="refreshForecast" class="ghost-btn" aria-label="Atualizar previsão">↻</button></div></header>
+  <header class="top design-top"><div class="spots-brand"><div class="logo">CODE</div><div class="spots-tagline">EVERY SPOT HAS A CODE</div></div><div style="display:flex;align-items:center;gap:8px"><div class="place"><svg class="location-marker" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 1v22M1 12h22"/></svg>UBATUBA</div><button id="refreshForecast" class="ghost-btn" aria-label="Atualizar previsão">↻</button></div></header>
   <main class="content">
     <h1>Previsão</h1><div class="sub">Próximos 7 dias · escolha o dia para ver a leitura completa</div>
     <div class="forecast-switch" role="tablist" aria-label="Fonte de previsão"><button id="codeForecastTab" type="button" role="tab" aria-controls="codeForecastPanel" aria-selected="true" class="active">CODE</button><button id="windguruForecastTab" type="button" role="tab" aria-controls="windguruForecastPanel" aria-selected="false">Windguru</button></div>
@@ -62,8 +62,8 @@
         <div id="swellDirCard" class="metric-card"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14"/><path d="m26 13-4 11-9 3 4-11 9-3ZM20 3v3M20 34v3M3 20h3M34 20h3"/></svg></div><small>Direção</small><strong id="swellDir">—</strong><div class="metric-sub" id="swellDirDeg">—</div></div>
         <div id="periodCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="13"/><path d="M20 14v8l6 4M16 4h8M20 4v5M30 10l3-3"/></svg></div><small>Período</small><strong id="period">—</strong><div class="metric-sub">—</div></div>
         <div id="windCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 13h18c8 0 8-10 2-10-3 0-4 2-4 4M4 20h27c8 0 8 11 1 11-3 0-5-2-5-4M4 27h13c7 0 7 9 1 9"/></svg></div><small>Vento</small><strong id="wind">—</strong><div class="metric-sub">—</div></div>
-        <div id="energyCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/><path d="M6 9 3 6M31 32l4 3"/></svg></div><small>Energia</small><strong id="energy">—</strong><div class="metric-sub">J/m²</div></div>
-        <div id="tideCard" class="metric-card"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 24c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0M3 32c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0M20 18V4m-5 5 5-5 5 5"/></svg></div><small>Maré</small><strong id="tideNow">—</strong><div class="metric-sub">próxima cheia/baixa</div></div>
+        <div id="energyCard" class="metric-card quality"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="m23 3-15 20h11l-2 14 15-21H21l2-13Z"/></svg></div><small>Energia</small><strong id="energy">—</strong><div class="metric-sub">J/m²</div></div>
+        <div id="tideCard" class="metric-card"><div class="metric-icon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 16c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0M3 24c3-3 6-3 9 0s6 3 9 0 6-3 9 0 5 3 7 0"/></svg></div><small>Maré</small><strong id="tideNow">—</strong><div class="metric-sub">próxima cheia/baixa</div></div>
       </div>
       <div class="summary-line"><span>Fonte da leitura</span><b id="summarySource">—</b></div>
     </div>
