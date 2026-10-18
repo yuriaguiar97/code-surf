@@ -175,11 +175,30 @@ body:has(#spot:target) { background: #05090b; padding-bottom: 0; }
 #spotModal :is(.swell-direction-hint,.hintbox) { color: #98aeb9; }
 #spotModal .hintbox { background: #0b161b88; border: 1px solid #304149; border-radius: 9px; padding: 12px; }
 #spotModal .spot-editor-actions { position: sticky; z-index: 2; bottom: 0; padding: 10px 16px max(10px,env(safe-area-inset-bottom)); background: #111b21f5; border-top: 1px solid #34434a; }
+#spotModal:has(#spotDeleteConfirm:not([hidden])) .spot-editor-actions { display: none; }
 #spotModal .sheet-actions { grid-template-columns: 1fr 1.4fr; gap: 9px; }
 #spotModal .sheet-actions .btn { margin: 0; min-height: 44px; border-radius: 9px; }
 #spotModal #saveSpot { color: #b4f1e9; background: #1b625c40; border: 1px solid #59bfb5; }
 #spotModal #cancelSpot { background: #0d181f; border-color: #35464e; color: #c4d3db; }
-#spotModal #deleteSpotInModal { display: block; width: auto; min-height: 32px; margin: 7px auto 0; padding: 6px 12px; background: none; border: 0; color: #e8a3a1; }
+#spotModal [hidden] { display: none !important; }
+#spotModal .spot-danger-zone { margin: 24px 0 0; border: 1px solid #35434b; border-radius: 10px; background: #0b151b80; }
+#spotModal .spot-danger-zone>summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; color: #afc0c8; font-size: var(--type-body); font-weight: var(--weight-label); cursor: pointer; list-style: none; }
+#spotModal .spot-danger-zone>summary::-webkit-details-marker { display: none; }
+#spotModal .spot-danger-zone>summary svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+#spotModal .spot-danger-zone[open]>summary svg { transform: rotate(180deg); }
+#spotModal .spot-danger-zone>summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: -3px; border-radius: 10px; }
+#spotModal .spot-danger-body { padding: 0 15px 15px; }
+#spotModal .spot-danger-body p { margin: 0 0 12px; color: var(--muted); font-size: var(--type-label); line-height: var(--leading-body); }
+#spotModal #deleteSpotInModal { display: block; min-height: 44px; margin: 0; padding: 10px 12px; background: #6c363316; border: 1px solid #92666380; border-radius: 8px; color: #e8a3a1; }
+#spotModal #spotDeleteConfirm { border-top: 1px solid #514247; margin-top: 4px; padding-top: 16px; }
+#spotModal #spotDeleteConfirm h3 { margin: 0 0 9px; font-size: var(--type-field); font-weight: var(--weight-heading); color: #e8c6c2; }
+#spotModal #spotDeleteNameLabel { display: block; color: var(--text); font-size: var(--type-body); margin-top: 6px; overflow-wrap: anywhere; }
+#spotModal .spot-delete-confirm-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; margin-top: 14px; }
+#spotModal .spot-delete-confirm-actions button { min-height: 44px; border-radius: 8px; margin: 0; }
+#spotModal #confirmSpotDelete { border: 1px solid #c58b85; color: #f4d5d1; background: #70332d55; }
+#spotModal #confirmSpotDelete:disabled { opacity: .35; cursor: default; }
+#spotModal .spot-danger-body .spot-delete-error { margin-top: 12px; margin-bottom: 0; color: #efaca4; }
+#spotModal .spot-delete-error:empty { display: none; }
 #mapModal .sheet { border-color: var(--spot-border); background: var(--spot-surface); }
 #mapModal .field { border-color: #35454e; background: #0c171d; border-radius: 9px; }
 @media(min-width:620px) {
