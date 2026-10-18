@@ -16,8 +16,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/code-32.png?v=20261008logo1">
 <link rel="icon" href="icons/favicon.ico?v=20261008logo1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css?v=20261018forecastpolish1">
-<link rel="stylesheet" href="spot-design.css?v=20261018rangelayout1">
+<link rel="stylesheet" href="styles.css?v=20261018alertsdelete1">
+<link rel="stylesheet" href="spot-design.css?v=20261018alertsdelete1">
 <link rel="stylesheet" href="typography.css?v=20261018refinement2">
 </head>
 <body>
@@ -161,7 +161,7 @@
     <div class="alerts-heading"><h1>Alertas</h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17h14l-2-4V9a5 5 0 0 0-10 0v4l-2 4ZM10 21h4M12 2v2"/></svg></div>
     <div class="card alerts-card"><div class="toggle-row"><div><b>Alertas ativos</b></div><label class="switch"><input id="globalAlert" type="checkbox" aria-label="Alertas ativos" checked><span class="slider"></span></label></div></div>
     <h2>Picos monitorados</h2><div class="sub alerts-subtitle">Você receberá um alerta quando as condições estiverem favoráveis.</div><div id="alertsList" class="card alerts-card"></div>
-    <h2>Primeiro aviso</h2><div class="card alerts-card alert-leads-card" id="alertLeads" role="radiogroup" aria-label="Primeiro aviso"><label class="toggle-row first-alert-option"><b>7 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="168" aria-label="Avisar 7 dias antes"></label><label class="toggle-row first-alert-option"><b>5 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="120" aria-label="Avisar 5 dias antes"></label><label class="toggle-row first-alert-option"><b>3 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="72" aria-label="Avisar 3 dias antes"></label><label class="toggle-row first-alert-option"><b>2 dias antes</b><input type="radio" name="firstAlertLead" data-alert-lead="48" aria-label="Avisar 2 dias antes"></label><label class="toggle-row first-alert-option"><b>1 dia antes</b><input type="radio" name="firstAlertLead" data-alert-lead="24" aria-label="Avisar 1 dia antes"></label></div>
+    <div class="card alerts-card alert-leads-card" id="alertLeads" role="radiogroup" aria-labelledby="alertLeadsTitle"><h2 id="alertLeadsTitle">Primeiro aviso</h2><div class="alert-lead-columns"><div class="alert-lead-column"><label class="toggle-row first-alert-option"><input type="radio" name="firstAlertLead" data-alert-lead="168" aria-label="Avisar 7 dias antes"><b>7 dias antes</b></label><label class="toggle-row first-alert-option"><input type="radio" name="firstAlertLead" data-alert-lead="120" aria-label="Avisar 5 dias antes"><b>5 dias antes</b></label><label class="toggle-row first-alert-option"><input type="radio" name="firstAlertLead" data-alert-lead="72" aria-label="Avisar 3 dias antes"><b>3 dias antes</b></label></div><div class="alert-lead-column"><label class="toggle-row first-alert-option"><input type="radio" name="firstAlertLead" data-alert-lead="48" aria-label="Avisar 2 dias antes"><b>2 dias antes</b></label><label class="toggle-row first-alert-option"><input type="radio" name="firstAlertLead" data-alert-lead="24" aria-label="Avisar 1 dia antes"><b>1 dia antes</b></label></div></div></div>
     <div class="card alerts-card"><div class="toggle-row"><div><b>Monitoramento do swell</b><small>Atualizações enquanto houver compatibilidade. Avisaremos se mudar ou voltar.</small></div><label class="switch"><input id="dailyAlert" type="checkbox" aria-label="Monitoramento do swell"><span class="slider"></span></label></div></div>
     <div class="card alerts-card push-card"><button id="activatePush" class="btn" type="button">ATIVAR NOTIFICAÇÕES</button><button id="testPush" class="btn secondary" type="button" hidden>ENVIAR NOTIFICAÇÃO DE TESTE</button><p id="pushStatus" class="sub" role="status" aria-live="polite">Ative as notificações neste aparelho para receber os alertas.</p></div>
     <div class="version">2026.10.12 · CODE</div>
@@ -190,10 +190,10 @@
   </section>
   <label class="editor-field-label" for="seedNote">Observações do pico</label><textarea id="seedNote" class="field" rows="3" placeholder="Ex.: dizem que funciona com sul longo e terral fraco"></textarea>
   <div class="hintbox">Energia é calculada automaticamente. O norte inicial começa com baixa confiança e perde peso conforme entram sessões reais.</div>
+  <details id="spotDangerZone" class="spot-danger-zone hidden"><summary>Ações do pico<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="spot-danger-body"><p>A exclusão remove o pico e todo o histórico de sessões dele.</p><button id="deleteSpotInModal" class="btn danger modal-delete" type="button">Excluir este pico</button><div id="spotDeleteConfirm" hidden><h3>Excluir este pico?</h3><p id="spotDeleteImpact"></p><label class="editor-field-label" for="spotDeleteName">Digite o nome abaixo para confirmar:<strong id="spotDeleteNameLabel"></strong></label><input id="spotDeleteName" class="field" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Nome exato do pico"><div class="spot-delete-confirm-actions"><button id="cancelSpotDelete" class="ghost-btn" type="button">Manter pico</button><button id="confirmSpotDelete" class="btn danger" type="button" disabled>Confirmar exclusão</button></div><p id="spotDeleteError" class="spot-delete-error" role="alert"></p></div></div></details>
   </div>
   <div class="spot-editor-actions">
   <div class="sheet-actions"><button id="cancelSpot" class="btn secondary">CANCELAR</button><button id="saveSpot" class="btn">SALVAR</button></div>
-  <button id="deleteSpotInModal" class="btn danger modal-delete hidden" type="button">EXCLUIR PICO</button>
   </div>
 </div></div>
 
@@ -206,6 +206,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="code-engine.js?v=20261017calmlimit1"></script>
-<script src="app.js?v=20261018rangelayout1"></script>
+<script src="app.js?v=20261018alertsdelete1"></script>
 </body>
 </html>

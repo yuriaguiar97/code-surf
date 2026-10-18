@@ -345,6 +345,16 @@ body:has(#spots:target){padding-bottom:0;background:#05090b}
 #alerts .first-alert-option{min-height:46px;border-bottom:1px solid #2a363d;gap:8px}
 #alerts .first-alert-option:last-child{border-bottom:0}
 #alerts .first-alert-option input{width:18px;height:18px;flex-shrink:0}
+#alerts #alertLeads{display:block;margin:24px 0 12px;padding:16px;background:linear-gradient(125deg,#172128,#0d1519)}
+#alerts #alertLeads h2{margin:0 0 12px}
+#alerts .alert-lead-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#alerts .alert-lead-column{min-width:0}
+#alerts .alert-lead-column+.alert-lead-column{border-left:1px solid #34434a;padding-left:16px}
+#alerts #alertLeads .first-alert-option{justify-content:flex-start;gap:10px;min-height:34px;padding:7px 0;border:0}
+#alerts #alertLeads .first-alert-option b{font-weight:var(--weight-body)}
+#alerts #alertLeads .first-alert-option input{appearance:none;-webkit-appearance:none;width:19px;height:19px;margin:0;border:1.5px solid #a4b2bb;border-radius:50%;background:transparent}
+#alerts #alertLeads .first-alert-option input:checked{border-color:#5fe9df;background:radial-gradient(circle,#5fe9df 0 4px,transparent 4.5px)}
+#alerts #alertLeads .first-alert-option input:focus-visible{outline:2px solid #5fe9df;outline-offset:3px}
 #alerts .push-card{margin-top:20px;padding:14px}
 #alerts #activatePush{border:1px solid #418f94;background:rgba(63,167,174,.08);color:#bdeee8;border-radius:9px;font-size:11px;letter-spacing:.08em}
 #alerts #pushStatus{font-size:11px;line-height:1.6;margin-bottom:0}

@@ -383,10 +383,49 @@ async function chooseSpotPhoto(file){if(!file)return;try{const photo=await compr
 function syncSwellDirections(){$('seedSwellDir').value=[...document.querySelectorAll('[data-swell-direction]')].filter(input=>input.checked).map(input=>input.value).join('/')}
 function setSwellDirections(value=''){const selected=new Set(CODEEngine.directions(value));document.querySelectorAll('[data-swell-direction]').forEach(input=>{input.checked=selected.has(CODEEngine.directions(input.value)[0])});syncSwellDirections()}
 function updateWindPolicyUI(){const strict=$('seedWindMode').value==='strict',limit=numField('seedLightWindMax')??3;$('seedWindMin').disabled=!strict;$('windLightLimit').hidden=strict;$('seedLightWindMax').disabled=strict;$('windPolicyHint').textContent=strict?'Exige a direção cadastrada, mesmo com vento fraco. O mínimo é exclusivo: 5 exige mais de 5 nós.':`Até ${limit} nós aceita qualquer direção; acima disso exige o vento ideal cadastrado. Sem direção cadastrada, aguarda vento mais fraco.`;}
-function openSpotEditor(id=null){state.editingSpotId=id;const spot=storage.spots().find(s=>s.id===id),seed=spot?.seed||{};state.pendingSpotPhoto=spot?.photo||null;updateSpotPhotoPreview(state.pendingSpotPhoto,spot?spotImage(storage.spots().findIndex(s=>s.id===id),spot.name):'');if($('chooseSpotPhoto'))$('chooseSpotPhoto').textContent=spot?'ALTERAR FOTO':'ESCOLHER FOTO';$('modalTitle').textContent=spot?'Editar pico':'Novo pico';$('spotName').value=spot?.name||'';$('spotLat').value=spot?.lat??'';$('spotLon').value=spot?.lon??'';$('seedWaveMin').value=seed.waveMin??'';$('seedWaveMax').value=seed.waveMax??'';$('seedPeriodMin').value=seed.periodMin??'';$('seedPeriodMax').value=seed.periodMax??'';setSwellDirections(seed.swellDir??'');$('seedWindDir').value=seed.windDir??'';$('seedWindMode').value=seed.windMode==='strict'?'strict':'flexible';$('seedWindMin').value=seed.windMin??'';$('seedLightWindMax').value=CODEEngine.lightWindLimit(seed);updateWindPolicyUI();$('seedWindMax').value=seed.windMax??'';$('seedNote').value=seed.note??'';updateLocationSummary();$('deleteSpotInModal').classList.toggle('hidden',!spot);$('spotModal').classList.add('show');$('spotModal').querySelector('.sheet').scrollTop=0;setTimeout(()=>$('spotName').focus(),50)}
-function closeSpotEditor(){$('spotModal').classList.remove('show');state.editingSpotId=null;state.pendingSpotPhoto=null}
+let spotDeletionTarget=null,spotDeletionPending=false;
+function cancelSpotDeletion(focus=false){
+  if(spotDeletionPending)return;
+  spotDeletionTarget=null;$('spotDeleteConfirm').hidden=true;$('spotDeleteName').value='';
+  $('confirmSpotDelete').disabled=true;$('spotDeleteError').textContent='';$('saveSpot').disabled=false;
+  $('deleteSpotInModal').classList.remove('hidden');
+  if(focus)$('deleteSpotInModal').focus();
+}
+function spotDeletionReady(){
+  const spot=spotDeletionTarget&&storage.spots().find(s=>s.id===spotDeletionTarget.id);
+  return !spotDeletionPending&&!!spot&&state.editingSpotId===spot.id&&spot.name===spotDeletionTarget.name&&$('spotDangerZone').open&&!$('spotDeleteConfirm').hidden&&$('spotDeleteName').value.trim()===spot.name;
+}
+function updateSpotDeletion(){$('confirmSpotDelete').disabled=!spotDeletionReady()}
+function configureSpotDeletion(spot){
+  cancelSpotDeletion();const zone=$('spotDangerZone');zone.open=false;zone.classList.toggle('hidden',!spot);
+  zone.ontoggle=()=>{if(!zone.open)cancelSpotDeletion()};
+  $('spotDeleteName').oninput=updateSpotDeletion;
+  $('cancelSpotDelete').onclick=()=>cancelSpotDeletion(true);
+  $('confirmSpotDelete').onclick=confirmSpotDeletion;
+}
+function openSpotEditor(id=null){
+  if(spotDeletionPending)return;
+  state.editingSpotId=id;
+  const spot=storage.spots().find(s=>s.id===id),seed=spot?.seed||{};
+  configureSpotDeletion(spot);
+  state.pendingSpotPhoto=spot?.photo||null;
+  updateSpotPhotoPreview(state.pendingSpotPhoto,spot?spotImage(storage.spots().findIndex(s=>s.id===id),spot.name):'');
+  if($('chooseSpotPhoto'))$('chooseSpotPhoto').textContent=spot?'ALTERAR FOTO':'ESCOLHER FOTO';
+  $('modalTitle').textContent=spot?'Editar pico':'Novo pico';$('spotName').value=spot?.name||'';
+  $('spotLat').value=spot?.lat??'';$('spotLon').value=spot?.lon??'';
+  $('seedWaveMin').value=seed.waveMin??'';$('seedWaveMax').value=seed.waveMax??'';
+  $('seedPeriodMin').value=seed.periodMin??'';$('seedPeriodMax').value=seed.periodMax??'';
+  setSwellDirections(seed.swellDir??'');$('seedWindDir').value=seed.windDir??'';
+  $('seedWindMode').value=seed.windMode==='strict'?'strict':'flexible';
+  $('seedWindMin').value=seed.windMin??'';$('seedLightWindMax').value=CODEEngine.lightWindLimit(seed);
+  updateWindPolicyUI();$('seedWindMax').value=seed.windMax??'';$('seedNote').value=seed.note??'';
+  updateLocationSummary();$('spotModal').classList.add('show');$('spotModal').querySelector('.sheet').scrollTop=0;
+  setTimeout(()=>$('spotName').focus(),50);
+}
+function closeSpotEditor(){if(spotDeletionPending)return;cancelSpotDeletion();$('spotModal').classList.remove('show');state.editingSpotId=null;state.pendingSpotPhoto=null}
 function numField(id){const v=$(id).value.trim().replace(',','.');return v===''?null:Number(v)}
 async function saveSpot(){
+  if(spotDeletionPending)return;
   const name=$('spotName').value.trim();if(!name)return alert('Dê um nome ao pico.');
   const lat=numField('spotLat'),lon=numField('spotLon'),seed={waveMin:numField('seedWaveMin'),waveMax:numField('seedWaveMax'),periodMin:numField('seedPeriodMin'),periodMax:numField('seedPeriodMax'),swellDir:$('seedSwellDir').value.trim(),windDir:$('seedWindDir').value.trim(),windMode:$('seedWindMode').value,lightWindMax:$('seedWindMode').value==='strict'?null:(numField('seedLightWindMax')??3),windMin:$('seedWindMode').value==='strict'?numField('seedWindMin'):null,windMax:numField('seedWindMax'),note:$('seedNote').value.trim()},hasSeed=Object.entries(seed).some(([k,v])=>!['windMode','lightWindMax'].includes(k)&&v!==null&&v!=='');
   if(seed.windMode!=='strict'&&$('seedLightWindMax').value.trim()&&(numField('seedLightWindMax')===null||seed.lightWindMax<0||seed.lightWindMax>200))return alert('Informe uma tolerância de vento entre 0 e 200 nós.');
@@ -406,11 +445,36 @@ async function saveSpot(){
   }catch(err){console.error(err);alert('Não consegui salvar o pico no CODE compartilhado. Confira sua conexão e tente novamente.')}
   finally{if(btn){btn.disabled=false;btn.textContent='SALVAR'}}
 }
-async function deleteSpot(id){
-  const spots=storage.spots(),spot=spots.find(s=>s.id===id);if(!spot)return;if(!confirm(`Excluir ${spot.name} e todo o histórico deste pico?`))return;
-  try{await sharedRequest('delete_spot',{spotId:id})}catch(err){console.error(err);alert('Não consegui excluir o pico do CODE compartilhado. Tente novamente.');return}
-  storage.setSpots(spots.filter(s=>s.id!==id));storage.setSessions(storage.sessions().filter(s=>s.spotId!==id));
-  if(state.currentSpotId===id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}if(state.editingSpotId===id)closeSpotEditor();renderSpots();renderSpotDetail();
+function deleteSpot(id){
+  if(spotDeletionPending)return;
+  const spot=storage.spots().find(s=>s.id===id);if(!spot)return;
+  if(state.editingSpotId!==id||!$('spotModal').classList.contains('show'))openSpotEditor(id);
+  spotDeletionTarget={id:spot.id,name:spot.name};
+  const count=storage.sessions().filter(s=>s.spotId===id).length;
+  $('spotDeleteImpact').textContent=`Este pico e ${count} ${plural(count,'sessão registrada','sessões registradas')} serão excluídos.`;
+  $('spotDeleteNameLabel').textContent=spot.name;$('spotDeleteName').value='';$('spotDeleteError').textContent='';
+  $('spotDangerZone').open=true;$('spotDeleteConfirm').hidden=false;$('deleteSpotInModal').classList.add('hidden');
+  $('saveSpot').disabled=true;updateSpotDeletion();$('spotDeleteName').focus();
+  $('spotDeleteConfirm').scrollIntoView?.({block:'nearest'});
+}
+async function confirmSpotDeletion(){
+  if(!spotDeletionReady())return;
+  const target={...spotDeletionTarget};spotDeletionPending=true;
+  const controls=['confirmSpotDelete','cancelSpotDelete','spotDeleteName','saveSpot','cancelSpot','closeSpotModal'];
+  controls.forEach(id=>$(id).disabled=true);$('confirmSpotDelete').textContent='Excluindo…';$('spotDeleteError').textContent='';
+  let deleted=false;
+  try{
+    await sharedRequest('delete_spot',{spotId:target.id});
+    storage.setSpots(storage.spots().filter(s=>s.id!==target.id));
+    storage.setSessions(storage.sessions().filter(s=>s.spotId!==target.id));
+    if(state.currentSpotId===target.id){state.currentSpotId='';localStorage.removeItem('code_current_spot')}
+    deleted=true;
+  }catch(err){console.error(err);$('spotDeleteError').textContent='Não foi possível confirmar a exclusão. Confira sua conexão e tente novamente.'}
+  finally{
+    spotDeletionPending=false;controls.forEach(id=>$(id).disabled=false);$('confirmSpotDelete').textContent='Confirmar exclusão';
+    if(deleted){closeSpotEditor();renderSpots();renderSpotDetail();if(!state.currentSpotId&&location.hash==='#spot')location.hash='spots'}
+    else{$('saveSpot').disabled=true;updateSpotDeletion()}
+  }
 }
 function updateLocationSummary(){const lat=$('spotLat').value,lon=$('spotLon').value,ok=lat!==''&&lon!=='';$('spotLocationSummary').classList.toggle('marked',ok);$('spotLocationSummary').textContent=ok?`Ponto marcado · ${Number(lat).toFixed(5)}, ${Number(lon).toFixed(5)}`:'Nenhum local marcado'}
 function openMap(){const lat=Number($('spotLat').value),lon=Number($('spotLon').value),has=$('spotLat').value!==''&&$('spotLon').value!==''&&Number.isFinite(lat)&&Number.isFinite(lon);state.pendingPoint=has?{lat,lon}:null;$('mapResults').innerHTML='';$('mapSearch').value='';$('mapModal').classList.add('show');setTimeout(()=>{if(!window.L){$('mapCoords').textContent='Mapa indisponível. Tente novamente em alguns segundos.';return}if(!state.map){state.map=L.map('mapCanvas',{zoomControl:true}).setView(has?[lat,lon]:[CFG.lat,CFG.lon],has?16:11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(state.map);state.map.on('click',e=>setMapPoint(e.latlng.lat,e.latlng.lng,'Ponto marcado'))}else{state.map.invalidateSize();state.map.setView(has?[lat,lon]:[CFG.lat,CFG.lon],has?16:11)}if(has)setMapPoint(lat,lon,'Ponto atual');else{$('mapCoords').textContent='Busque uma praia ou toque no mapa para marcar o pico.';if(state.mapMarker){state.map.removeLayer(state.mapMarker);state.mapMarker=null}}},120)}
