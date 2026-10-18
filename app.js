@@ -252,7 +252,7 @@ function renderHistory(sessions){
   history.innerHTML=sessions.length?sortedHistory(sessions,mode).map(session=>{
     const time=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(session.ts||'')?' · '+esc(session.ts.slice(11,16)):'';
     return `<details class="history-item" data-session-id="${esc(session.id)}"${openIds.has(String(session.id))||state.historyEditMode?' open':''}>
-      <summary class="history-head"><span class="history-session-meta"><b>${esc(session.date)}${time}</b><small>${session.registeredBy?'por '+esc(session.registeredBy):'Sessão registrada'}</small></span><span class="history-score"><span>Nota da sessão</span><strong>${esc(session.score)}<span>/10</span></strong></span><svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <summary class="history-head"><span class="history-session-meta"><b>${esc(session.date)}${time}</b><small>${session.registeredBy?'por '+esc(session.registeredBy):'Sessão registrada'}</small></span><span class="history-grade"><span class="history-grade-label">Nota da sessão</span><span class="history-score"><strong>${esc(session.score)}<span>/10</span></strong></span></span><svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
       <div class="history-body"><div class="history-grid">
         <div><span>Ondulação</span><b>${fmt(session.wave)} m · ${dir(session.waveDir)} ${fmt(session.waveDir,0)}°</b></div>
         <div><span>Período</span><b>${fmt(session.period,0)} s</b></div>
