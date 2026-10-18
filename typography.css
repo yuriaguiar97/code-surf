@@ -1,0 +1,268 @@
+/* CODE type system. Load after component styles. These roles apply to every
+   screen and editor; logos and navigation glyphs retain their brand styling. */
+:root {
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --type-micro: 10px;
+  --type-label: 12px;
+  --type-body: 14px;
+  --type-field: 16px;
+  --type-section: 20px;
+  --type-title: 30px;
+  --type-value: 25px;
+  --weight-body: 400;
+  --weight-label: 600;
+  --weight-value: 750;
+  --weight-heading: 800;
+  --leading-body: 1.5;
+  --leading-heading: 1.2;
+}
+html, body, button, input, textarea, select, .leaflet-container, svg text {
+  font-family: var(--font-ui);
+}
+body {
+  font-size: var(--type-body);
+  font-weight: var(--weight-body);
+}
+:is(.screen, .modal, .pin-card) :is(input, textarea, select) {
+  font-family: var(--font-ui);
+}
+/* Page and section headings: no per-tab font or weight. */
+:is(#forecast, #spots, #spot, #register, #alerts).screen h1 {
+  font-size: var(--type-title);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: -.025em;
+}
+:is(#forecast, #spots, #spot, #register, #alerts).screen h2,
+:is(#spotModal, #mapModal, #pinGate) h2 {
+  font-size: var(--type-section);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: -.02em;
+}
+/* Repeated card headings and sub-navigation use the same semibold role. */
+:is(#forecast, #spots, #spot, #register, #alerts).screen :is(.spot-title, .spot-card .spot-name) {
+  font-size: var(--type-section);
+  font-weight: var(--weight-value);
+  line-height: var(--leading-heading);
+  letter-spacing: -.02em;
+}
+:is(#forecast, #spots, #spot, #register, #alerts).screen :is(.spot-tab, .forecast-switch button) {
+  font-size: var(--type-body);
+  font-weight: var(--weight-label);
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+/* Body copy, helper text and form fields. 16px fields avoid iOS focus zoom. */
+:is(#forecast, #spots, #spot, #register, #alerts, #spotModal, #mapModal, #pinGate) :is(.sub, .panel-copy, .history-comment, .code-info-copy, .notice) {
+  font-size: var(--type-body);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+}
+:is(#forecast, #spots, #spot, #register, #alerts, #spotModal, #mapModal, #pinGate) :is(.field, .session-time-fields .field, .session-inline-input, .session-edit-grid .field) {
+  font-size: var(--type-field);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+}
+:is(#spot, #register, #spotModal, #mapModal) :is(.session-time-fields label, .wind-policy-label, .swell-direction-picker legend, .session-edit-grid label, .capture small, .code-metric-card>span) {
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+  line-height: var(--leading-body);
+  letter-spacing: .01em;
+}
+:is(#forecast, #spots, #spot, #register, #alerts, #spotModal, #mapModal) :is(.section-label, .history-grid span, .history-observed span, .badge, .radar-label, .condition-pill) {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-label);
+  line-height: 1.4;
+  letter-spacing: .08em;
+}
+:is(#forecast, #spots, #spot, #register, #alerts, #spotModal, #mapModal) :is(.source, .status, .hintbox, .location-summary, .map-coords, .session-direction, .session-unit, .session-forecast-moment, .session-edit-status, .register-identity, .history-empty, .history-audit, .swell-direction-hint, .toggle-row small, .history-session-meta>small, .radar-summary, .radar-window small, .spot-window-note, .code-confidence-level) {
+  font-size: var(--type-label);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+}
+:is(#forecast, #spots, #spot, #register, #alerts, #spotModal, #mapModal) :is(.btn, .mini, .ghost-btn, .toggle-row b, .radar-window b, .session-conditions-head>b, .history-session-meta>b) {
+  font-size: var(--type-body);
+  font-weight: var(--weight-label);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+:is(#spot, #register) :is(.history-grid b, .history-observed b, .row b, .code-metric-card b, .capture b) {
+  font-size: var(--type-field);
+  font-weight: var(--weight-value);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+#spot .history-audit .row b {
+  font-size: var(--type-label);
+}
+#spot :is(.history-score>strong, .history-score>strong>span) {
+  font-size: var(--type-body);
+  font-weight: var(--weight-label);
+  font-variant-numeric: tabular-nums;
+}
+#spot .history-grade-label {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-label);
+  line-height: 1.3;
+}
+#spot :is(.history-sort select, .code-confidence-card span) {
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+}
+#spot .code-confidence-value {
+  font-size: var(--type-value);
+  font-weight: var(--weight-value);
+  font-variant-numeric: tabular-nums;
+}
+#spot .score-number {
+  font-size: 50px;
+  font-weight: var(--weight-value);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em;
+}
+#spots .spot-card .spot-meta>small,
+#spots .spot-meta .confidence-num strong {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-body);
+  line-height: 1.3;
+}
+#spots .spot-window {
+  font-size: var(--type-label);
+  font-weight: var(--weight-body);
+  line-height: var(--leading-body);
+}
+#spots .spot-stars { font-size: var(--type-label); }
+/* One family in the daily matrix; heading weight and tracking distinguish it
+   from tabular-number values without introducing a second typeface. */
+#forecast .forecast-table :is(th, td) {
+  font-family: var(--font-ui);
+  font-size: var(--type-label);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+#forecast .forecast-table th {
+  font-weight: var(--weight-label);
+  letter-spacing: .06em;
+}
+#forecast .forecast-table th[scope="row"] {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-label);
+  letter-spacing: .04em;
+}
+#forecast .forecast-table td {
+  font-weight: var(--weight-body);
+  letter-spacing: 0;
+}
+#forecast .day-card b {
+  font-size: 18px;
+  font-weight: var(--weight-value);
+  font-variant-numeric: tabular-nums;
+}
+#forecast .day-card :is(.day-name, .day-meta) {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-label);
+}
+#alerts .alert-spot-row b { font-size: var(--type-body); }
+#alerts #activatePush {
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+  letter-spacing: .05em;
+}
+#alerts #pushStatus {
+  font-size: var(--type-label);
+  line-height: var(--leading-body);
+}
+/* Original current-conditions surfaces and strong type, new illustrations. */
+#forecast .hero-card {
+  padding: 16px;
+  border-radius: 27px;
+  background: linear-gradient(180deg, rgba(10,28,42,.96), rgba(6,17,26,.96));
+  border-color: rgba(137,188,214,.15);
+}
+#forecast .hero-card:before {
+  background: radial-gradient(circle at 85% 0, rgba(88,201,255,.13), transparent 42%), radial-gradient(circle at 0 90%, rgba(95,233,223,.11), transparent 40%);
+  opacity: 1;
+}
+#forecast .hero-head {
+  align-items: flex-start;
+  gap: 12px;
+}
+#forecast .hero-head small {
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+  line-height: 1.4;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+#forecast .hero-head h2 { margin-top: 5px; }
+#forecast .snapshot-grid { gap: 10px; }
+#forecast .metric-card {
+  min-width: 0;
+  min-height: 126px;
+  padding: 14px 12px;
+  border-radius: 17px;
+  background: rgba(4,13,21,.42);
+  border-color: rgba(255,255,255,.055);
+}
+#forecast .metric-card small {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  padding-right: 37px;
+  font-size: var(--type-label);
+  font-weight: var(--weight-label);
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+#forecast .metric-card strong,
+#forecast #tideCard strong {
+  font-size: var(--type-value);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.025em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  margin: 9px 0 5px;
+  color: var(--text);
+}
+#forecast .metric-sub {
+  font-size: var(--type-label);
+  font-weight: var(--weight-body);
+  line-height: 1.5;
+  color: #b7c9d2;
+}
+#forecast .metric-icon {
+  left: auto;
+  right: 10px;
+  top: 12px;
+  width: 33px;
+  height: 33px;
+  border-radius: 10px;
+  border: 1px solid rgba(95,233,223,.14);
+  background: rgba(95,233,223,.08);
+  color: #70e6e2;
+}
+#forecast :is(#periodCard, #tideCard, #energyCard) .metric-icon { color: #70e6e2; }
+#forecast .metric-icon svg { width: 27px; height: 27px; stroke-width: 1.5; }
+#forecast .summary-line,
+#forecast .summary-line b {
+  font-size: var(--type-micro);
+  font-weight: var(--weight-body);
+  line-height: 1.5;
+}
+@media(max-width:370px) {
+  :root { --type-title: 26px; --type-value: 23px; }
+  #forecast .hero-card { padding: 12px; }
+  #forecast .metric-card { padding: 12px 10px; }
+  #forecast .metric-card small { padding-right: 31px; }
+  #forecast .metric-icon { right: 8px; width: 29px; height: 29px; }
+  #forecast .metric-icon svg { width: 25px; height: 25px; }
+  #spots .spot-card .spot-meta { flex-wrap: wrap; row-gap: 6px; }
+}
