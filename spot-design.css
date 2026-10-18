@@ -1,0 +1,190 @@
+/* Spot interiors use the same graphite, photography and contour system as the
+   approved spot list. Typography remains owned by typography.css. */
+:root {
+  --spot-surface: linear-gradient(125deg, #172128, #0d1519);
+  --spot-border: #2c383e;
+}
+body:has(#spot:target) { background: #05090b; padding-bottom: 0; }
+#spot.screen { padding-bottom: 0; }
+#spot .spot-detail-top {
+  max-width: 760px; margin: 0 auto; min-height: 98px;
+  padding: calc(19px + env(safe-area-inset-top)) 16px 17px;
+  display: grid; grid-template-columns: 58px minmax(0,1fr) 58px; gap: 8px;
+}
+#spot .spot-detail-top .spots-brand { text-align: center; }
+#spot .spot-detail-top .spots-tagline { font-size: 6px; letter-spacing: .26em; }
+#spot .spot-detail-top .place { font-size: 8px; letter-spacing: .1em; justify-content: flex-end; }
+#spot .back { display: flex; align-items: center; gap: 3px; }
+#spot .back svg { width: 17px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.4; flex-shrink: 0; }
+#spot .content { padding: 0 12px calc(145px + env(safe-area-inset-bottom)); }
+#spot .cover {
+  position: relative; height: 230px; border-radius: 16px 16px 0 0;
+  background-position: center; border-color: var(--spot-border); box-shadow: none; overflow: hidden;
+}
+#spot .cover:after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 30%, rgba(3,9,12,.8));
+}
+#spot .cover .spot-cover-title {
+  position: absolute; z-index: 1; left: 18px; right: 18px; bottom: 18px;
+  margin: 0; color: #f2f6f6; text-shadow: 0 2px 12px #0008; overflow-wrap: anywhere;
+}
+#spot .cover-reticle {
+  display: none; position: absolute; z-index: 1; left: calc(50% - 22px); top: 34%;
+  width: 44px; height: 44px; fill: none; stroke: #e2efec; stroke-width: .6; opacity: .65;
+}
+#spot .cover.has-custom-photo .cover-reticle { display: block; }
+#spot:has(.spot-tab[data-tab="history"].active) .cover,
+#spot:has(.spot-tab[data-tab="code"].active) .cover { height: 165px; }
+#spot .spot-tabs {
+  gap: 0; margin: 0 0 20px; padding: 0 8px; background: #0e171c;
+  border: 1px solid var(--spot-border); border-top: 0; border-radius: 0 0 13px 13px;
+}
+#spot .spot-tab {
+  position: relative; flex: 1; min-width: 0; min-height: 52px; padding: 11px 3px;
+  background: none; border: 0; border-radius: 0; box-shadow: none; color: #a9bac2;
+}
+#spot .spot-tab + .spot-tab:before {
+  content: ""; position: absolute; top: 18px; bottom: 18px; left: 0; width: 1px; background: #314047;
+}
+#spot .spot-tab.active { color: #eff8f7; }
+#spot .spot-tab.active:after {
+  content: ""; position: absolute; bottom: 0; left: 9px; right: 9px; height: 2px;
+  background: #5fe9df; box-shadow: 0 -3px 12px #5fe9df21;
+}
+#spot .spot-tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
+#spot :is(.radar-detail, .spot-summary-card, .spot-best-card, .history-item, .code-learning-card, .code-confidence-card) {
+  position: relative; border: 1px solid var(--spot-border); border-radius: 13px;
+  background: var(--spot-surface); box-shadow: none; backdrop-filter: none;
+}
+#spot :is(.radar-detail, .history-item, .code-learning-card, .code-confidence-card):before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: url('assets/code-contours.svg') right top / 220px auto no-repeat; opacity: .12;
+}
+#spot :is(.radar-detail, .history-item, .code-learning-card, .code-confidence-card)>* { position: relative; }
+#spot .radar-detail { padding: 18px; margin-bottom: 12px; }
+#spot .radar-detail .spot-signal { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; color: #7ac67d; }
+#spot .radar-on .spot-signal { color: #4dd3e1; }
+#spot .radar-swell .spot-signal { color: #65b8dc; }
+#spot :is(.radar-off, .radar-unavailable, .radar-insufficient) .spot-signal { color: #a0a6ac; }
+#spot .spot-signal .radar-label { color: inherit; }
+#spot .radar-detail .signal-marker { display: grid; place-items: center; width: 19px; height: 19px; }
+#spot .radar-detail .signal-marker svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1; }
+#spot .radar-detail .signal-dot { display: block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+#spot .radar-off .signal-dot { box-shadow: none; }
+#spot .radar-windows { margin-top: 5px; }
+#spot .radar-window { border-color: #314047; padding: 13px 0; gap: 6px; }
+#spot .radar-window:first-child { border-top: 0; padding-top: 8px; }
+#spot .radar-window:last-child { padding-bottom: 0; }
+#spot .radar-window .radar-window-status { color: #79d9d0; }
+#spot .spot-summary-card { padding: 17px 18px; margin: 12px 0; grid-template-columns: minmax(0,1fr) minmax(0,1.4fr); gap: 20px; }
+#spot .spot-score-main { min-width: 0; }
+#spot .spot-score-main>small { font-size: var(--type-micro); letter-spacing: .08em; font-weight: var(--weight-label); }
+#spot .score-number { margin-top: 4px; line-height: 1.1; }
+#spot .spot-summary-meta { padding-left: 18px; border-left: 1px solid #35434a; display: grid; gap: 8px; min-width: 0; }
+#spot .spot-summary-meta>small { font-size: var(--type-label); line-height: 1.5; }
+#spot .spot-summary-meta .badge { padding: 0; border: 0; background: none; color: #b7d8d4; letter-spacing: 0; white-space: normal; }
+#spot .spot-best-card { padding: 18px; margin-top: 12px; }
+#spot .spot-best-card h2 { margin: 0 0 10px; }
+#spot .spot-panel #overviewBest { padding: 0; border: 0; background: none; box-shadow: none; backdrop-filter: none; }
+#spot .spot-panel #overviewBest .row { display: flex; gap: 8px; align-items: center; padding: 15px 0; border-color: #2e3d45; }
+#spot .spot-panel #overviewBest .row:last-child { border-bottom: 0; padding-bottom: 0; }
+#spot .spot-panel #overviewBest .row>span { flex: 1; color: #adbdc6; }
+#spot .spot-panel #overviewBest .row>span { display: flex; align-items: center; gap: 10px; }
+#spot #overviewBest .detail-metric-icon { width: 25px; height: 25px; flex-shrink: 0; margin: 0; }
+#spot .spot-panel #overviewBest .row b { max-width: 60%; padding-left: 8px; }
+#spot .panel-heading { margin: 20px 0 14px; }
+#spot .panel-heading h2 { margin: 0; }
+#spot :is(.edit-round, .code-info-button) { width: 40px; height: 40px; min-width: 40px; border-radius: 10px; background: #111a20; border-color: #34434b; }
+#spot .history-sort select { border-color: #34434b; background: #111a20; border-radius: 10px; }
+#spot .history-card { margin: 0; }
+#spot .history-item { margin-bottom: 10px; }
+#spot .history-item>.history-head { min-height: 82px; padding: 14px; gap: 8px; }
+#spot .history-head>.history-grade { display: flex; align-items: center; gap: 8px; }
+#spot .history-grade-label { max-width: 45px; white-space: normal; text-align: right; }
+#spot .history-grade>.history-score { width: 40px; height: 40px; border: 1px solid #94bbb9; background: #09212666; }
+#spot .history-body { padding: 0 14px 14px; }
+#spot .history-body>.history-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; padding-top: 16px; border-color: #34434a; }
+#spot .history-grid>div { padding: 0; border: 0; border-radius: 0; background: none; }
+#spot .history-grid>div:nth-child(even) { padding-left: 14px; border-left: 1px solid #35434b; }
+#spot .history-grid>div:last-child { grid-column: 1 / -1; padding-bottom: 3px; }
+#spot .history-grid span { color: #aebdc5; }
+#spot .history-observed { margin-top: 14px; }
+#spot .history-comment { margin-top: 14px; padding: 12px; border: 1px solid #34434a; border-radius: 10px; background: #0b141a88; color: #dce7ec; }
+#spot .history-actions { margin-top: 16px; }
+#spot .code-learning-card { padding: 16px; }
+#spot .learning-kicker { display: flex; align-items: center; gap: 9px; color: #72ddd2; font-size: var(--type-micro); font-weight: var(--weight-label); letter-spacing: .08em; }
+#spot .learning-kicker svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1; }
+#spot .code-metrics-grid { grid-template-columns: repeat(2,minmax(0,1fr)); margin-top: 16px; gap: 9px; }
+#spot .code-metric-card { padding: 13px 11px; border: 1px solid #34434a; border-radius: 9px; background: #08131977; box-shadow: none; }
+#spot .detail-metric-icon { display: block; width: 31px; height: 31px; margin-bottom: 9px; fill: none; stroke: #a6ded8; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+#spot .code-metric-card span { color: #aebfc7; }
+#spot .code-metric-card b { overflow-wrap: anywhere; }
+#spot .code-confidence-card { margin-top: 12px; padding: 18px; }
+#spot .code-confidence-card .code-confidence-head { display: grid; gap: 13px; }
+#spot .code-confidence-reading { gap: 10px; }
+#spot .code-confidence-value { color: #f1f7f8; }
+#spot .confidence { height: 4px; background: #34444d; border-radius: 9px; overflow: hidden; }
+#spot .confidence i { display: block; height: 100%; background: linear-gradient(90deg,#48c4ce,#68e5d8); }
+#spot .code-info-popover { border-color: #43555f; background: #14232d; border-radius: 12px; }
+/* Photo-first editor with persistent labels and paired wave / period fields. */
+#spotModal { background: #02070bd6; backdrop-filter: blur(9px); }
+#spotModal .sheet { max-width: 620px; max-height: 94dvh; padding: 0; background: linear-gradient(135deg,#172128,#0b1318); border: 1px solid var(--spot-border); border-radius: 18px 18px 12px 12px; }
+#spotModal .spot-editor-head { top: 0; z-index: 3; margin: 0; padding: 17px 16px; background: #141e24; border-radius: 0; border-bottom: 1px solid #2d3b43; }
+#spotModal .spot-editor-close { width: 36px; height: 36px; border: 1px solid #38474f; border-radius: 50%; background: #0b141a; }
+#spotModal .spot-editor-body { padding: 0 16px 16px; }
+#spotModal .spot-photo-editor { position: relative; margin: 16px 0 18px; }
+#spotModal .spot-photo-preview { height: 178px; border-radius: 10px; background-color: #0c171d; border-color: #35464f; }
+#spotModal .spot-photo-button { position: absolute; right: 9px; bottom: 9px; width: auto; padding: 9px 11px; margin: 0; min-height: 40px; background: #081118dc; border: 1px solid #71838b70; border-radius: 7px; color: #ebf3f5; backdrop-filter: blur(6px); }
+#spotModal .spot-photo-button:before { content: ""; display: inline-block; vertical-align: middle; width: 17px; height: 17px; margin-right: 7px; background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23dbe9ec" stroke-width="1.5"%3E%3Cpath d="M3 7h4l2-3h6l2 3h4v13H3Z"/%3E%3Ccircle cx="12" cy="13" r="4"/%3E%3C/svg%3E') center/contain no-repeat; }
+#spotModal .editor-field-label { display: block; margin: 15px 0 0; color: #afc0c8; font-size: var(--type-label); font-weight: var(--weight-label); line-height: 1.5; }
+#spotModal .field { margin: 7px 0 0; border-color: #35454e; border-radius: 8px; background: #0b151bba; min-height: 46px; color: #e6f0f3; }
+#spotModal .field::placeholder { color: #778f9c; opacity: 1; }
+#spotModal .field:focus { border-color: #63cfc7; box-shadow: 0 0 0 2px #63cfc719; }
+#spotModal .field:disabled { opacity: .45; }
+#spotModal .editor-map-button { display: flex; align-items: center; gap: 9px; padding: 12px; margin-top: 7px; border-radius: 8px; border-color: #35454e; background: #0c161cc9; text-align: left; }
+#spotModal .editor-map-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.3; flex-shrink: 0; }
+#spotModal .editor-map-button .map-button-chevron { width: 14px; margin-left: auto; }
+#spotModal .location-summary { margin: 7px 0 0; padding: 0 3px; border: 0; background: none; color: #94aeb9; }
+#spotModal .editor-north { position: relative; margin: 22px 0; padding: 15px; border: 1px solid #35434b; border-radius: 12px; background: #111c2388; }
+#spotModal .editor-north:before { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: url('assets/code-contours.svg') right top/180px auto no-repeat; opacity: .1; }
+#spotModal .editor-north>* { position: relative; }
+#spotModal .editor-north h3 { margin: 0 0 6px; font-size: var(--type-section); font-weight: var(--weight-heading); letter-spacing: -.02em; line-height: var(--leading-heading); }
+#spotModal .editor-north .section-label { margin: 0 0 12px; color: #8faebc; }
+#spotModal .form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+#spotModal .form-grid .editor-field-label { min-width: 0; margin: 0; }
+#spotModal .swell-direction-picker { margin-top: 20px; }
+#spotModal .swell-direction-grid { gap: 6px; }
+#spotModal .swell-direction-option span { border-radius: 6px; border-color: #35454e; background: #09131899; }
+#spotModal .swell-direction-option input:checked+span { color: #99eee6; border-color: #62d3ca; background: #17413d66; box-shadow: inset 0 0 0 1px #62d3ca30; }
+#spotModal :is(.swell-direction-hint,.hintbox) { color: #98aeb9; }
+#spotModal .hintbox { background: #0b161b88; border: 1px solid #304149; border-radius: 9px; padding: 12px; }
+#spotModal .spot-editor-actions { position: sticky; z-index: 2; bottom: 0; padding: 10px 16px max(10px,env(safe-area-inset-bottom)); background: #111b21f5; border-top: 1px solid #34434a; }
+#spotModal .sheet-actions { grid-template-columns: 1fr 1.4fr; gap: 9px; }
+#spotModal .sheet-actions .btn { margin: 0; min-height: 44px; border-radius: 9px; }
+#spotModal #saveSpot { color: #b4f1e9; background: #1b625c40; border: 1px solid #59bfb5; }
+#spotModal #cancelSpot { background: #0d181f; border-color: #35464e; color: #c4d3db; }
+#spotModal #deleteSpotInModal { display: block; width: auto; min-height: 32px; margin: 7px auto 0; padding: 6px 12px; background: none; border: 0; color: #e8a3a1; }
+#mapModal .sheet { border-color: var(--spot-border); background: var(--spot-surface); }
+#mapModal .field { border-color: #35454e; background: #0c171d; border-radius: 9px; }
+@media(min-width:620px) {
+  #spot .cover { height: 285px; }
+  #spot .code-metric-card { display: grid; grid-template-columns: 40px minmax(0,1fr); column-gap: 12px; align-content: center; }
+  #spot .detail-metric-icon { grid-row: 1 / 3; margin: 0; align-self: center; }
+}
+@media(max-width:370px) {
+  #spot .spot-detail-top { grid-template-columns: 47px minmax(0,1fr) 48px; gap: 5px; padding-left: 12px; padding-right: 12px; }
+  #spot .spot-detail-top .logo { font-size: 23px; }
+  #spot .spot-detail-top .spots-tagline { font-size: 5px; }
+  #spot .spot-tab { font-size: var(--type-label); }
+  #spot .cover { height: 205px; }
+  #spot .history-head>.history-grade { display: grid; justify-items: center; gap: 4px; }
+  #spot .history-grade-label { max-width: none; font-size: var(--type-micro); text-align: center; }
+  #spot .history-body>.history-grid { gap: 12px; }
+  #spot .history-grid>div:nth-child(even) { padding-left: 10px; }
+  #spot .code-learning-card { padding: 12px; }
+  #spot .code-metric-card { padding: 12px 9px; }
+  #spot .spot-summary-card { padding: 15px; gap: 12px; }
+  #spotModal .spot-editor-body { padding-left: 12px; padding-right: 12px; }
+  #spotModal .editor-north { padding: 12px; }
+}
